@@ -2,7 +2,7 @@ package orichalcum.reflection
 {
 	import orichalcum.lifecycle.IDisposable;
 	
-	public interface IReflector extends IDisposable
+	public interface IReflector
 	{
 		function isType(qualifiedClassName:String):Boolean;
 		function isPrimitiveType(qualifiedClassName:String):Boolean;
@@ -11,7 +11,7 @@ package orichalcum.reflection
 		
 		function getType(qualifiedClassName:String):Class;
 		function getTypeName(classOrInstance:*):String;
-		function getTypeDescription(type:Class):XML;
+		function getTypeDescription(classOrInstance:*):XML;
 		
 		//function implementsOrExtends(classOrInstanceA:*, superclassOrInterface:*):Boolean;
 		//function getAncestors(type:Class, classNameFilter:RegExp = null):XMLList;

@@ -4,13 +4,22 @@ package orichalcum.reflection
 	import flash.utils.describeType;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
+	import orichalcum.lifecycle.IDisposable;
 
-	public class Reflector implements IReflector
+	public class Reflector implements IReflector, IDisposable
 	{
+		static private var _instance:Reflector;
+		
+		static public function getInstance(applicationDomain:ApplicationDomain = null):IReflector
+		{
+			return _instance ||= new Reflector(applicationDomain);
+		}
+		
 		private var _nativeTypes:RegExp = /^air\.|^fl\.|^flash\.|^flashx\.|^spark\.|^mx\.|^Object$|^Class$|^String$|^Function$|^Array$|^Boolean$|^Number$|^uint$|^int$/;
 		private var _primitiveTypes:RegExp = /^Object$|^Class$|^String$|^Function$|^Array$|^Boolean$|^Number$|^uint$|^int/;
 		private var _applicationDomain:ApplicationDomain;
 		private var _typeDescriptions:Dictionary;
+		
 		
 		public function Reflector(applicationDomain:ApplicationDomain = null)
 		{
@@ -55,14 +64,14 @@ package orichalcum.reflection
 			return _applicationDomain.getDefinition(qualifiedClassName) as Class;
 		}
 		
-		public function getTypeDescription(type:Class):XML 
-		{
-			return _typeDescriptions[getQualifiedClassName(type)] ||= describeType(type);
-		}
-		
 		public function getTypeName(classOrInstance:*):String
 		{
 			return getQualifiedClassName(classOrInstance);
+		}
+		
+		public function getTypeDescription(classOrInstance:*):XML 
+		{
+			return _typeDescriptions[getQualifiedClassName(classOrInstance)] ||= describeType(classOrInstance);
 		}
 		
 	}
