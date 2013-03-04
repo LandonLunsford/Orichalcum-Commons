@@ -1,0 +1,70 @@
+package orichalcum.reflection 
+{
+	import flash.system.ApplicationDomain;
+	import flash.utils.describeType;
+	import flash.utils.Dictionary;
+	import flash.utils.getQualifiedClassName;
+
+	public class Reflector implements IReflector
+	{
+		private var _nativeTypes:RegExp = /^air\.|^fl\.|^flash\.|^flashx\.|^spark\.|^mx\.|^Object$|^Class$|^String$|^Function$|^Array$|^Boolean$|^Number$|^uint$|^int$/;
+		private var _primitiveTypes:RegExp = /^Object$|^Class$|^String$|^Function$|^Array$|^Boolean$|^Number$|^uint$|^int/;
+		private var _applicationDomain:ApplicationDomain;
+		private var _typeDescriptions:Dictionary;
+		
+		public function Reflector(applicationDomain:ApplicationDomain = null)
+		{
+			_applicationDomain = applicationDomain || ApplicationDomain.currentDomain;
+			_typeDescriptions = new Dictionary;
+		}
+		
+		/* INTERFACE orichalcum.lifecycle.IDisposable */
+		
+		public function dispose():void 
+		{
+			_nativeTypes = null;
+			_primitiveTypes = null;
+			_applicationDomain = null;
+			_typeDescriptions = null;
+		}
+		
+		/* INTERFACE orichalcum.reflection.IReflector */
+		
+		public function isNativeType(qualifiedClassName:String):Boolean
+		{
+			return _nativeTypes.test(qualifiedClassName);
+		}
+		
+		public function isPrimitiveType(qualifiedClassName:String):Boolean
+		{
+			return _primitiveTypes.test(qualifiedClassName);
+		}
+		
+		public function isComplexType(qualifiedClassName:String):Boolean
+		{
+			return !isPrimitiveType(qualifiedClassName);
+		}
+		
+		public function isType(qualifiedClassName:String):Boolean 
+		{
+			return _applicationDomain.hasDefinition(qualifiedClassName);
+		}
+		
+		public function getType(qualifiedClassName:String):Class 
+		{
+			return _applicationDomain.getDefinition(qualifiedClassName) as Class;
+		}
+		
+		public function getTypeDescription(type:Class):XML 
+		{
+			return _typeDescriptions[getQualifiedClassName(type)] ||= describeType(type);
+		}
+		
+		public function getTypeName(classOrInstance:*):String
+		{
+			return getQualifiedClassName(classOrInstance);
+		}
+		
+	}
+
+}
