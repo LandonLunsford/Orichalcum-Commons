@@ -21,10 +21,28 @@
     </source-path>
     <library-path>
       <path-element>c:\users\landon\documents\github\orichalcum-commons\lib\flexunit-4.1.0-8-as3_4.1.0.16076.swc</path-element>
+      <path-element>c:\users\landon\documents\github\orichalcum-commons\lib\hamcrest-as3-only-1.1.3.swc</path-element>
     </library-path>
   </compiler>
   <include-classes>
+    <class>orichalcum.collection.AbstractList</class>
+    <class>orichalcum.collection.ArrayList</class>
+    <class>orichalcum.collection.ICollection</class>
+    <class>orichalcum.collection.IList</class>
+    <class>orichalcum.collection.LinkedList</class>
+    <class>orichalcum.collection.LinkedListNode</class>
     <class>orichalcum.lifecycle.IDisposable</class>
+    <class>orichalcum.logging.ILog</class>
+    <class>orichalcum.logging.ILogFormatter</class>
+    <class>orichalcum.logging.ILogTarget</class>
+    <class>orichalcum.logging.Log</class>
+    <class>orichalcum.logging.LogLevel</class>
+    <class>orichalcum.logging.format.ALogFormatter</class>
+    <class>orichalcum.logging.format.StandardFormatter</class>
+    <class>orichalcum.logging.target.ALogTarget</class>
+    <class>orichalcum.logging.target.FileStreamTarget</class>
+    <class>orichalcum.logging.target.TextFieldTarget</class>
+    <class>orichalcum.logging.target.TraceTarget</class>
     <class>orichalcum.reflection.IReflector</class>
     <class>orichalcum.reflection.Reflector</class>
     <class>orichalcum.utility.ArrayUtil</class>

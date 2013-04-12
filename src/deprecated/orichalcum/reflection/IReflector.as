@@ -13,8 +13,6 @@ package orichalcum.reflection
 		function getTypeName(classOrInstance:*):String;
 		function getTypeDescription(classOrInstance:*):XML;
 		
-		function isPrimitive(value:*):Boolean;
-		
 		//function implementsOrExtends(classOrInstanceA:*, superclassOrInterface:*):Boolean;
 		//function getAncestors(type:Class, classNameFilter:RegExp = null):XMLList;
 	}

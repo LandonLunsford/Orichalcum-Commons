@@ -6,7 +6,7 @@ package orichalcum.reflection
 	import flash.utils.getQualifiedClassName;
 	import orichalcum.lifecycle.IDisposable;
 
-	public class Reflector implements IDisposable, IReflector
+	public class Reflector implements IReflector, IDisposable
 	{
 		static private var _instance:Reflector;
 		
@@ -72,11 +72,6 @@ package orichalcum.reflection
 		public function getTypeDescription(classOrInstance:*):XML 
 		{
 			return _typeDescriptions[getQualifiedClassName(classOrInstance)] ||= describeType(classOrInstance);
-		}
-		
-		public function isPrimitive(value:*):Boolean 
-		{
-			return value is int || value is uint || value is Number || value is Boolean || value is String;
 		}
 		
 	}

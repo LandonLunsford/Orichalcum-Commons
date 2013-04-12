@@ -21,7 +21,7 @@ package orichalcum.logging.format
 		
 		/* INTERFACE orichalcum.logging.ILogFormatter */
 		
-		public function format(level:LogLevel, source:Object, message:String):String 
+		public function format(level:LogLevel, source:Object, message:String, substitutions:Array = null):String 
 		{
 			throw new IllegalOperationError('AbstractFormatter is an abstract class and its "format" function must be overridden');
 		}

@@ -1,69 +1,14 @@
 package orichalcum.utility 
 {
-	import flash.display.DisplayObjectContainer;
-	
 	public class ObjectUtil
 	{
-		static public function isEmpty(object:Object):Boolean
-		{
-			if (object)
-				for (var property:String in object)
-					return true;
-			return false;
-		}
-		
-		static public function extend(a:Object, b:Object):Object
-		{
-			for (var property:String in b)
-				a[property] = b[property];
-			return a;
-		}
-		
-		static public function find(targetRoot:Object, targetPath:String, pathDelimiter:String = '.'):*
-		{
-			if (!targetPath|| !targetPath.length) return targetRoot;
-			var target:* = targetRoot, nextTargetName:String, previousPeriodIndex:int, nextPeriodIndex:int;
-			while (true)
-			{
-				nextPeriodIndex = targetPath.indexOf(pathDelimiter, previousPeriodIndex);
-				if (nextPeriodIndex < 0)
-				{
-					nextTargetName = targetPath.substring(previousPeriodIndex);
-					if (nextTargetName in target)
-					{
-						return target[nextTargetName];
-					}
-					if (target is DisplayObjectContainer)
-					{
-						return target.getChildByName(nextTargetName);
-					}
-					return null;
-				}
-
-				nextTargetName = targetPath.substring(previousPeriodIndex, nextPeriodIndex)
-				if (nextTargetName in target)
-				{
-					target = target[nextTargetName];
-				}
-				else if (target is DisplayObjectContainer)
-				{
-					target = target.getChildByName(nextTargetName);
-				}
-				else
-				{
-					return null;
-				}
-				previousPeriodIndex = nextPeriodIndex + 1;
-			}
-			return target;
-		}
 		
 		/**
 		 * @param	child Object to which the parents attributes will be given
 		 * @param	parent Object from which the child will inherit attributes
 		 * @return	the modified child object
 		 */
-		static public function merge(child:Object, parent:Object):Object
+		static public function extend(child:Object, parent:Object):Object
 		{
 			var attribute:String;
 			if (isDynamic(child))
@@ -113,6 +58,7 @@ package orichalcum.utility
 			const proxy:Object = clone(object1);
 			for (var property:String in proxy)
 			{
+				
 				if (property in object2)
 				{
 					var temp:* = object1[property];
@@ -153,7 +99,7 @@ package orichalcum.utility
 		{
 			try
 			{
-				object.__;
+				object.poop;
 			}
 			catch (error:Error)
 			{
@@ -169,25 +115,24 @@ package orichalcum.utility
 		 * @param	properties Map of properties and values which will be set in the new object
 		 * @return	New object of indicated type
 		 */
-		static public function create(type:Class, args:Array = null):Object
+		static public function create(type:Class, parameters:Array = null):Object
 		{
 			if (!type) throw new ArgumentError('Parameter "type" must not be null');
-			
-			if (args)
+
+			if (parameters)
 			{
-				switch(args.length)
+				switch(parameters.length)
 				{
-					case 1:	return new type(args[0]);
-					case 2: return new type(args[0], args[1]);
-					case 3: return new type(args[0], args[1], args[2]);
-					case 4: return new type(args[0], args[1], args[2], args[3]);
-					case 5: return new type(args[0], args[1], args[2], args[3], args[4]);
-					case 6: return new type(args[0], args[1], args[2], args[3], args[4], args[5]);
-					case 7: return new type(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-					case 8: return new type(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-					case 9:	return new type(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
-					case 10:return new type(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-					throw new ArgumentError('too many arguments. refactor!');
+					case 1:	return new type(parameters[0]);
+					case 2: return new type(parameters[0], parameters[1]);
+					case 3: return new type(parameters[0], parameters[1], parameters[2]);
+					case 4: return new type(parameters[0], parameters[1], parameters[2], parameters[3]);
+					case 5: return new type(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]);
+					case 6: return new type(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5]);
+					case 7: return new type(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5], parameters[6]);
+					case 8: return new type(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5], parameters[6], parameters[7]);
+					case 9:	return new type(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5], parameters[6], parameters[7], parameters[8]);
+					case 10:return new type(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5], parameters[6], parameters[7], parameters[8], parameters[9]);
 				}
 			}
 			return new type();
@@ -196,8 +141,8 @@ package orichalcum.utility
 		static public function clone(object:Object):Object
 		{
 			const clone:Object = {};
-			for (var propertyName:String in object)
-				clone[propertyName] = object[propertyName];
+			for (var property:String in object)
+				clone[property] = object[property];
 			return clone;
 		}
 		

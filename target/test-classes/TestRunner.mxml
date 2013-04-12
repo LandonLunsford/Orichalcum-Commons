@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--can't use velocity, got:
+java.io.InvalidClassException: org.apache.velocity.runtime.parser.node.ASTprocess; class invalid for deserialization-->
+<unitestingsupport:TestApplication 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:unitestingsupport="org.sonatype.flexmojos.unitestingsupport.*"
+	layout="absolute"
+	initialize="init()" 
+	port="50638" 
+	controlPort="50637" 
+	>
+
+
+
+	<mx:Script>
+		<![CDATA[
+
+import orichalcum.collection.AbstractListTest; AbstractListTest;
+import orichalcum.collection.ArrayListTest; ArrayListTest;
+import orichalcum.collection.LinkedListTest; LinkedListTest;
+
+
+			private function init():void {
+addTest( AbstractListTest);
+addTest( ArrayListTest);
+addTest( LinkedListTest);
+
+			}
+		]]>
+	</mx:Script>
+
+</unitestingsupport:TestApplication>

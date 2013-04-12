@@ -3,7 +3,7 @@ package orichalcum.logging
 
 	public interface ILogFormatter 
 	{
-		function format(level:LogLevel, source:Object, message:String):String;
+		function format(level:LogLevel, source:Object, message:String, substitutions:Array = null):String;
 		function get showTime():Boolean;
 		function set showTime(value:Boolean):void;
 		function get showLevel():Boolean;

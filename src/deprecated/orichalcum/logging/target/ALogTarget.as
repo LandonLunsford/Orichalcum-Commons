@@ -29,7 +29,7 @@ package orichalcum.logging.target
 		
 		public function log(level:LogLevel, source:Object, message:String, substitutions:Array = null):void 
 		{
-			logMessage(formatter.format(level, source, message));
+			logMessage(formatter.format(level, source, message, substitutions));
 		}
 		
 		protected function logMessage(message:String):void

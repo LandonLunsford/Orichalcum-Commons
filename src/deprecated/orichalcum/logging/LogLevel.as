@@ -38,7 +38,7 @@ package orichalcum.logging
 				case 'INFO': return INFO;
 				case 'DEBUG': return DEBUG;
 			}
-			throw new ArgumentError;
+			throw new ArgumentError(string + ' is not a recognized LogLevel name: (DEBUG, INFO, WARN, ERROR, FATAL).');
 		}
 		
 	}

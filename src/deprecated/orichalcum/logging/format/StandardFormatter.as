@@ -1,19 +1,21 @@
 package orichalcum.logging.format 
 {
+	import flash.filesystem.File;
 	import flash.utils.getQualifiedClassName;
+	import mx.utils.StringUtil;
 	import orichalcum.logging.ILogFormatter;
 	import orichalcum.logging.LogLevel;
-	import orichalcum.utility.StringUtil;
 
 	public class StandardFormatter extends ALogFormatter
 	{
 		
-		override public function format(level:LogLevel, source:Object, message:String):String 
+		override public function format(level:LogLevel, source:Object, message:String, substitutions:Array = null):String 
 		{
 			var levelName:String = StringUtil.substitute('{0}', level.name);
 			while (levelName.length < 6) levelName += ' ';
 			const sourceName:String = getQualifiedClassName(source);
-			return StringUtil.substitute('{0} {1}[{2}] {3}\n', formattedTime, levelName, sourceName, message);
+			const formattedMessage:String = StringUtil.substitute(message, substitutions);
+			return StringUtil.substitute('{0} {1}[{2}] {3}' + File.lineEnding, formattedTime, levelName, sourceName, formattedMessage);
 		}
 		
 		private function get formattedTime():String
