@@ -119,7 +119,7 @@ package orichalcum.reflection
 					case 13: new type(null, null, null, null, null, null, null, null, null, null, null, null, null); break;
 					case 14: new type(null, null, null, null, null, null, null, null, null, null, null, null, null, null); break;
 					case 15: new type(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null); break;
-					throw new ArgumentError(StringUtil.substitute('Type "{0}" requires over {1} constructor arguments. Consider refactoring.', getTypeName(type), 16));
+					throw new ArgumentError(StringUtil.substitute('Type "{0}" requires over {1} constructor arguments. Consider refactor.', getTypeName(type), 16));
 				}
 			}
 			catch (error:Error)
