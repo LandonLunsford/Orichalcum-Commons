@@ -94,7 +94,7 @@ package orichalcum.reflection
 			return describeType(classOrInstance);
 		}
 		
-		private function create(type:Class):Object
+		private function create(type:Class):void
 		{
 			if (type == null)
 				throw new ArgumentError('Argument "type" passed to method "create" must not be null.');
@@ -103,22 +103,22 @@ package orichalcum.reflection
 			{
 				switch(describeType(type).factory.constructor.parameter.length())
 				{
-					case 0: return new type;
-					case 1: return new type(null);
-					case 2: return new type(null, null);
-					case 3: return new type(null, null, null);
-					case 4: return new type(null, null, null, null);
-					case 5: return new type(null, null, null, null, null);
-					case 6: return new type(null, null, null, null, null, null);
-					case 7: return new type(null, null, null, null, null, null, null);
-					case 8: return new type(null, null, null, null, null, null, null, null);
-					case 9: return new type(null, null, null, null, null, null, null, null, null);
-					case 10: return new type(null, null, null, null, null, null, null, null, null, null);
-					case 11: return new type(null, null, null, null, null, null, null, null, null, null, null);
-					case 12: return new type(null, null, null, null, null, null, null, null, null, null, null, null);
-					case 13: return new type(null, null, null, null, null, null, null, null, null, null, null, null, null);
-					case 14: return new type(null, null, null, null, null, null, null, null, null, null, null, null, null, null);
-					case 15: return new type(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+					case 0: new type; break;
+					case 1: new type(null); break;
+					case 2: new type(null, null); break;
+					case 3: new type(null, null, null); break;
+					case 4: new type(null, null, null, null); break;
+					case 5: new type(null, null, null, null, null); break;
+					case 6: new type(null, null, null, null, null, null); break;
+					case 7: new type(null, null, null, null, null, null, null); break;
+					case 8: new type(null, null, null, null, null, null, null, null); break;
+					case 9: new type(null, null, null, null, null, null, null, null, null); break;
+					case 10: new type(null, null, null, null, null, null, null, null, null, null); break;
+					case 11: new type(null, null, null, null, null, null, null, null, null, null, null); break;
+					case 12: new type(null, null, null, null, null, null, null, null, null, null, null, null); break;
+					case 13: new type(null, null, null, null, null, null, null, null, null, null, null, null, null); break;
+					case 14: new type(null, null, null, null, null, null, null, null, null, null, null, null, null, null); break;
+					case 15: new type(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null); break;
 					throw new ArgumentError(StringUtil.substitute('Type "{0}" requires over {1} constructor arguments. Consider refactoring.', getTypeName(type), 16));
 				}
 			}
@@ -126,7 +126,6 @@ package orichalcum.reflection
 			{
 				
 			}
-			return null;
 		}
 		
 	}
