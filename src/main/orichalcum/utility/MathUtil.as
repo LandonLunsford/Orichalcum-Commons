@@ -1,5 +1,7 @@
 package orichalcum.utility 
 {
+
+	import flash.geom.Point;
 	
 	public class MathUtil 
 	{
@@ -21,6 +23,18 @@ package orichalcum.utility
 		{
 			return int((number / _powers[index]) % 10);
 		}
+
+		static public function gcd(x:int, y:int):int
+		{
+			while (x * y != 0) x >= y ? x %= y : y %= x;
+			return x + y;
+		}
+		
+		static public function ratio(width:int = 0, height:int = 0):Point
+		{
+			const gcd:int = gcd(width, height);
+			return new Point(width / gcd, height / gcd);
+		}
 		
 		/**
 		 * @param	value Number that will be bound by upper and lower limits
@@ -39,7 +53,6 @@ package orichalcum.utility
 		
 		static public function fuzzyEquals(a:Number, b:Number, threshold:Number = 1):Boolean
 		{
-			//return a >= b - threshold && a <= b + threshold;
 			return Math.abs(a - b) < threshold;
 		}
 		
