@@ -11,8 +11,37 @@ package orichalcum.animation
 	 * @author Landon Lunsford
 	 */
 	
-	public class Process extends EventDispatcher
+	internal class Process extends EventDispatcher
 	{
+		static private var _emptyFunction:Function = function():void {};
+		
+		static public function loop(callback:Function, interval:int = 1, ...args):Process
+		{
+			return fork(callback, interval, Infinity, args);
+		}
+		
+		static public function delay(callback:Function, duration:int = 1, ...args):Process
+		{
+			return fork(callback, duration, 0, args);
+		}
+		
+		static public function begin(callback:Function, interval:int = 1, iterations:Number = Infinity, ...args):Process
+		{
+			return fork(callback, interval, iterations - 1, args);
+		}
+		
+		static private function fork(callback:Function, interval:int = 1, repeats:Number = 0, args:Array = null):Process
+		{
+			const process:Process = new Process;
+			process.callback = callback == null ? _emptyFunction : callback;
+			process.interval = interval;
+			process.repeats = repeats;
+			process.args = args;
+			process.time = 0;
+			process.start();
+			return process;
+		}
+		
 		public var time:int;
 		public var interval:int;
 		public var repeats:Number = 0;
@@ -21,13 +50,13 @@ package orichalcum.animation
 		
 		public function start():void
 		{
-			coreEventDispatcher.addEventListener(Event.ENTER_FRAME, update, true, 0, false);
+			_eventDispatcher.addEventListener(Event.ENTER_FRAME, update, true, 0, false);
 			//dispatchEvent(INIT_EVENT);
 		}
 		
 		public function pause():void
 		{
-			coreEventDispatcher.removeEventListener(Event.ENTER_FRAME, update);
+			_eventDispatcher.removeEventListener(Event.ENTER_FRAME, update);
 		}
 		
 		public function reset():void

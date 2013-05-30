@@ -18,6 +18,7 @@
     <verbose-stacktraces>false</verbose-stacktraces>
     <source-path>
       <path-element>c:\users\landon\documents\github\orichalcum-commons\src\main</path-element>
+      <path-element>c:\users\landon\documents\github\orichalcum-commons\src\test</path-element>
     </source-path>
     <library-path>
       <path-element>c:\users\landon\documents\github\orichalcum-commons\lib\flexunit-4.1.0-8-as3_4.1.0.16076.swc</path-element>
@@ -25,6 +26,16 @@
     </library-path>
   </compiler>
   <include-classes>
+    <class>orichalcum.animation.Animation</class>
+    <class>orichalcum.animation.AnimationTimeline</class>
+    <class>orichalcum.animation.ColorTween</class>
+    <class>orichalcum.animation.coreEventDispatcher</class>
+    <class>orichalcum.animation.Ease</class>
+    <class>orichalcum.animation.Process</class>
+    <class>orichalcum.animation.Tween</class>
+    <class>orichalcum.audio.ISound</class>
+    <class>orichalcum.audio.Sound</class>
+    <class>orichalcum.audio.VariableSound</class>
     <class>orichalcum.collection.AbstractList</class>
     <class>orichalcum.collection.ArrayList</class>
     <class>orichalcum.collection.ICollection</class>
@@ -45,14 +56,22 @@
     <class>orichalcum.logging.target.TraceTarget</class>
     <class>orichalcum.reflection.IReflector</class>
     <class>orichalcum.reflection.Reflector</class>
+    <class>orichalcum.system.FlashPlayer</class>
     <class>orichalcum.utility.ArrayUtil</class>
     <class>orichalcum.utility.BitmapUtil</class>
     <class>orichalcum.utility.ColorUtil</class>
     <class>orichalcum.utility.DisplayObjectUtil</class>
+    <class>orichalcum.utility.FunctionUtil</class>
     <class>orichalcum.utility.MathUtil</class>
     <class>orichalcum.utility.ObjectUtil</class>
     <class>orichalcum.utility.Random</class>
     <class>orichalcum.utility.StringUtil</class>
     <class>orichalcum.utility.XmlUtil</class>
+    <class>TestRunner</class>
+    <class>TestSuite</class>
+    <class>orichalcum.collection.AbstractListTest</class>
+    <class>orichalcum.collection.ArrayListTest</class>
+    <class>orichalcum.collection.LinkedListTest</class>
+    <class>orichalcum.utility.FunctionUtilTest</class>
   </include-classes>
 </flex-config>

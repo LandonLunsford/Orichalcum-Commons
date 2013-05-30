@@ -1,7 +1,6 @@
 package orichalcum.animation
 {
 	import com.orichalcum.core.coreEventDispatcher;
-	import com.orihalcum.core.Processor;
 	import flash.display.Bitmap;
 	import flash.events.Event;
 
@@ -77,12 +76,12 @@ package orichalcum.animation
 		
 		public function play():void
 		{
-			coreEventDispatcher.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
+			_eventDispatcher.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
 		}
 		
 		public function stop():void
 		{
-			coreEventDispatcher.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			_eventDispatcher.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		public function nextFrame():void

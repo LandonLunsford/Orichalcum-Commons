@@ -20,6 +20,38 @@ package orichalcum.animation
 	
 	public class Tween extends Process
 	{
+		
+		static public function to(target:Object, duration:Number = 0, vars:Object = null):Tween
+		{
+			var tween:Tween;
+			if (isColorTween(target, vars))
+			{
+				tween = new ColorTween(vars.colorTransform, target as DisplayObject, duration, vars);
+			}
+			else
+			{
+				tween = new Tween(target, duration, vars);
+			}
+			tween.start();
+			return tween;
+		}
+		
+		static public function from(target:Object, duration:Number = 0, vars:Object = null):Tween
+		{
+			if (isColorTween(target, vars))
+			{
+				const colorTransform:ColorTransform = target.transform.colorTransform;
+				target.transform.colorTransform = vars.colorTransform;
+				vars.colorTransform = colorTransform;
+			}
+			return to(target, duration, ObjectUtil.swap(vars, target));
+		}
+		
+		static private function isColorTween(target:Object, vars:Object = null):Boolean
+		{
+			return vars && vars.colorTransform && target as DisplayObject;
+		}
+		
 		public var target:Object;
 		public var snap:Boolean;
 		public var yoyo:Boolean;
