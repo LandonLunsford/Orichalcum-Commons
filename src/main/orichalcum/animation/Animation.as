@@ -76,12 +76,12 @@ package orichalcum.animation
 		
 		public function play():void
 		{
-			_eventDispatcher.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
+			_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
 		}
 		
 		public function stop():void
 		{
-			_eventDispatcher.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			_enterFrameEventDispatcher.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		public function nextFrame():void

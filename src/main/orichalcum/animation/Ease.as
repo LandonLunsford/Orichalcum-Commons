@@ -5,22 +5,22 @@ package orichalcum.animation
 		static private const TWO_PI:Number = Math.PI * 2;
 		static private const HALF_PI:Number = Math.PI * 0.5;
 		
-		static public function getInverse(ease:Function):Function
-		{
-			switch(ease)
-			{
-				case quadIn:	return quadOut;
-				case quadOut:	return quadIn;
-				case cubicIn:	return cubicOut;
-				case cubicOut:	return cubicIn;
-				case quartIn:	return quartOut;
-				case quintIn:	return quintOut;
-				case circIn:	return circOut;
-				case bounceIn:	return bounceOut;
-				case bounceOut:	return bounceIn;
-			}
-			return ease;
-		}
+		//static public function getInverse(ease:Function):Function
+		//{
+			//switch(ease)
+			//{
+				//case quadIn:	return quadOut;
+				//case quadOut:	return quadIn;
+				//case cubicIn:	return cubicOut;
+				//case cubicOut:	return cubicIn;
+				//case quartIn:	return quartOut;
+				//case quintIn:	return quintOut;
+				//case circIn:	return circOut;
+				//case bounceIn:	return bounceOut;
+				//case bounceOut:	return bounceIn;
+			//}
+			//return ease;
+		//}
 		
 		static public function linear(t:Number, b:Number, c:Number, d:Number):Number
 		{
