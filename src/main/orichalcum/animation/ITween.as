@@ -8,6 +8,9 @@ package orichalcum.animation
 		function get position():Number;
 		function set position(value:Number):void;
 		
+		function get progress():Number;
+		function set progress(value:Number):void;
+		
 		function get target():Object;
 		function set target(value:Object):void;
 		
@@ -91,7 +94,8 @@ package orichalcum.animation
 		function reset(supressCallbacks:Boolean = false):void;
 		function replay(supressCallbacks:Boolean = false):void;
 		function end(supressCallbacks:Boolean = false):void;
-		function playReverse(supressCallbacks:Boolean = false):void;
+		function reverse():void;
+		function playInReverse(supressCallbacks:Boolean = false):void;
 	}
 
 }
