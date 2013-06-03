@@ -23,7 +23,7 @@ package orichalcum.animation
 			
 			
 			//const tween:Tween = new Tween(
-			const tween:Tween = Tween.to(
+			const tween:ITween = Tween.to(
 				target,
 				0,
 				{

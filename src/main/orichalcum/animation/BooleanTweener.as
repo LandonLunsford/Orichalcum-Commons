@@ -6,11 +6,11 @@ package orichalcum.animation
 	internal class BooleanTweener implements ITweener
 	{
 		public var end:Boolean;
+		private var _previousValue:Boolean;
 		
 		public function BooleanTweener(end:Boolean = false) 
 		{
 			this.end = end;
-			
 			trace(this);
 		}
 		
@@ -20,6 +20,8 @@ package orichalcum.animation
 		public function tween(target:Object, property:String, progress:Number):void
 		{
 			target[property] = progress < 1 ? target[property] : end;
+			
+			trace(progress, target[property], end);
 		}
 		
 		public function toString():String

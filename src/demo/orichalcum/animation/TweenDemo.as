@@ -23,21 +23,21 @@ package orichalcum.animation
 		 */
 		public function TweenDemo() 
 		{
-			const t:Shape = new Shape;
-			t.graphics.beginFill(0xffffff * Math.random())
-			t.graphics.drawCircle(0, 0, 200);
-			t.graphics.endFill();
-			addChild(t);
+			const target:Shape = new Shape;
+			target.graphics.beginFill(0xffffff * Math.random())
+			target.graphics.drawCircle(0, 0, 200);
+			target.graphics.endFill();
+			addChild(target);
 			
-			t.x = stage.stageWidth * 0.5
-			t.y = stage.stageHeight * 0.5
+			target.x = stage.stageWidth * 0.5
+			target.y = stage.stageHeight * 0.5
 			
 			const eventTracer:Function = function(event:Event):void { trace(event.type, '\t\t', event.target.target.y); };
 			const callbackTracer:Function = function(jump:Boolean):void { trace(jump, '\t\t', this.target.y); };
 			
 			//const tween:Tween = new Tween(
-			const tween:Tween = Tween.to(
-				t,
+			const tween:ITween = Tween.to(
+				target,
 				0,
 				{
 					delay: 1
@@ -47,23 +47,23 @@ package orichalcum.animation
 					,repeats: 2
 					,yoyo:true
 					,y: '[-200]'
-					,dispatchEvents: true
 					,onInit: callbackTracer
+					//,visible:false
 				}
 			);
 			tween.addEventListener(Event.INIT, eventTracer)
-			//tween.addEventListener(Event.CHANGE, eventTracer)
+			tween.addEventListener(Event.CHANGE, eventTracer)
 			tween.addEventListener(Event.COMPLETE, eventTracer)
 			tween.addEventListener('yoyo', eventTracer)
 			
 			
-			stage.addEventListener(MouseEvent.CLICK, function(event:Event):void { tween.toggle() } );
-			stage.addEventListener(KeyboardEvent.KEY_DOWN, function(event:KeyboardEvent):void
-			{
-				event.keyCode == Keyboard.LEFT && tween.setPosition(tween.position - 0.1, false);
-				event.keyCode == Keyboard.RIGHT && tween.setPosition(tween.position + 0.1, false);
-				event.keyCode == Keyboard.DOWN && tween.playReverse(false);
-			});
+			//stage.addEventListener(MouseEvent.CLICK, function(event:Event):void { tween.toggle() } );
+			//stage.addEventListener(KeyboardEvent.KEY_DOWN, function(event:KeyboardEvent):void
+			//{
+				//event.keyCode == Keyboard.LEFT && tween.setPosition(tween.position - 0.1, false);
+				//event.keyCode == Keyboard.RIGHT && tween.setPosition(tween.position + 0.1, false);
+				//event.keyCode == Keyboard.DOWN && tween.playReverse(false);
+			//});
 			
 			//new Tween(
 				//t,
@@ -88,22 +88,7 @@ package orichalcum.animation
 			//trace(test.test('[4.0]'));
 			//trace(test.test(' [4.0] '));
 			//trace(test.test(' [ 4.0 ] '));
-			//
-			//trace(('[4]').replace(stripper, ''));
-			//trace(('[+4]').replace(stripper, ''));
-			//trace(('[-4]').replace(stripper, ''));
-			//trace(('[4.1]').replace(stripper, ''));
-			//trace(('[4.0]').replace(stripper, ''));
-			//trace((' [4.0] ').replace(stripper, ''));
-			//trace((' [ 4.0 ] ').replace(stripper, ''));
-			//
-			//trace(parseFloat(test.exec('[4]')));
-			//trace(parseFloat(test.exec('[+4]')));
-			//trace(parseFloat(test.exec('[-4]')));
-			//trace(parseFloat(test.exec('[4.1]')));
-			//trace(parseFloat(test.exec('[4.0]')));
-			//trace(parseFloat(test.exec(' [4.0] ')));
-			//trace(parseFloat(test.exec(' [ 4.0 ] ')));
+			
 		}
 		
 	}

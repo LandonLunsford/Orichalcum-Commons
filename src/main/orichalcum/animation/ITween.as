@@ -1,7 +1,8 @@
 package orichalcum.animation 
 {
+	import flash.events.IEventDispatcher;
 	
-	public interface ITween 
+	public interface ITween extends IEventDispatcher
 	{
 		
 		function get position():Number;

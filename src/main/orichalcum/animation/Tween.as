@@ -46,19 +46,8 @@ package orichalcum.animation
 		{
 			const previousTime:Number = _currentTime;
 			_currentTime = getTimer();
-			
-			if (pauseAll) return;
-			
-			_deltaTime = (_currentTime - previousTime) * _timeScale;
-			//const deltaTime:Number = (_currentTime - previousTime) * _timeScale;
-			
-			/**
-			 * Infers that tweens have no order.
-			 */
-			//for (var tween:Object in _tweens)
-				//tween.isPlaying && tween._integrate(deltaTime);
+			_deltaTime = pauseAll ? 0 : (_currentTime - previousTime) * _timeScale;
 		}
-		
 		
 		//
 		//static public function pauseTweensOf(target:Object):void
@@ -83,75 +72,114 @@ package orichalcum.animation
 			_timeScale = value * 0.001; 
 		}
 		
-		/* @private */
+		/** @private */
 		static private const NULL_TARGET:Object = new _NullProxy; // should be a proxy to nothing that sets no state
 		
-		/* @private */
+		/** @private */
 		static private var _currentTime:Number;
 		
-		/* @private */
+		/** @private */
 		static private var _deltaTime:Number;
 		
-		/* @private */
-		//static private var _tweens:Array = [];
+		/** @private */
 		static private var _tweensByTarget:Dictionary = new Dictionary(true);
+		
+		/** @private */
 		static private var _tweens:Dictionary = new Dictionary(true);
 		
 		static public var pauseAll:Boolean;
 		static public var defaultEase:Function = Ease.quadOut;
+		
+		/* @private */
 		private var _target:Object;
-		private var _duration:Number = 0; /* duration of 1 iteration */
+		
+		/**
+		 * The duration of one iteration
+		 * If yoyo is set to true this duration includes the forward and backward portion of the iteration
+		 * 
+		 * @private
+		 */
+		private var _duration:Number = 0;
+		
+		/** @private */
 		private var _delay:Number = 0;
+		
+		/** @private */
 		private var _repeats:Number = 0;
+		
+		/** @private */
 		private var _onInit:Function = FunctionUtil.noop;
+		
+		/** @private */
 		private var _onChange:Function = FunctionUtil.noop;
+		
+		/** @private */
 		private var _onYoyo:Function = FunctionUtil.noop;
+		
+		/** @private */
 		private var _onComplete:Function = FunctionUtil.noop;
+		
+		/** @private */
 		private var _ease:Function = defaultEase;
+		
+		/** @private */
 		private var _isPlaying:Boolean;
+		
+		/** @private */
 		private var _yoyo:Boolean;
+		
+		/** @private */
 		private var _next:ITween;
+		
+		/** @private */
 		private var _autoPlay:Boolean = true;
+		
+		/** @private */
 		private var _timeScale:Number = 1;
+		
+		/** @private */
 		private var _useFrames:Boolean;
+		
+		/** @private */
 		private var _to:Object;
+		
+		/** @private */
 		private var _position:Number = 0;
+		
+		/** @private */
 		private var _previousPosition:Number = -EPSILON;
 		
 		/**
 		 * Animation class
 		 */
 		
-		static public function to(...args):Tween
+		static public function to(...args):ITween
 		{
 			const tween:Tween = new Tween;
 			tween._construct(args);
-			_add(tween);
-			return tween;
+			return _add(tween as ITween);
 		}
 		
-		static public function from(...args):Tween
+		static public function from(...args):ITween
 		{
 			const tween:Tween = new Tween;
 			tween._construct(args, true);
-			_add(tween);
+			return _add(tween as ITween);
+		}
+		
+		static private function _add(tween:ITween):ITween
+		{
+			const tweensOfTarget:Array = _tweensByTarget[tween.target] ||= [];
+			tweensOfTarget.indexOf(tween) < 0 && (tweensOfTarget[tweensOfTarget.length] = tween);
 			return tween;
 		}
 		
-		static private function _add(tween:ITween):void
-		{
-			const tweensOfTarget:Array = _tweensByTarget[tween.target] ||= [];
-			if (tweensOfTarget.indexOf(tween) < 0)
-				tweensOfTarget[tweensOfTarget.length] = tween;
-		}
-		
-		static private function _remove(tween:ITween):void
+		static private function _remove(tween:ITween):ITween
 		{
 			const tweensOfTarget:Array = _tweensByTarget[tween.target];
-			if (tweensOfTarget == null) return;
-			const index:int = tweensOfTarget.indexOf(tween);
-			if (index < 0) return;
-			tweensOfTarget.splice(index, 1);
+			var index:int;
+			tweensOfTarget && (index = tweensOfTarget.indexOf(tween)) >= 0 && tweensOfTarget.splice(index, 1);
+			return tween;
 		}
 		
 		//static public function delay(
@@ -454,8 +482,12 @@ package orichalcum.animation
 			}
 		}
 		
+		static private var _tweeners:Object = {};
+		
 		private function _initialize(target:Object = null, duration:Number = 0, to:Object = null, swap:Boolean = false):void
 		{
+			ObjectUtil.empty(_tweeners);
+			
 			target = this.target = target;
 			
 			swap && ObjectUtil.swap(to, target);
@@ -487,10 +519,10 @@ package orichalcum.animation
 					}
 					else if (end is String)
 					{
-						end = numberExtractor.exec(end);
+						var endValue:Number = parseFloat(numberExtractor.exec(end));
 						tweener = new NumberTweener;
 						tweener.start = start;
-						tweener.end = isRelative.test(end) ? start + end : end;
+						tweener.end = isRelative.test(end) ? start + endValue : endValue;
 						tweener.round = isRounded.test(end);
 					}
 					else if (end is Object)
@@ -498,13 +530,16 @@ package orichalcum.animation
 						// check plugins
 					}
 					
-					to[property] = tweener;
+					// adding to an object while iterating over it ruins it
+					_tweeners[property] = tweener;
 				}
 				else
 				{
 					delete to[property];
 				}
 			}
+			
+			for (var p:String in _tweeners) to[p] = _tweeners[p];
 			
 			if (this.duration <= 0) this.duration = duration;
 			
@@ -517,6 +552,8 @@ package orichalcum.animation
 		
 		private function _setPosition(value:Number, jump:Boolean = false, supressCallbacks:Boolean = false):void
 		{
+			_previousPosition = _position;
+			// something changed in here and now mhy numbers are incorrect
 			var calculatedPosition:Number;
 			
 			jump && (_previousPosition = _position - EPSILON);
@@ -564,7 +601,7 @@ package orichalcum.animation
 			isReflecting && _onYoyoHandler(jump, supressCallbacks);
 			isComplete && _onCompleteHandler(jump, supressCallbacks);
 			
-			_previousPosition = _position;
+			
 		}
 		
 		private function _onInitHandler(jump:Boolean, supressCallbacks:Boolean):void 
@@ -604,7 +641,8 @@ package orichalcum.animation
 		private function _setIsPlaying(value:Boolean):void
 		{
 			if (_isPlaying == value) return;
-			if (_isPlaying = value)
+			_isPlaying = value;
+			if (value)
 			{
 				_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, _integrate);
 			}
@@ -617,7 +655,8 @@ package orichalcum.animation
 		private function _integrate(event:Event):void 
 		{
 			// cool yoyo feature
-			_setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
+			//trace(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
+			pauseAll || _setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
 		}
 		
 		
