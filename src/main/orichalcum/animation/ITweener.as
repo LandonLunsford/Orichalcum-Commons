@@ -3,7 +3,7 @@ package orichalcum.animation
 	
 	public interface ITweener 
 	{
-		function tween(progress:Number, target:Object):void;
+		function tween(target:Object, property:String, progress:Number):void;
 	}
 
 }

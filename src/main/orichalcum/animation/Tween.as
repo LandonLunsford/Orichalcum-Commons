@@ -4,6 +4,7 @@ package orichalcum.animation
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
+	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	import orichalcum.utility.FunctionUtil;
 	import orichalcum.utility.ObjectUtil;
@@ -37,17 +38,38 @@ package orichalcum.animation
 		
 		{
 			_currentTime = getTimer();
-			_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, _onEnterFrame);
+			_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, _integrateTweens);
 		}
 		
 		/* @private */
-		static private function _onEnterFrame(event:Event):void
+		static private function _integrateTweens(event:Event):void
 		{
 			const previousTime:Number = _currentTime;
 			_currentTime = getTimer();
+			
 			if (pauseAll) return;
+			
 			_deltaTime = (_currentTime - previousTime) * _timeScale;
+			//const deltaTime:Number = (_currentTime - previousTime) * _timeScale;
+			
+			/**
+			 * Infers that tweens have no order.
+			 */
+			//for (var tween:Object in _tweens)
+				//tween.isPlaying && tween._integrate(deltaTime);
 		}
+		
+		
+		//
+		//static public function pauseTweensOf(target:Object):void
+		//{
+			//
+		//}
+		//
+		//static public function playTweensOf(target:Object):void
+		//{
+			//
+		//}
 		
 		static private var _timeScale:Number = 0.001; // optimization
 		
@@ -71,11 +93,12 @@ package orichalcum.animation
 		static private var _deltaTime:Number;
 		
 		/* @private */
-		static private var _tweens:Array = [];
+		//static private var _tweens:Array = [];
+		static private var _tweensByTarget:Dictionary = new Dictionary(true);
+		static private var _tweens:Dictionary = new Dictionary(true);
 		
 		static public var pauseAll:Boolean;
 		static public var defaultEase:Function = Ease.quadOut;
-		
 		private var _target:Object;
 		private var _duration:Number = 0; /* duration of 1 iteration */
 		private var _delay:Number = 0;
@@ -91,7 +114,7 @@ package orichalcum.animation
 		private var _autoPlay:Boolean = true;
 		private var _timeScale:Number = 1;
 		private var _useFrames:Boolean;
-		private var _tweeners:Array = [];
+		private var _to:Object;
 		private var _position:Number = 0;
 		private var _previousPosition:Number = -EPSILON;
 		
@@ -103,6 +126,7 @@ package orichalcum.animation
 		{
 			const tween:Tween = new Tween;
 			tween._construct(args);
+			_add(tween);
 			return tween;
 		}
 		
@@ -110,7 +134,24 @@ package orichalcum.animation
 		{
 			const tween:Tween = new Tween;
 			tween._construct(args, true);
+			_add(tween);
 			return tween;
+		}
+		
+		static private function _add(tween:ITween):void
+		{
+			const tweensOfTarget:Array = _tweensByTarget[tween.target] ||= [];
+			if (tweensOfTarget.indexOf(tween) < 0)
+				tweensOfTarget[tweensOfTarget.length] = tween;
+		}
+		
+		static private function _remove(tween:ITween):void
+		{
+			const tweensOfTarget:Array = _tweensByTarget[tween.target];
+			if (tweensOfTarget == null) return;
+			const index:int = tweensOfTarget.indexOf(tween);
+			if (index < 0) return;
+			tweensOfTarget.splice(index, 1);
 		}
 		
 		//static public function delay(
@@ -124,6 +165,8 @@ package orichalcum.animation
 		 * @private
 		 */
 		private var _step:Number = 1;
+		
+		
 		
 		public function Tween(...args)
 		{
@@ -293,11 +336,13 @@ package orichalcum.animation
 		public function next(...args):ITween 
 		{
 			throw new Error();
+			return this;
 		}
 		
 		public function to(...args):ITween 
 		{
-			throw new Error();
+			_construct(args);
+			return this;
 		}
 		//
 		//public function delay(duration:Number):ITween 
@@ -399,11 +444,6 @@ package orichalcum.animation
 		// INTERNAL
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 		
-		private function get _endPosition():Number
-		{
-			return _duration * iterations * (yoyo ? 2 : 1);
-		}
-		
 		private function _construct(args:Array, swap:Boolean = false):void
 		{
 			switch (args.length)
@@ -416,8 +456,7 @@ package orichalcum.animation
 		
 		private function _initialize(target:Object = null, duration:Number = 0, to:Object = null, swap:Boolean = false):void
 		{
-			this.target = target;
-			this.duration = duration;
+			target = this.target = target;
 			
 			swap && ObjectUtil.swap(to, target);
 			
@@ -428,30 +467,38 @@ package orichalcum.animation
 					this[property] = to[property];
 					delete to[property];
 				}
-				else if (property in target)
+				else if (property in this.target)
 				{
-					var tweener:ITweener;
-					var start:* = target[property];
+					var tweener:Object = _to && _to[property];
+					var start:* = this.target[property];
 					var end:* = to[property];
 					
 					if (end is Boolean)
 					{
-						tweener = new BooleanTweener(property, start, end);
+						tweener ||= new BooleanTweener;
+						tweener.end = end;
 					}
 					else if (end is Number)
 					{
-						tweener = new NumberTweener(property, start, end, false, false);
+						tweener = new NumberTweener;
+						tweener.start = start;
+						tweener.end = end;
+						//this.end = relative ? start + end : end;
 					}
 					else if (end is String)
 					{
-						tweener = new NumberTweener(property, start, numberExtractor.exec(end), isRelative.test(end), isRounded.test(end));
+						end = numberExtractor.exec(end);
+						tweener = new NumberTweener;
+						tweener.start = start;
+						tweener.end = isRelative.test(end) ? start + end : end;
+						tweener.round = isRounded.test(end);
 					}
 					else if (end is Object)
 					{
 						// check plugins
 					}
 					
-					_tweeners[_tweeners.length] = tweener;
+					to[property] = tweener;
 				}
 				else
 				{
@@ -459,6 +506,9 @@ package orichalcum.animation
 				}
 			}
 			
+			if (this.duration <= 0) this.duration = duration;
+			
+			_to = to;
 			_position = -delay;
 			_previousPosition = _position - EPSILON;
 			
@@ -505,8 +555,8 @@ package orichalcum.animation
 				
 				const progress:Number = (_duration == 0 && _position >= 0) ? 1 : ease(calculatedPosition / _duration, 0, 1, 1);
 				
-				for each(var tweener:Object in _tweeners)
-					tweener.tween(progress, target);
+				for (var property:String in _to)
+					_to[property].tween(target, property, progress);
 					
 				_onChangeHandler(jump, supressCallbacks);
 			}
@@ -546,27 +596,30 @@ package orichalcum.animation
 			hasEventListener(Event.COMPLETE) && dispatchEvent(new Event(Event.COMPLETE));
 		}
 		
-		private function _tick(event:Event):void 
+		private function get _endPosition():Number
 		{
-			if (pauseAll) return;
-			//_setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1)); // cool duration feature
-			_setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1)); // cool duration feature
-			//_setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step); // cool duration feature
+			return _duration * iterations * (yoyo ? 2 : 1);
 		}
 		
 		private function _setIsPlaying(value:Boolean):void
 		{
 			if (_isPlaying == value) return;
-			_isPlaying = value;
-			if (value)
+			if (_isPlaying = value)
 			{
-				_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, _tick);
+				_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, _integrate);
 			}
 			else
 			{
-				_enterFrameEventDispatcher.removeEventListener(Event.ENTER_FRAME, _tick);
+				_enterFrameEventDispatcher.removeEventListener(Event.ENTER_FRAME, _integrate);
 			}
 		}
+		
+		private function _integrate(event:Event):void 
+		{
+			// cool yoyo feature
+			_setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
+		}
+		
 		
 		
 		

@@ -5,14 +5,10 @@ package orichalcum.animation
 
 	internal class BooleanTweener implements ITweener
 	{
-		public var name:String
-		public var start:Number;
-		public var end:Number;
+		public var end:Boolean;
 		
-		public function BooleanTweener(name:String, start:Number, end:Number) 
+		public function BooleanTweener(end:Boolean = false) 
 		{
-			this.name = name;
-			this.start = start;
 			this.end = end;
 			
 			trace(this);
@@ -21,14 +17,14 @@ package orichalcum.animation
 		/**
 		 * For a boolean tween this is easy just return the setter value when
 		 */
-		public function tween(progress:Number, target:Object):void
+		public function tween(target:Object, property:String, progress:Number):void
 		{
-			target[name] = progress < 1 ? target[name] : end;
+			target[property] = progress < 1 ? target[property] : end;
 		}
 		
 		public function toString():String
 		{
-			return StringUtil.substitute('<boolean-tweener name="{0}" start="{1}" end="{2}">', name, start, end);
+			return StringUtil.substitute('<boolean-tweener name="{0}" start="{1}" end="{2}">', '?', '?', end);
 		}
 	}
 
