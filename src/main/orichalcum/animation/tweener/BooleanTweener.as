@@ -7,7 +7,7 @@ package orichalcum.animation.tweener
 		private var _start:Boolean;
 		private var _end:Boolean;
 
-		public function init(start:Boolean, end:Boolean):ITween
+		public function init(start:Boolean, end:Boolean):ITweener
 		{
 			_start = start;
 			_end = end;
