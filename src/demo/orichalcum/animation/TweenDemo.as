@@ -46,7 +46,8 @@ package orichalcum.animation
 					//,useFrames: true
 					,repeats: 2
 					,yoyo:true
-					,y: '[-200]'
+					//,y: '[-200]'
+					,y: '-200'
 					,onInit: callbackTracer
 					//,visible:false
 				}

@@ -19,7 +19,7 @@ package orichalcum.animation.tweener
 		 */
 		public function tween(target:Object, property:String, progress:Number):void
 		{
-			target[property] = progress < 1 ? _start : _end;
+			target[property] = progress < 0.99 ? _start : _end;
 		}
 
 		public function toString():String

@@ -95,7 +95,7 @@ package orichalcum.animation
 		function replay(supressCallbacks:Boolean = false):void;
 		function end(supressCallbacks:Boolean = false):void;
 		function reverse():void;
-		function playInReverse(supressCallbacks:Boolean = false):void;
+		function playBackwards(supressCallbacks:Boolean = false):void;
 	}
 
 }

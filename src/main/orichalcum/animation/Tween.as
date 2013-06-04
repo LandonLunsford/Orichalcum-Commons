@@ -6,6 +6,9 @@ package orichalcum.animation
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
+	import orichalcum.animation.tweener.AdditiveNumberTweener;
+	import orichalcum.animation.tweener.BooleanTweener;
+	import orichalcum.animation.tweener.NumberTweener;
 	import orichalcum.utility.FunctionUtil;
 	import orichalcum.utility.ObjectUtil;
 	
@@ -460,7 +463,7 @@ package orichalcum.animation
 			_step = -_step;
 		}
 		
-		public function playReverse(supressCallbacks:Boolean = false):void 
+		public function playBackwards(supressCallbacks:Boolean = false):void 
 		{
 			// this will make on complete fire first
 			end(supressCallbacks);
@@ -508,22 +511,17 @@ package orichalcum.animation
 					if (end is Boolean)
 					{
 						tweener ||= new BooleanTweener;
-						tweener.end = end;
+						tweener.init(end);
 					}
 					else if (end is Number)
 					{
-						tweener = new NumberTweener;
-						tweener.start = start;
-						tweener.end = end;
-						//this.end = relative ? start + end : end;
+						tweener ||= new AdditiveNumberTweener;
+						tweener.init(start, end, false, false);
 					}
 					else if (end is String)
 					{
-						var endValue:Number = parseFloat(numberExtractor.exec(end));
-						tweener = new NumberTweener;
-						tweener.start = start;
-						tweener.end = isRelative.test(end) ? start + endValue : endValue;
-						tweener.round = isRounded.test(end);
+						tweener ||= new AdditiveNumberTweener;
+						tweener.init(start, parseFloat(numberExtractor.exec(end)), isRounded.test(end), isRelative.test(end));
 					}
 					else if (end is Object)
 					{

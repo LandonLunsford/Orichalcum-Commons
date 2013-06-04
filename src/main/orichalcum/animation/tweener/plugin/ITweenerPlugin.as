@@ -1,8 +1,9 @@
 package orichalcum.animation.tweener.plugin
 {
-	public interface ITweenerPlugin
+	import orichalcum.animation.ITweener;
+	
+	public interface ITweenerPlugin extends ITweener
 	{
 		public function get property():String;
-		public function init(target:Object, value:*):void;
 	}
 }
