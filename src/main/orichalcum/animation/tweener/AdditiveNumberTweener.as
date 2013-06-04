@@ -5,12 +5,13 @@ package orichalcum.animation.tweener
 
 	public class AdditiveNumberTweener implements ITweener
 	{
-		static private const RETURN:Function = function(next:Number):Number { return next; }
+		static private const RETURN:Function = function(value:Number):Number { return value; }
+		private var _round:Function = RETURN;
 		private var _start:Number;
 		private var _previousValue:Number;
 		private var _distance:Number;
 		private var _position:Number;
-		private var _round:Function = RETURN;
+		
 		
 		/** flyweight */
 		public function init(start:Number, end:Number, rounded:Boolean, relative:Boolean):void
@@ -61,7 +62,7 @@ package orichalcum.animation.tweener
 		
 		public function toString():String
 		{
-			return StringUtil.substitute('<number-tweener start="{0}" end="{1}" round="{2}">', _start, _start + _distance, _roundFilter == ROUND);
+			return StringUtil.substitute('<number-tweener start="{0}" end="{1}" round="{2}">', _start, _start + _distance, _round == ROUND);
 		}
 		
 	}
