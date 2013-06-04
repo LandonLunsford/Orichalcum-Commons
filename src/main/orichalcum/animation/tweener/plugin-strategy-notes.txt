@@ -1,0 +1,37 @@
+ITweener
+	function tween(target:Object, property:String, progress:Number):void;
+
+ITweenerPlugin extends ITweener
+	function get property():String;
+	function init(target:Object, params:*):void;
+	
+	
+	AutoAlphaPlugin extends NumberTweener implements ITweenerPlugin
+	{
+		
+		/* INTERFACE orichalcum.animation.tweener.ITweenerPlugin */
+
+		public  get property():String
+		{
+			return 'alpha';
+		}
+		
+		public function init(target:Object, value:*):void
+		{
+			super(target, value);
+		}
+		
+		/* INTERFACE orichalcum.animation.tweener.ITweener */
+		
+		public function tween(target:Object, property:String, progress:Number):void
+		{
+			super(target, property, progress);
+			
+			if (target is DisplayObject)
+				target.visibile = target.alpha < 0.01;
+		}
+	}
+
+...
+Tween.install(AutoAlphaPlugin)
+...
