@@ -2,34 +2,38 @@ package orichalcum.animation.tweener
 {
 	import orichalcum.utility.StringUtil;
 	
-
 	public class NumberTweener implements ITweener
 	{
-		//static private const isRounded:RegExp = /\[.*\]/;
-		//static private const isRelative:RegExp = /\+|\-/;
-		//static private const numberExtractor:RegExp = /[-+]?[0-9]*\.?[0-9]+/;
-		//tweener.init(start, parseFloat(numberExtractor.exec(end)), isRounded.test(end), isRelative.test(end));
+		static private const isRounded:RegExp = /\[.*\]/;
+		static private const isRelative:RegExp = /\+=|-=/;
+		static private const float:RegExp = /[-+]?[0-9]*\.?[0-9]+/;
 		
 		// may want to refactor into decorator class or other class for efficiency
-		static private const RETURN:Function = function(value:Number):Number { return value; }
+		private const RETURN:Function = function(value:Number):Number { return value; }
 		protected var _round:Function = RETURN;
 		protected var _start:Number;
 		protected var _distance:Number;
 		
 		/* INTERFACE orichalcum.animation.tweener.ITweener */
 		
-		//public function init(target:Object, property:String, parameters:Object):ITweener 
-		//{
-			//_start = target[property];
-			//var end:Number = 
-		//}
-		
-		/** flyweight */
-		public function init(start:Number, end:Number, rounded:Boolean, relative:Boolean):void
+		public function init(start:*, end:*):void
 		{
 			_start = start;
-			_distance = relative ? end : end - start;
-			_round = rounded ? Math.round : RETURN;
+			
+			if (end is Number)
+			{
+				_distance = end - start;
+			}
+			else if (end is String)
+			{
+				const endNumber:Number = parseFloat(float.exec(end));
+				_distance = isRelative.test(end) ? endNumber : endNumber - start;
+				_round = isRounded.test(end) ? Math.round : RETURN;
+			}
+			else
+			{
+				throw new ArgumentError('Argument "end" passed to method NumberTweener.init() must be a Number or String number representation');
+			}
 		}
 		
 		public function tween(target:Object, property:String, progress:Number):void
