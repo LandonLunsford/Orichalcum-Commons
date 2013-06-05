@@ -10,7 +10,7 @@ package orichalcum.animation.tweener
 		//protected var _distanceRemaining:Number;
 		
 		
-		override public function init(start:Number, end:Number):void
+		override public function init(start:*, end:*):void
 		{
 			super.init(start, end);
 			_previousValue = start;
