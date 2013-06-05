@@ -72,40 +72,65 @@ setPosition --> goto
 	playBackwards():void // not necessary == gotoAndS
 
 	
+	
+	
 	for (var propertyName:String in to)
 	{
-		const tweener:ITweener = getTweener(target, propertyName, to[propertyName]);
-	
-		tweener && (_tweeners[propertyName] = tweener);
+		const tweener:ITweener = _tweeners[propertyName] ||= createTweener(target, propertyName, target[propertyName]);
 	
 		// no longer necessary with delegate tweeners
 		//if (!(propertyName in target))
 			//delete ....
 	}
 	
-	function getTweener(target:Object, propertyName:String, propertyValue:*):ITweener
+	function createTweener(target:Object, propertyName:String, propertyValue:*):ITweener
 	{
-		const tweener:ITweener = _tweenerPlugins[propertyName];
+		const tweener:ITweener = _tweenersByProperty[propertyName];
 		return tweener
-			? tweener
-			: getDefaultTweener(_defaultTweeners[getQualifiedClassName(propertyValue)]);
+			? new tweener
+			: new _tweenersByClass[getQualifiedClassName(propertyValue)];
 	}
+	
+	_tweenersByProperty:Object = {};
+	_tweenersByClass:Object = {'Number': NumberTweener, 'Boolean': BooleanTweener};
 	
 	/**
 	 * this implementation only allows one tweener per property
 	 */
-	function install(tweener:ITweener, propertyOrProperties:*):void
+	function install(tweener:ITweener, triggers:*):void
 	{
 		if (tweener == null)
-			throw new ArgumentError();
-			
-		if (propertyOrProperties is String)
 		{
-			_tweenerPlugins[propertyOrProperties] = tweener;
+			throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Tween" must not be null.');
 		}
-		else if (propertyOrProperties is Array || propertyOrProperties is Vector.<String>)
+		else if (triggers is String)
 		{
-			for each(var propertyName:String in propertyOrProperties)
-				_tweenerPlugins[propertyName] = tweener;
+			_tweenersByProperty[triggers] = tweener;
+		}
+		else if (triggers is Class)
+		{
+			_tweenersByClass[getQualifiedClassName(triggers)] = tweener;
+		}
+		else if (triggers is Array || triggers is Vector.<String>)
+		{
+			for each(var trigger:String in triggers)
+				install(tweener, trigger);
+		}
+		else
+		{
+			throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Tween" must be one of the following types: String, Class, Array, Vector.<String>, Vector.<Class>.');
 		}
 	}
+	
+	
+	
+	
+	
+	make optional matcher function ? fn(target, property, parameters):Boolean
+	
+	install(AdditiveNumberTweener, ['x','y','z']);
+	install(AutoHideTweener, ['alpha'], function(target:Object):Boolean { return target is DisplayObject; });
+	install(ColorTransformTweener, ['tint', 'color', 'colorTransform'], function(target:Object, property:String, parameters:Object):Boolean{ return target is DisplayObject; });
+	
+	
+	
