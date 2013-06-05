@@ -6,7 +6,6 @@ package orichalcum.animation
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
-	import orichalcum.animation.tweener.AdditiveNumberTweener;
 	import orichalcum.animation.tweener.BooleanTweener;
 	import orichalcum.animation.tweener.NumberTweener;
 	import orichalcum.utility.FunctionUtil;
@@ -34,22 +33,60 @@ package orichalcum.animation
 	
 	public class Tween extends EventDispatcher implements ITween
 	{
+		/** @private */
 		static private const EPSILON:Number = 0.0001;
-		static private const isRounded:RegExp = /\[.*\]/;
-		static private const isRelative:RegExp = /\+|\-/;
-		static private const numberExtractor:RegExp = /[-+]?[0-9]*\.?[0-9]+/;
+		
+		/** @private */
+		static private const _tweenersByProperty:Object = {};
+		
+		/** @private */
+		static private const _tweenersByClass:Object = {'Number': NumberTweener, 'Boolean': BooleanTweener};
 		
 		{
 			_currentTime = getTimer();
 			_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, _integrateTweens);
 		}
 		
-		/* @private */
+		/** @private */
 		static private function _integrateTweens(event:Event):void
 		{
 			const previousTime:Number = _currentTime;
 			_currentTime = getTimer();
 			_deltaTime = pauseAll ? 0 : (_currentTime - previousTime) * _timeScale;
+		}
+		
+		/** @private */
+		static private function _createTweener(propertyName:String, propertyValue:*):ITweener
+		{
+			const tweenerForProperty:ITweener = _tweenersByProperty[propertyName];
+			return tweenerForProperty
+				? new tweenerForProperty
+				: new _tweenersByClass[getQualifiedClassName(propertyValue)];
+		}
+		
+		static public function install(tweener:ITweener, triggers:*):void
+		{
+			if (tweener == null)
+			{
+				throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Tween" must not be null.');
+			}
+			else if (triggers is String)
+			{
+				_tweenersByProperty[triggers] = tweener;
+			}
+			else if (triggers is Class)
+			{
+				_tweenersByClass[getQualifiedClassName(triggers)] = tweener;
+			}
+			else if (triggers is Array || triggers is Vector.<String>)
+			{
+				for each(var trigger:String in triggers)
+					install(tweener, trigger);
+			}
+			else
+			{
+				throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Tween" must be one of the following types: String, Class, Array, Vector.<String>, Vector.<Class>.');
+			}
 		}
 		
 		//
@@ -76,7 +113,7 @@ package orichalcum.animation
 		}
 		
 		/** @private */
-		static private const NULL_TARGET:Object = new _NullProxy; // should be a proxy to nothing that sets no state
+		static private const NULL_TARGET:Object = new _NullProxy;
 		
 		/** @private */
 		static private var _currentTime:Number;
@@ -144,7 +181,7 @@ package orichalcum.animation
 		private var _useFrames:Boolean;
 		
 		/** @private */
-		private var _to:Object;
+		private var _to:Object = {};
 		
 		/** @private */
 		private var _position:Number = 0;
@@ -381,7 +418,7 @@ package orichalcum.animation
 			//thow new Error();
 		//}
 		//
-		public function setPosition(position:Number, supressCallbacks:Boolean = false):void 
+		public function goto(position:Number, supressCallbacks:Boolean = false):void 
 		{
 			_setPosition(position, true, supressCallbacks);
 		}
@@ -485,12 +522,9 @@ package orichalcum.animation
 			}
 		}
 		
-		static private var _tweeners:Object = {};
 		
 		private function _initialize(target:Object = null, duration:Number = 0, to:Object = null, swap:Boolean = false):void
 		{
-			ObjectUtil.empty(_tweeners);
-			
 			target = this.target = target;
 			
 			swap && ObjectUtil.swap(to, target);
@@ -500,44 +534,20 @@ package orichalcum.animation
 				if (property in this)
 				{
 					this[property] = to[property];
-					delete to[property];
-				}
-				else if (property in this.target)
-				{
-					var tweener:Object = _to && _to[property];
-					var start:* = this.target[property];
-					var end:* = to[property];
-					
-					if (end is Boolean)
-					{
-						tweener ||= new BooleanTweener;
-						tweener.init(end);
-					}
-					else if (end is Number)
-					{
-						tweener ||= new AdditiveNumberTweener;
-						tweener.init(start, end, false, false);
-					}
-					else if (end is String)
-					{
-						tweener ||= new AdditiveNumberTweener;
-						tweener.init(start, parseFloat(numberExtractor.exec(end)), isRounded.test(end), isRelative.test(end));
-					}
-					else if (end is Object)
-					{
-						// check plugins
-					}
-					
-					// adding to an object while iterating over it ruins it
-					_tweeners[property] = tweener;
 				}
 				else
 				{
-					delete to[property];
+					const tweener:ITweener = _to[property] ||= _createTweener(property, target[property]);
+					if (tweener)
+					{
+						tweener.init(this.target[property], to[property]);
+					}
+					else
+					{
+						delete _to[property];
+					}
 				}
 			}
-			
-			for (var p:String in _tweeners) to[p] = _tweeners[p];
 			
 			if (this.duration <= 0) this.duration = duration;
 			
@@ -591,15 +601,13 @@ package orichalcum.animation
 				const progress:Number = (_duration == 0 && _position >= 0) ? 1 : ease(calculatedPosition / _duration, 0, 1, 1);
 				
 				for (var property:String in _to)
-					_to[property].tween(target, property, progress);
+					_to[property].tween(target, property, progress, passedZero, isComplete);
 					
 				_onChangeHandler(jump, supressCallbacks);
 			}
 			
 			isReflecting && _onYoyoHandler(jump, supressCallbacks);
 			isComplete && _onCompleteHandler(jump, supressCallbacks);
-			
-			
 		}
 		
 		private function _onInitHandler(jump:Boolean, supressCallbacks:Boolean):void 
@@ -656,8 +664,6 @@ package orichalcum.animation
 			//trace(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
 			pauseAll || _setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
 		}
-		
-		
 		
 		
 	}
