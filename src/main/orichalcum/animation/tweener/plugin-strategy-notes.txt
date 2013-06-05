@@ -35,3 +35,77 @@ ITweenerPlugin extends ITweener
 ...
 Tween.install(AutoAlphaPlugin)
 ...
+
+
+
+
+
+///////////////////////////////// ignore some of that and view below
+
+
+tween API
+
+>	play
+||	pause 
+|| & >	toggle 
+[]	stop 
+|<< + >	replay
+|<<	start | reset | gotoStart | skipToStart 
+>>|	end | gotoEnd | skipToEnd 
+?	goto | skipTo | seek | gotoAndStop + gotoAndPlay
+?	reverse
+?	playBackward
+
+setPosition --> goto
+
+	play():void // pssibly has event when on zero and no delay
+	pause():void
+	toggle():void // forwards to play therefore possibly has event to supress
+	stop():void
+	replay():void // pssibly has event when no delay
+	goto(position:Number, supressCallbacks:Boolean = false):void
+	gotoStart(position:Number, supressCallbacks:Boolean = false):void // stop inferred
+	gotoEnd(position:Number, supressCallbacks:Boolean = false):void // stop inferred
+	gotoAndPlay(position:Number, supressCallbacks:Boolean = false):void
+	gotoAndStop(position:Number, supressCallbacks:Boolean = false):void
+	reverse():void
+	playBackwards():void // not necessary == gotoAndS
+
+	
+	for (var propertyName:String in to)
+	{
+		const tweener:ITweener = getTweener(target, propertyName, to[propertyName]);
+	
+		tweener && (_tweeners[propertyName] = tweener);
+	
+		// no longer necessary with delegate tweeners
+		//if (!(propertyName in target))
+			//delete ....
+	}
+	
+	function getTweener(target:Object, propertyName:String, propertyValue:*):ITweener
+	{
+		const tweener:ITweener = _tweenerPlugins[propertyName];
+		return tweener
+			? tweener
+			: getDefaultTweener(_defaultTweeners[getQualifiedClassName(propertyValue)]);
+	}
+	
+	/**
+	 * this implementation only allows one tweener per property
+	 */
+	function install(tweener:ITweener, propertyOrProperties:*):void
+	{
+		if (tweener == null)
+			throw new ArgumentError();
+			
+		if (propertyOrProperties is String)
+		{
+			_tweenerPlugins[propertyOrProperties] = tweener;
+		}
+		else if (propertyOrProperties is Array || propertyOrProperties is Vector.<String>)
+		{
+			for each(var propertyName:String in propertyOrProperties)
+				_tweenerPlugins[propertyName] = tweener;
+		}
+	}
