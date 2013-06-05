@@ -1,8 +1,7 @@
 package orichalcum.animation.tweener
 {
-	
 	/**
-	 * Only works well in conjunction with round
+	 * Only works well in conjuction with rouned target values (e.g. '[-200]')
 	 */
 	public class AdditiveNumberTweener extends NumberTweener
 	{
@@ -11,9 +10,9 @@ package orichalcum.animation.tweener
 		//protected var _distanceRemaining:Number;
 		
 		
-		override public function init(start:Number, end:Number, rounded:Boolean, relative:Boolean):void
+		override public function init(start:Number, end:Number):void
 		{
-			super.init(start, end, rounded, relative);
+			super.init(start, end);
 			_previousValue = start;
 			//_distanceRemaining = _distance;
 		}
