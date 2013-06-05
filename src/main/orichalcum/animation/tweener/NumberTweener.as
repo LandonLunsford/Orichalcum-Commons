@@ -8,6 +8,7 @@ package orichalcum.animation.tweener
 		//static private const isRounded:RegExp = /\[.*\]/;
 		//static private const isRelative:RegExp = /\+|\-/;
 		//static private const numberExtractor:RegExp = /[-+]?[0-9]*\.?[0-9]+/;
+		//tweener.init(start, parseFloat(numberExtractor.exec(end)), isRounded.test(end), isRelative.test(end));
 		
 		// may want to refactor into decorator class or other class for efficiency
 		static private const RETURN:Function = function(value:Number):Number { return value; }
