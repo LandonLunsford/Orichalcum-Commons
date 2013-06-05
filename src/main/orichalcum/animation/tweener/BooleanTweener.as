@@ -17,14 +17,14 @@ package orichalcum.animation.tweener
 		/**
 		 * For a boolean tween this is easy just return the setter value when
 		 */
-		public function tween(target:Object, property:String, progress:Number):void
+		public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):void
 		{
-			target[property] = progress < 0.99 ? _start : _end;
+			target[property] = isEnd ? _start : _end;
 		}
 
 		public function toString():String
 		{
-			return StringUtil.substitute('<boolean-tweener end="{2}">', _end);
+			return StringUtil.substitute('<boolean-tweener start="{0}" end="{1}">', _start, _end);
 		}
 	}
 
