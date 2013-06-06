@@ -4,18 +4,21 @@ package orichalcum.animation.tweener
 
 	public class BooleanTweener implements ITweener
 	{
+		/** @private */
 		private var _start:Boolean;
+		
+		/** @private */
 		private var _end:Boolean;
-
+		
 		public function init(start:*, end:*):void
 		{
-			_start = Boolean(start);
-			_end = Boolean(end);
+			_start = start;
+			_end = end;
 		}
 		
-		public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):void
+		public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*
 		{
-			target[property] = isEnd ? _start : _end;
+			return target[property] = isEnd ? _start : _end;
 		}
 
 		public function toString():String
