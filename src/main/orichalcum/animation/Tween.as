@@ -5,8 +5,10 @@ package orichalcum.animation
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.utils.Dictionary;
+	import flash.utils.getQualifiedClassName;
 	import flash.utils.getTimer;
 	import orichalcum.animation.tweener.BooleanTweener;
+	import orichalcum.animation.tweener.ITweener;
 	import orichalcum.animation.tweener.NumberTweener;
 	import orichalcum.utility.FunctionUtil;
 	import orichalcum.utility.ObjectUtil;
@@ -40,7 +42,7 @@ package orichalcum.animation
 		static private const _tweenersByProperty:Object = {};
 		
 		/** @private */
-		static private const _tweenersByClass:Object = {'Number': NumberTweener, 'Boolean': BooleanTweener};
+		static private const _tweenersByClass:Object = {'int': NumberTweener, 'Number': NumberTweener, 'Boolean': BooleanTweener};
 		
 		{
 			_currentTime = getTimer();
@@ -58,13 +60,16 @@ package orichalcum.animation
 		/** @private */
 		static private function _createTweener(propertyName:String, propertyValue:*):ITweener
 		{
-			const tweenerForProperty:ITweener = _tweenersByProperty[propertyName];
+			const tweenerForProperty:Class = _tweenersByProperty[propertyName];
+			
+			trace(getQualifiedClassName(propertyValue));
+			
 			return tweenerForProperty
 				? new tweenerForProperty
 				: new _tweenersByClass[getQualifiedClassName(propertyValue)];
 		}
 		
-		static public function install(tweener:ITweener, triggers:*):void
+		static public function install(tweener:Class, triggers:*):void
 		{
 			if (tweener == null)
 			{
@@ -551,7 +556,6 @@ package orichalcum.animation
 			
 			if (this.duration <= 0) this.duration = duration;
 			
-			_to = to;
 			_position = -delay;
 			_previousPosition = _position - EPSILON;
 			
