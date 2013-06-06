@@ -85,7 +85,7 @@ package orichalcum.animation
 		 */
 		//function delay(duration:Number):ITween;
 		
-		function setPosition(position:Number, supressCallbacks:Boolean = false):void;
+		function goto(position:Number, supressCallbacks:Boolean = false):void;
 		function gotoAndPlay(position:Number, supressCallbacks:Boolean = false):void;
 		function gotoAndStop(position:Number, supressCallbacks:Boolean = false):void;
 		function play():void;
