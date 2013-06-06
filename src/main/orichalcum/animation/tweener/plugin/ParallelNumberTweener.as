@@ -7,6 +7,9 @@ package orichalcum.animation.tweener.plugin
 	 */
 	public class ParallelNumberTweener extends NumberTweener
 	{
+	
+		static public const properties:Array = ['x', 'y', 'z'];
+	
 		/** @private */
 		protected var _previousValue:Number;
 		
