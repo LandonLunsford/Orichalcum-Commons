@@ -4,15 +4,42 @@ package orichalcum.animation.tweener
 	
 	public class NumberTweener implements ITweener
 	{
-		static private const isRounded:RegExp = /\[.*\]/;
-		static private const isRelative:RegExp = /\+=|-=/;
-		static private const float:RegExp = /[-+]?[0-9]*\.?[0-9]+/;
 		
-		// may want to refactor into decorator class or other class for efficiency
+		/** @private */
+		static private const ROUNDED_DETECTOR:RegExp = /\[.*\]/;
+		
+		/** @private */
+		static private const RELATIVE_DETECTOR:RegExp = /\+=|-=/;
+		
+		/** @private */
+		static private const FLOAT_DETECTOR:RegExp = /[-+]?[0-9]*\.?[0-9]+/;
+		
+		/** @private */
+		static private const EXTRA_SYMBOLS:RegExp = /=|\[|\]/g;
+		
+		/** @private */
 		private const RETURN:Function = function(value:Number):Number { return value; }
+		
+		/** @private */
 		protected var _round:Function = RETURN;
+		
+		/** @private */
 		protected var _start:Number;
+		
+		/** @private */
 		protected var _distance:Number;
+		
+		/** @private */
+		protected function get round():Boolean
+		{
+			return _round == Math.round;
+		}
+		
+		/** @private */
+		protected function set round(value:Boolean):void
+		{
+			_round = value ? Math.round : RETURN;
+		}
 		
 		/* INTERFACE orichalcum.animation.tweener.ITweener */
 		
@@ -26,9 +53,10 @@ package orichalcum.animation.tweener
 			}
 			else if (end is String)
 			{
-				const endNumber:Number = parseFloat(float.exec(end));
-				_distance = isRelative.test(end) ? endNumber : endNumber - start;
-				_round = isRounded.test(end) ? Math.round : RETURN;
+				const endAsString:String = end as String;
+				const endAsNumber:Number = parseFloat(FLOAT_DETECTOR.exec(endAsString.replace(EXTRA_SYMBOLS, '')));
+				_distance = RELATIVE_DETECTOR.test(endAsString) ? endAsNumber : endAsNumber - start;
+				_round = ROUNDED_DETECTOR.test(endAsString) ? Math.round : RETURN;
 			}
 			else
 			{
@@ -36,9 +64,9 @@ package orichalcum.animation.tweener
 			}
 		}
 		
-		public function tween(target:Object, property:String, progress:Number):void
+		public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*
 		{
-			target[property] = _round(_start + progress * _distance);
+			return target[property] = _round(_start + progress * _distance);
 		}
 		
 		public function toString():String
