@@ -3,6 +3,8 @@ package orichalcum.animation
 	import com.orichalcum.core.coreEventDispatcher;
 	import flash.display.Bitmap;
 	import flash.events.Event;
+	import orichalcum.core.Core;
+	import orichalcum.core.orichalcum_internal;
 
 	/**
 	 * @TODO Frame scripts should be in the Animation (ie implement addFrameScript(frameNumber, function);
@@ -76,12 +78,12 @@ package orichalcum.animation
 		
 		public function play():void
 		{
-			_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
+			Core.eventDispatcher.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
 		}
 		
 		public function stop():void
 		{
-			_enterFrameEventDispatcher.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			Core.eventDispatcher.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		public function nextFrame():void

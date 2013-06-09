@@ -1,4 +1,4 @@
-package orichalcum.animation 
+package orichalcum.core 
 {
 	import flash.errors.IllegalOperationError;
 

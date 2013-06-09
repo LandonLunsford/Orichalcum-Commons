@@ -10,6 +10,7 @@ package orichalcum.animation
 	import orichalcum.animation.tweener.BooleanTweener;
 	import orichalcum.animation.tweener.ITweener;
 	import orichalcum.animation.tweener.NumberTweener;
+	import orichalcum.core.Core;
 	import orichalcum.utility.FunctionUtil;
 	import orichalcum.utility.ObjectUtil;
 	
@@ -654,11 +655,11 @@ package orichalcum.animation
 			_isPlaying = value;
 			if (value)
 			{
-				_enterFrameEventDispatcher.addEventListener(Event.ENTER_FRAME, _integrate);
+				Core.eventDispatcher.addEventListener(Event.ENTER_FRAME, _integrate);
 			}
 			else
 			{
-				_enterFrameEventDispatcher.removeEventListener(Event.ENTER_FRAME, _integrate);
+				Core.eventDispatcher.removeEventListener(Event.ENTER_FRAME, _integrate);
 			}
 		}
 		

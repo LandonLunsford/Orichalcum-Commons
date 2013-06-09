@@ -14,7 +14,7 @@ package orichalcum.utility
 		public function safeCall_context():void
 		{
 			const _this:* = this;
-			FunctionUtil.safeCall(function():void {
+			FunctionUtil.call(function():void {
 				assertThat(_this, strictlyEqualTo(this));
 			}, this);
 		}
@@ -22,7 +22,7 @@ package orichalcum.utility
 		[Test]
 		public function safeCall_exactArgs():void
 		{
-			FunctionUtil.safeCall(function(a:Boolean = false, b:int = -1):void {
+			FunctionUtil.call(function(a:Boolean = false, b:int = -1):void {
 				assertThat(a, isTrue());
 				assertThat(b, equalTo(1));
 			}, this, true, 1);
@@ -31,7 +31,7 @@ package orichalcum.utility
 		[Test]
 		public function safeCall_tooLittleArgs():void
 		{
-			FunctionUtil.safeCall(function(a:Boolean = false, b:int = -1):void {
+			FunctionUtil.call(function(a:Boolean = false, b:int = -1):void {
 				assertThat(a, isTrue());
 				assertThat(b, equalTo(-1));
 			}, this, true);
@@ -40,7 +40,7 @@ package orichalcum.utility
 		[Test]
 		public function safeCall_tooManyArgs():void
 		{
-			FunctionUtil.safeCall(function(a:Boolean = false, b:int = -1):void {
+			FunctionUtil.call(function(a:Boolean = false, b:int = -1):void {
 				assertThat(a, isTrue());
 				assertThat(b, equalTo(1));
 				assertThat(arguments.length == arguments.callee.length);
