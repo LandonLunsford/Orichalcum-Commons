@@ -9,11 +9,20 @@ package
 		static public const LEFT:Direction = new Direction(3, 'left');
 		static public const RIGHT:Direction = new Direction(4, 'right');
 		
+		{
+			NONE._opposite = NONE;
+			UP._opposite = DOWN;
+			DOWN._opposite = UP;
+			LEFT._opposite = RIGHT;
+			RIGHT._opposite = LEFT;
+		}
+		
 		static private const _directionsByCode:Array = [NONE, UP, DOWN, LEFT, RIGHT];
 		static private const _directionsByName:Object = {none:NONE, up:UP, down:DOWN, left:LEFT, right:RIGHT};
 		
 		private var _code:int;
 		private var _name:String;
+		private var _opposite:Direction;
 		
 		public function Direction(code:int, name:String) 
 		{
@@ -29,6 +38,11 @@ package
 		public function get name():String 
 		{
 			return _name;
+		}
+		
+		public function get opposite():Direction
+		{
+			return _opposite;
 		}
 		
 		public function toString():String
