@@ -4,11 +4,11 @@ package enumeration
 
 	public class Direction 
 	{
-		static public const NONE:Direction = new Direction(0, 'none');
-		static public const UP:Direction = new Direction(1, 'up');
-		static public const DOWN:Direction = new Direction(2, 'down');
-		static public const LEFT:Direction = new Direction(3, 'left');
-		static public const RIGHT:Direction = new Direction(4, 'right');
+		static public const NONE:Direction = new Direction(0, 'none', -1);
+		static public const UP:Direction = new Direction(1, 'up', Keyboard.UP);
+		static public const DOWN:Direction = new Direction(2, 'down', Keyboard.DOWN);
+		static public const LEFT:Direction = new Direction(3, 'left', Keyboard.LEFT);
+		static public const RIGHT:Direction = new Direction(4, 'right', Keyboard.RIGHT);
 		
 		static private const _directionsByCode:Array = [NONE, UP, DOWN, LEFT, RIGHT];
 		static private const _directionsByName:Object = {none:NONE, up:UP, down:DOWN, left:LEFT, right:RIGHT};
@@ -29,12 +29,14 @@ package enumeration
 		
 		private var _code:int;
 		private var _name:String;
+		private var _keyCode:int;
 		private var _opposite:Direction;
 		
-		public function Direction(code:int, name:String) 
+		public function Direction(code:int, name:String, keyCode:int) 
 		{
 			_code = code;
 			_name = name;
+			_keyCode = keyCode;
 		}
 		
 		public function get code():int 
@@ -45,6 +47,11 @@ package enumeration
 		public function get name():String 
 		{
 			return _name;
+		}
+		
+		public function get keyCode():int
+		{
+			return _keyCode;
 		}
 		
 		public function get opposite():Direction
