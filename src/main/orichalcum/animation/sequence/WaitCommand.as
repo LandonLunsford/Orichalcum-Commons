@@ -9,10 +9,10 @@ package orichalcum.animation.sequence
 	{
 		
 		private var _position:Number = 0;
-		private var _duration:Number;
-		private var _useFrames:Boolean;
-		private var _callback:Function;
-		private var _callbackArguments:Array;
+		protected var _duration:Number;
+		protected var _useFrames:Boolean;
+		protected var _callback:Function;
+		protected var _callbackArguments:Array;
 		private var _isPlaying:Boolean;
 		
 		
@@ -43,6 +43,11 @@ package orichalcum.animation.sequence
 		}
 		
 		override public function play(callback:Function = null, ...args):IPlayable
+		{
+			return _play(callback, args);
+		}
+		
+		protected function _play(callback:Function = null, args:Array = null):IPlayable
 		{
 			isPlaying = true;
 			_callback = callback != null ? callback : _callback;

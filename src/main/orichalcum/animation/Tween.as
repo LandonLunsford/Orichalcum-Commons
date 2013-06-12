@@ -178,9 +178,6 @@ package orichalcum.animation
 		private var _next:ITween;
 		
 		/** @private */
-		private var _autoPlay:Boolean = true;
-		
-		/** @private */
 		private var _timeScale:Number = 1;
 		
 		/** @private */
@@ -201,16 +198,21 @@ package orichalcum.animation
 		
 		static public function to(...args):ITween
 		{
-			const tween:Tween = new Tween;
-			tween._construct(args);
-			return _add(tween as ITween);
+			return _create(args, false);
 		}
 		
 		static public function from(...args):ITween
 		{
+			return _create(args, true);
+		}
+		
+		static private function _create(args:Array, from:Boolean):ITween
+		{
 			const tween:Tween = new Tween;
-			tween._construct(args, true);
-			return _add(tween as ITween);
+			tween._construct(args, from);
+			tween.replay();
+			_add(tween as ITween);
+			return tween;
 		}
 		
 		static private function _add(tween:ITween):ITween
@@ -382,16 +384,6 @@ package orichalcum.animation
 			_timeScale = value;
 		}
 		
-		public function get autoPlay():Boolean 
-		{
-			return _autoPlay;
-		}
-		
-		public function set autoPlay(value:Boolean):void 
-		{
-			_autoPlay = value;
-		}
-		
 		public function get useFrames():Boolean 
 		{
 			return _useFrames;
@@ -461,27 +453,13 @@ package orichalcum.animation
 		
 		public function toggle():void
 		{
+			// incomplete... this can trigger init so it needs to pass supresscallbacks
 			isPlaying = !isPlaying;
 		}
 		
-		public function play():void
+		public function play(supressCallbacks:Boolean = false):void
 		{
-			_setIsPlaying(true);
-		}
-		
-		public function stop():void
-		{
-			_setIsPlaying(false);
-		}
-		
-		public function end(supressCallbacks:Boolean = false):void
-		{
-			gotoAndStop(_endPosition, supressCallbacks);
-		}
-		
-		public function reset(supressCallbacks:Boolean = false):void
-		{
-			gotoAndStop(-_delay, supressCallbacks);
+			gotoAndPlay(_position, supressCallbacks);
 		}
 		
 		public function replay(supressCallbacks:Boolean = false):void
@@ -489,16 +467,31 @@ package orichalcum.animation
 			gotoAndPlay(-_delay, supressCallbacks);
 		}
 		
+		public function pause():void
+		{
+			_setIsPlaying(false);
+		}
+		
+		public function stop(supressCallbacks:Boolean = false):void
+		{
+			gotoAndStop(-_delay, supressCallbacks);
+		}
+		
+		public function end(supressCallbacks:Boolean = false):void
+		{
+			gotoAndStop(_endPosition, supressCallbacks);
+		}
+		
 		public function gotoAndPlay(position:Number, supressCallbacks:Boolean = false):void
 		{
 			_setPosition(position, true, supressCallbacks);
-			play();
+			_setIsPlaying(true);
 		}
 		
 		public function gotoAndStop(position:Number, supressCallbacks:Boolean = false):void
 		{
 			_setPosition(position, true, supressCallbacks);
-			stop();
+			_setIsPlaying(false);
 		}
 		
 		public function reverse():void
@@ -559,8 +552,6 @@ package orichalcum.animation
 			
 			_position = -delay;
 			_previousPosition = _position - EPSILON;
-			
-			autoPlay && replay();
 		}
 		
 		private function _setPosition(value:Number, jump:Boolean = false, supressCallbacks:Boolean = false):void
@@ -638,7 +629,7 @@ package orichalcum.animation
 		
 		private function _onCompleteHandler(jump:Boolean, supressCallbacks:Boolean):void 
 		{
-			stop();
+			pause();
 			if (supressCallbacks) return;
 			_onComplete.length == 1 ? _onComplete(jump) : _onComplete();
 			hasEventListener(Event.COMPLETE) && dispatchEvent(new Event(Event.COMPLETE));

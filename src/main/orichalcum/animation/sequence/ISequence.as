@@ -2,9 +2,6 @@ package orichalcum.animation.sequence
 {
 	import orichalcum.animation.IPlayable;
 
-	/**
-	 * AKA Command Chain
-	 */
 	public interface ISequence extends IPlayable
 	{
 		//////////////////////////////////////////////////////////////////
@@ -17,7 +14,7 @@ package orichalcum.animation.sequence
 		
 		function call(...args):ISequence;
 		
-		//function to(...args):ISequence;
+		function to(...args):ISequence;
 		
 		
 	}

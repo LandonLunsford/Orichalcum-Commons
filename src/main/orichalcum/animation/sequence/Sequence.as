@@ -54,26 +54,30 @@ package orichalcum.animation.sequence
 		
 		public function replay():IPlayable 
 		{
-			return this;
+			return play();
 		}
 		
 		public function pause():IPlayable 
 		{
+			// needs to pause current one
 			return this;
 		}
 		
 		public function stop():IPlayable 
 		{
+			// stop current
 			return this;
 		}
 		
 		public function toggle():IPlayable 
 		{
+			// track is playing etc
 			return this;
 		}
 		
 		public function end(supressCallbacks:Boolean = false):IPlayable 
 		{
+			// got through command chain calling end on all remaining
 			return this;
 		}
 		
