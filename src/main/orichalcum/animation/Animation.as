@@ -1,12 +1,9 @@
 package orichalcum.animation 
 {
 	import flash.errors.IllegalOperationError;
+	import flash.utils.Dictionary;
 
-	/**
-	 * @author Landon Lunsford
-	 */
-
-	public class Animation implements IAnimation 
+	public class Animation extends AnimationBase implements IAnimation 
 	{
 		
 		static public function create(...args):IAnimation
@@ -15,32 +12,27 @@ package orichalcum.animation
 			return new Animation;
 		}
 		
-		static public function animate(target:Object):IAnimation
+		static public function animate(target:Object):IAnimationBuilder
 		{
 			return create().animate(target);
 		}
 		
-		static public function to(...args):IAnimation
+		static public function to(...args):IAnimationBuilder
 		{
 			return create().to.apply(null, args);
 		}
 		
-		static public function from(...args):IAnimation
+		static public function from(...args):IAnimationBuilder
 		{
 			return create().from.apply(null, args);
 		}
 		
-		static public function delay(duration:Number, useFrames:Boolean = false):IAnimation 
+		static public function delay(duration:Number, useFrames:Boolean = false):IAnimationBuilder 
 		{
 			return create().delay(duration, useFrames);
 		}
 		
-		static public function call(callback:Function, ...args):IAnimation 
-		{
-			return this;
-		}
-		
-		static public function complete(callback:Function, ...args):IAnimation 
+		static public function call(callback:Function, ...args):IAnimationBuilder 
 		{
 			return this;
 		}
@@ -48,17 +40,23 @@ package orichalcum.animation
 		/**
 		 * DisplayObjectContainer of Animations
 		 */
-		private var _parent:IAnimation;
-		private var _children:Vector.<Object>;
+		//private var _parent:IAnimation;
+		//private var _children:Vector.<AnimationNode>;
+		private var _childrenStartTimes:Dictionary = new Dictionary;
+		private var _children:Vector.<AnimationBase>;
 		private var _currentChildIndex:int;
 		
 		
 		private var _target:Object;
-		private var _useFrames:Boolean = null;
+		private var _useFrames:Boolean;
 		private var _timeScale:Number = 1;
 		
 		private var _completeCallback:Function;
 		private var _completeCallbackArguments:Array;
+		
+		private var _isPlaying:Boolean;
+		
+		private var _duration:Number = 0;
 		
 		public function Animation() 
 		{
@@ -79,7 +77,11 @@ package orichalcum.animation
 		
 		public function get duration():Number 
 		{
-			throw new IllegalOperationError;
+			var duration:Number = 0;
+			for each(var child:AnimationBase in _children)
+			{
+				if (_childrenStartTimes[child] + child
+			}
 		}
 		
 		public function set duration(value:Number):void 
@@ -109,7 +111,7 @@ package orichalcum.animation
 		
 		public function get timeScale():Number
 		{
-			return _parent ? _parent.timeScale * _timeScale : _timeScale;
+			return _timeScale;
 		}
 		
 		public function set timeScale(value:Number):void 
@@ -119,7 +121,7 @@ package orichalcum.animation
 		
 		public function get useFrames():Boolean
 		{
-			return _parent ? _parent.useFrames : _useFrames;
+			return _useFrames;
 		}
 		
 		public function set useFrames(value:Boolean):void 
@@ -134,13 +136,13 @@ package orichalcum.animation
 		
 		public function get isPaused():Boolean 
 		{
-			return _isPaused;
+			return !isPlaying;
 		}
 		
-		public function add(animation:IAnimation):IAnimation 
+		public function add(animation:IAnimation, time:Number = NaN):IAnimation 
 		{
-			animation.parent = this;
-			_children.push(animation);
+			const node:AnimationNode = new AnimationNode(animation, isNaN(time) ? duration : time);
+			_children.push(node);
 			return this;
 		}
 		
@@ -221,9 +223,9 @@ package orichalcum.animation
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		
 		
-		public function get children():Vector.<Object> 
+		public function get children():Vector.<AnimationBase> 
 		{
-			return _children ||= new Vector.<Object>;
+			return _children ||= new Vector.<AnimationBase>;
 		}
 		
 		

@@ -43,17 +43,6 @@ package orichalcum.animation
 		function get isPaused():Boolean;
 		
 		// function get ease():Function // I could have an overarching ease that defaults linear ( : J
-		
-		///////////////////////////////////////////////
-		// Creation
-		///////////////////////////////////////////////
-		
-		function add(animation:IAnimation):IAnimation;
-		function animate(target:Object):IAnimation;
-		function to(...args):IAnimation;
-		function from(...args):IAnimation;
-		function delay(duration:Number, useFrames:Boolean = false):IAnimation;
-		function call(callback:Function, ...args):IAnimation;
 		//function init(callback:Function, ...args):IAnimation;
 		//function change(callback:Function, ...args):IAnimation;
 		//function yoyo(callback:Function, ...args):IAnimation;
