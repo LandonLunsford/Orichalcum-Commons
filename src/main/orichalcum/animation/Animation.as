@@ -1,195 +1,232 @@
-package orichalcum.animation
+package orichalcum.animation 
 {
-	import com.orichalcum.core.coreEventDispatcher;
-	import flash.display.Bitmap;
-	import flash.events.Event;
-	import orichalcum.core.Core;
-	import orichalcum.core.orichalcum_internal;
+	import flash.errors.IllegalOperationError;
 
 	/**
-	 * @TODO Frame scripts should be in the Animation (ie implement addFrameScript(frameNumber, function);
-	 * @BUG Though animation would be good to decouple from its container
-	 * 	this causes problems when its onEnterFrame doesn't line up with its
-	 * 	container's
-	 * @BUG stop() on frameData with null cellData doesn't work
-	 * 
 	 * @author Landon Lunsford
 	 */
-	
-	public class Animation extends Bitmap
+
+	public class Animation implements IAnimation 
 	{
 		
-		/******************************************************************
-		 * Private members
-		 *****************************************************************/
-		
-		private var _timeline:AnimationTimeline;
-		
-		private var _currentFrame:int;
-		
-		private var _currentLabel:String;
-		
-		private var _cells:Array;
-		
-		private var _frameRate:Number;
-		
-		private var _frameCount:Number = 0;
-		
-		/******************************************************************
-		 * Accessors
-		 *****************************************************************/
-		
-		public function get timeline():AnimationTimeline { return _timeline; }
-		
-		public function get cells():Array { return _cells; }
-		
-		public function get frameRate():Number { return _frameRate; }
-		
-		public function get currentFrame():int { return _timeline ? _currentFrame : 0; }
-		
-		public function get totalFrames():int { return _timeline ? _timeline.totalFrames : 0; }
-		
-		public function get currentLabel():String { return _timeline ? _currentLabel : null; }
-		
-		/******************************************************************
-		 * Modifiers
-		 *****************************************************************/
-		
-		public function set timeline(timeline:AnimationTimeline):void
+		static public function create(...args):IAnimation
 		{
-			_timeline = timeline;
-			updateCurrentFrame(_currentFrame);
+			// similar to tween take target, and options like on complete!
+			return new Animation;
 		}
 		
-		public function set cells(cells:Array):void
+		static public function animate(target:Object):IAnimation
 		{
-			_cells = cells;
-			updateCurrentFrame(_currentFrame);
+			return create().animate(target);
 		}
 		
-		public function set frameRate(value:Number):void
+		static public function to(...args):IAnimation
 		{
-			if (value > 0) _frameRate = value;
+			return create().to.apply(null, args);
 		}
 		
-		/******************************************************************
-		 * Public interface
-		 *****************************************************************/
-		
-		public function play():void
+		static public function from(...args):IAnimation
 		{
-			Core.eventDispatcher.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
+			return create().from.apply(null, args);
 		}
 		
-		public function stop():void
+		static public function delay(duration:Number, useFrames:Boolean = false):IAnimation 
 		{
-			Core.eventDispatcher.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			return create().delay(duration, useFrames);
 		}
 		
-		public function nextFrame():void
+		static public function call(callback:Function, ...args):IAnimation 
 		{
-			updateCurrentFrame(_currentFrame + 1);
+			return this;
 		}
 		
-		public function prevFrame():void
+		static public function complete(callback:Function, ...args):IAnimation 
 		{
-			updateCurrentFrame(_currentFrame - 1);
+			return this;
 		}
 		
-		public function gotoAndPlay(frame:*):void
-		{
-			updateCurrentFrame(frame);
-			play();
-		}
+		/**
+		 * DisplayObjectContainer of Animations
+		 */
+		private var _parent:IAnimation;
+		private var _children:Vector.<Object>;
+		private var _currentChildIndex:int;
 		
-		public function gotoAndStop(frame:*):void
-		{
-			stop();
-			updateCurrentFrame(frame);
-		}
 		
-		public function dispose():void
-		{
-			_cells = null;
-			_timeline = null;
-		}
+		private var _target:Object;
+		private var _useFrames:Boolean = null;
+		private var _timeScale:Number = 1;
 		
-		/******************************************************************
-		 * Private methods
-		 *****************************************************************/
-
-		private function onEnterFrame(event:Event):void
-		{
-			// Feature disabled for efficiency
-			//if (isNaN(_frameRate))
-			//{
-				nextFrame();
-			//}
-			//else
-			//{
-				//_frameCount += isNaN(_frameRate) ? 1 : _frameRate / stage.frameRate;
-				//updateCurrentFrame(_currentFrame + int(_frameCount));
-				//if (_frameCount >= 1) _frameCount = 0;
-			//}
-		}
+		private var _completeCallback:Function;
+		private var _completeCallbackArguments:Array;
 		
-		private function updateCurrentFrame(frame:*):void
+		public function Animation() 
 		{
-			if (!_timeline) return;
 			
-			if (frame is Number)
-			{
-				_currentFrame = frame > totalFrames || frame < 1 ? 1 : frame;
-			}
-			else if (frame is String)
-			{
-				_currentFrame = _timeline.getFrameNumber(frame);
-			}
-				
-			updateView(_timeline.getFrame(_currentFrame));
-			executeScript(_timeline.getFrameScript(_currentFrame));
 		}
 		
-		private function executeScript(script:Function):void
+		/* INTERFACE orichalcum.animation.IAnimation */
+		
+		public function get target():Object 
 		{
-			if (script != null) script(this);
+			return _target;
 		}
 		
-		private function updateView(frameData:Object):void
+		public function set target(value:Object):void 
 		{
-			if (!_cells) return;
-			
-			for (var property:String in frameData)
-				this[property] = frameData[property];
+			_target = value;
 		}
 		
-		private function set cell(cellNumber:int):void
+		public function get duration():Number 
 		{
-			bitmapData = cellNumber < 0 ? null : cells[cellNumber];
+			throw new IllegalOperationError;
 		}
 		
-		private function set label(value:String):void
+		public function set duration(value:Number):void 
 		{
-			_currentLabel = value;
+			throw new IllegalOperationError;
 		}
 		
-		/******************************************************************
-		 * Overriden members
-		 *****************************************************************/
-
-		override public function set scaleX(value:Number):void 
+		public function get position():Number 
 		{
-			if (scaleX == value) return;
-			x += width * scaleX;
-			super.scaleX = value;
+			throw new IllegalOperationError;
 		}
 		
-		override public function set scaleY(value:Number):void 
+		public function set position(value:Number):void 
 		{
-			if (scaleY == value) return;
-			y += height * scaleY;
-			super.scaleY = value;
+			throw new IllegalOperationError;
 		}
+		
+		public function get progress():Number 
+		{
+			throw new IllegalOperationError;
+		}
+		
+		public function set progress(value:Number):void 
+		{
+			throw new IllegalOperationError;
+		}
+		
+		public function get timeScale():Number
+		{
+			return _parent ? _parent.timeScale * _timeScale : _timeScale;
+		}
+		
+		public function set timeScale(value:Number):void 
+		{
+			_timeScale = value;
+		}
+		
+		public function get useFrames():Boolean
+		{
+			return _parent ? _parent.useFrames : _useFrames;
+		}
+		
+		public function set useFrames(value:Boolean):void 
+		{
+			_useFrames = value;
+		}
+		
+		public function get isPlaying():Boolean 
+		{
+			return _isPlaying;
+		}
+		
+		public function get isPaused():Boolean 
+		{
+			return _isPaused;
+		}
+		
+		public function add(animation:IAnimation):IAnimation 
+		{
+			animation.parent = this;
+			_children.push(animation);
+			return this;
+		}
+		
+		public function animate(target:Object):IAnimation 
+		{
+			_target = target; // must set overide in all child tweens
+			return this;
+		}
+		
+		public function to(...args):IAnimation 
+		{
+			return this;
+		}
+		
+		public function from(...args):IAnimation 
+		{
+			return this;
+		}
+		
+		public function delay(duration:Number, useFrames:Boolean = false):IAnimation 
+		{
+			return this;
+		}
+		
+		public function call(callback:Function, ...args):IAnimation 
+		{
+			return this;
+		}
+		
+		public function complete(callback:Function, ...args):IAnimation 
+		{
+			return this;
+		}
+		
+		public function play():IAnimation 
+		{
+			return this;
+		}
+		
+		public function pause():IAnimation 
+		{
+			return this;
+		}
+		
+		public function toggle(flag:Boolean):IAnimation 
+		{
+			return this;
+		}
+		
+		public function stop():IAnimation 
+		{
+			return this;
+		}
+		
+		public function replay():IAnimation 
+		{
+			return this;
+		}
+		
+		public function goto(position:Number):IAnimation 
+		{
+			return this;
+		}
+		
+		public function rewind():IAnimation 
+		{
+			return this;
+		}
+		
+		public function end(triggerCallbacks:Boolean = true):IAnimation 
+		{
+			return this;
+		}
+		
+		
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		// PRIVATE
+		//////////////////////////////////////////////////////////////////////////////////////////////
+		
+		
+		public function get children():Vector.<Object> 
+		{
+			return _children ||= new Vector.<Object>;
+		}
+		
+		
 		
 	}
 

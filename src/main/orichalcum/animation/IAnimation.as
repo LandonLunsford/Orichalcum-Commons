@@ -35,6 +35,9 @@ package orichalcum.animation
 		function get useFrames():Boolean;
 		function set useFrames(value:Boolean):void;
 		
+		function get timeScale():Number;
+		function get timeScale(value:Number):void;
+		
 		function get isPlaying():Boolean;
 		
 		function get isPaused():Boolean;

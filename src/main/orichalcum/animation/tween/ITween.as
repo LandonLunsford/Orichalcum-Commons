@@ -22,9 +22,6 @@ package orichalcum.animation.tween
 		
 		function get ease():Function;
 		function get ease(value:Function):void;
-		
-		function get timeScale():Number;
-		function get timeScale(value:Number):void;
 				
 		function get onInit():Function;
 		function set onInit(value:Function):void;

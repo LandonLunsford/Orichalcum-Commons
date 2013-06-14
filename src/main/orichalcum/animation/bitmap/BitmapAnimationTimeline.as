@@ -1,6 +1,6 @@
-package orichalcum.animation
+package orichalcum.animation.bitmap
 {
-	public class AnimationTimeline
+	public class BitmapAnimationTimeline
 	{
 		/**
 		 * Indexes at 1
@@ -17,7 +17,7 @@ package orichalcum.animation
 		 */
 		private var _scriptMap:Object;
 		
-		public function AnimationTimeline(data:Object)
+		public function BitmapAnimationTimeline(data:Object)
 		{
 			_frames = [];
 			_frameMap = {};

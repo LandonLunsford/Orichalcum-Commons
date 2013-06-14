@@ -1,4 +1,4 @@
-package orichalcum.animation 
+package orichalcum.animation.ease 
 {
 	final public class Ease
 	{
