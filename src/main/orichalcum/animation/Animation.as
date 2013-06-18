@@ -1,9 +1,12 @@
 package orichalcum.animation 
 {
 	import flash.errors.IllegalOperationError;
+	import flash.events.Event;
 	import flash.utils.Dictionary;
+	import orichalcum.core.Core;
+	import orichalcum.utility.FunctionUtil;
 
-	public class Animation extends AnimationBase implements IAnimation 
+	public class Animation extends AnimationBase implements IAnimationBuilder
 	{
 		
 		static public function create(...args):IAnimation
@@ -37,26 +40,18 @@ package orichalcum.animation
 			return this;
 		}
 		
-		/**
-		 * DisplayObjectContainer of Animations
-		 */
-		//private var _parent:IAnimation;
-		//private var _children:Vector.<AnimationNode>;
 		private var _childrenStartTimes:Dictionary = new Dictionary;
 		private var _children:Vector.<AnimationBase>;
 		private var _currentChildIndex:int;
-		
-		
 		private var _target:Object;
 		private var _useFrames:Boolean;
 		private var _timeScale:Number = 1;
-		
+		private var _isPlaying:Boolean;
 		private var _completeCallback:Function;
 		private var _completeCallbackArguments:Array;
 		
-		private var _isPlaying:Boolean;
-		
-		private var _duration:Number = 0;
+		//private var _duration:Number = 0; // dynamic?
+		private var _position:Number = 0;
 		
 		public function Animation() 
 		{
@@ -75,13 +70,21 @@ package orichalcum.animation
 			_target = value;
 		}
 		
+		/**
+		 * O(n)
+		 */
 		public function get duration():Number 
 		{
 			var duration:Number = 0;
 			for each(var child:AnimationBase in _children)
 			{
-				if (_childrenStartTimes[child] + child
+				var endTime:Number = _childrenStartTimes[child] + child.duration;
+				if (endTime > duration)
+				{
+					duration = endTime;
+				}
 			}
+			return duration;
 		}
 		
 		public function set duration(value:Number):void 
@@ -91,22 +94,25 @@ package orichalcum.animation
 		
 		public function get position():Number 
 		{
-			throw new IllegalOperationError;
+			return _position;
 		}
 		
 		public function set position(value:Number):void 
 		{
-			throw new IllegalOperationError;
+			_setPosition(value < 0 ? 0 : value, true);
 		}
 		
+		/**
+		 * O(2n)
+		 */
 		public function get progress():Number 
 		{
-			throw new IllegalOperationError;
+			duration <= 0 ? 0 : _position / duration;
 		}
 		
 		public function set progress(value:Number):void 
 		{
-			throw new IllegalOperationError;
+			_setPosition(value < 0 ? 0 : value * duration, true);
 		}
 		
 		public function get timeScale():Number
@@ -136,13 +142,13 @@ package orichalcum.animation
 		
 		public function get isPaused():Boolean 
 		{
-			return !isPlaying;
+			return !_isPlaying;
 		}
 		
 		public function add(animation:IAnimation, time:Number = NaN):IAnimation 
 		{
-			const node:AnimationNode = new AnimationNode(animation, isNaN(time) ? duration : time);
-			_children.push(node);
+			_childrenStartTimes[animation] = isNaN(time) ? duration : time;
+			children.push(animation);
 			return this;
 		}
 		
@@ -154,67 +160,73 @@ package orichalcum.animation
 		
 		public function to(...args):IAnimation 
 		{
+			throw new IllegalOperationError;
 			return this;
 		}
 		
 		public function from(...args):IAnimation 
 		{
+			throw new IllegalOperationError;
 			return this;
 		}
 		
 		public function delay(duration:Number, useFrames:Boolean = false):IAnimation 
 		{
+			throw new IllegalOperationError;
 			return this;
 		}
 		
 		public function call(callback:Function, ...args):IAnimation 
 		{
+			throw new IllegalOperationError;
 			return this;
 		}
 		
 		public function complete(callback:Function, ...args):IAnimation 
 		{
+			_completeCallback = callback == null ? FunctionUtil.noop : callback;
+			_completeCallbackArguments = args;
 			return this;
 		}
 		
 		public function play():IAnimation 
 		{
-			return this;
+			return _setIsPlaying(true);
 		}
 		
 		public function pause():IAnimation 
 		{
-			return this;
+			return _setIsPlaying(false);
 		}
 		
-		public function toggle(flag:Boolean):IAnimation 
+		public function toggle(flag:* = null):IAnimation 
 		{
-			return this;
+			return _setIsPlaying(flag == null ? !_isPlaying : flag);
 		}
 		
 		public function stop():IAnimation 
 		{
-			return this;
+			return rewind().pause();
 		}
 		
 		public function replay():IAnimation 
 		{
-			return this;
+			return rewind().play();
 		}
 		
 		public function goto(position:Number):IAnimation 
 		{
-			return this;
+			return _setPosition(position, true);
 		}
 		
 		public function rewind():IAnimation 
 		{
-			return this;
+			return goto(0);
 		}
 		
 		public function end(triggerCallbacks:Boolean = true):IAnimation 
 		{
-			return this;
+			return goto(duration, true, triggerCallbacks);
 		}
 		
 		
@@ -222,12 +234,50 @@ package orichalcum.animation
 		// PRIVATE
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		
-		
-		public function get children():Vector.<AnimationBase> 
+		private function get children():Vector.<AnimationBase> 
 		{
 			return _children ||= new Vector.<AnimationBase>;
 		}
 		
+		private function _setIsPlaying(value:Boolean):IAnimation
+		{
+			if (_isPlaying == value) return;
+			
+			if (_isPlaying = value)
+			{
+				Core.eventDispatcher.addEventListener(Event.ENTER_FRAME, _integrate);
+			}
+			else
+			{
+				Core.eventDispatcher.removeEventListener(Event.ENTER_FRAME, _integrate);
+			}
+			return this;
+		}
+		
+		private function _integrate(event:Event):void 
+		{
+			//_setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
+			//_setPosition(_position + (useFrames ? 1 : Core.deltaTime) * timeScale);
+			
+			for each(var child:AnimationBase in _children)
+			{
+				child._render(_target, Core.deltaTime, _timeScale, _useFrames, false, true);
+			}
+		}
+		
+		private function _setPosition(value:Number, isJump:Boolean = false, triggerCallbacks:Boolean = true):IAnimation 
+		{
+			//_render(_target,
+			for each(var child:AnimationBase in _children)
+			{
+				child._setPosition();
+				
+				if (_childrenStartTimes[child]
+			}
+			
+			
+			return this;
+		}
 		
 		
 	}

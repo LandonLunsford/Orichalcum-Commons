@@ -56,9 +56,14 @@ package orichalcum.utility
 			return Math.abs(a - b) < threshold;
 		}
 		
-		public function numberInterpolation(a:Number, b:Number, lamda:Number):Number
+		static public function numberInterpolation(a:Number, b:Number, lamda:Number):Number
 		{
 			return a + (b - a) * lamda;
+		}
+		
+		static public function isBetween(value:Number, a:Number, b:Number):Boolean
+		{
+			return value >= a && value <= b;
 		}
 		
 		
