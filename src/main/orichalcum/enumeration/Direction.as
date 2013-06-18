@@ -86,7 +86,7 @@ package enumeration
 		
 		static public function fromVector(x:Number, y:Number):Direction
 		{
-			if (x == y) return NONE;
+			if (x == 0 && y == 0) return NONE;
 			
 			return Math.abs(y) > Math.abs(x)
 				? y > 0 ? DOWN : UP
