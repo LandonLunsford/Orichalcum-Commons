@@ -66,6 +66,19 @@ package orichalcum.utility
 			return value >= a && value <= b;
 		}
 		
+		static public function sum(...values):Number
+		{
+			var sum:Number = 0;
+			for each(var value:Number in values)
+				sum += value;
+			return sum;
+		}
+		
+		static public function average(...values):Number
+		{
+			return values.length == 0 ? 0 : sum.apply(null, values) / values.length;
+		}
+		
 		
 	}
 

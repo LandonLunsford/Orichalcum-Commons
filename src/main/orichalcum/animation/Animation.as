@@ -40,7 +40,7 @@ package orichalcum.animation
 			return this;
 		}
 		
-		private var _childrenStartTimes:Dictionary = new Dictionary;
+		private var _childrenStartPositions:Dictionary = new Dictionary;
 		private var _children:Vector.<AnimationBase>;
 		private var _currentChildIndex:int;
 		private var _target:Object;
@@ -78,7 +78,7 @@ package orichalcum.animation
 			var duration:Number = 0;
 			for each(var child:AnimationBase in _children)
 			{
-				var endTime:Number = _childrenStartTimes[child] + child.duration;
+				var endTime:Number = _childrenStartPositions[child] + child.duration;
 				if (endTime > duration)
 				{
 					duration = endTime;
@@ -147,7 +147,7 @@ package orichalcum.animation
 		
 		public function add(animation:IAnimation, time:Number = NaN):IAnimation 
 		{
-			_childrenStartTimes[animation] = isNaN(time) ? duration : time;
+			_childrenStartPositions[animation] = isNaN(time) ? duration : time;
 			children.push(animation);
 			return this;
 		}
@@ -254,31 +254,26 @@ package orichalcum.animation
 			return this;
 		}
 		
+		private function _setPosition(value:Number, isJump:Boolean = false, triggerCallbacks:Boolean = true):void
+		{
+			// not sure how to handle with children timescale * parent.timescale and absolute value setting
+		}
+		
 		private function _integrate(event:Event):void 
 		{
 			//_setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
 			//_setPosition(_position + (useFrames ? 1 : Core.deltaTime) * timeScale);
 			
+			const deltaPosition:Number = _useFrames ? _timeScale : Core.deltaTime * _timeScale;
+			
+			_position += deltaPosition;
+			
 			for each(var child:AnimationBase in _children)
 			{
-				child._render(_target, Core.deltaTime, _timeScale, _useFrames, false, true);
-			}
-		}
-		
-		private function _setPosition(value:Number, isJump:Boolean = false, triggerCallbacks:Boolean = true):IAnimation 
-		{
-			//_render(_target,
-			for each(var child:AnimationBase in _children)
-			{
-				child._setPosition();
-				
-				if (_childrenStartTimes[child]
+				child._render(_target || child.target, child.position - _childrenStartPositions[child] + deltaPosition * child.timeScale, isJump, triggerCallbacks);
 			}
 			
-			
-			return this;
 		}
-		
 		
 	}
 

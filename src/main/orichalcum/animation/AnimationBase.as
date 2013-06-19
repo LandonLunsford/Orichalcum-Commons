@@ -11,7 +11,7 @@ package orichalcum.animation
 		}
 		
 		
-		protected function _render(target:Object, deltaTime:Number, timeScale:Number, useFrames:Boolean, isJump:Boolean, triggerCallbacks:Boolean):void
+		protected function _render(target:Object, value:Number, isJump:Boolean = false, triggerCallbacks:Boolean = true):void
 		{
 			// parent animation needs to proxy target, timeScale, useFrames
 			// to proxy this add parent and recursive lookups for each value

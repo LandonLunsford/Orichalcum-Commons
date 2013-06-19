@@ -7,6 +7,7 @@ package orichalcum.animation.tween
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
 	import flash.utils.getTimer;
+	import orichalcum.animation.AnimationBase;
 	import orichalcum.animation.tweener.BooleanTweener;
 	import orichalcum.animation.tweener.ITweener;
 	import orichalcum.animation.tweener.NumberTweener;
@@ -34,17 +35,16 @@ package orichalcum.animation.tween
 	
 	[Event(name = "yoyo", type = "flash.events.Event")]
 	
-	public class Tween extends EventDispatcher implements ITween
+	public class Tween extends AnimationBase implements ITween, IEventDispatcher
 	{
 	
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// CLASS
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+		
 		static public var pauseAll:Boolean;
 		static public var defaultEase:Function = Ease.quadOut;
-	
-	
+		
 		/** @private */
 		static private const EPSILON:Number = 0.0001;
 		
@@ -282,6 +282,9 @@ package orichalcum.animation.tween
 		
 		/** @private */
 		private var _isInitialized:Boolean = false;
+		
+		/** @private */
+		private var _eventDispatcher:IEventDispatcher;
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////////
 		// Constructor
@@ -585,6 +588,38 @@ package orichalcum.animation.tween
 			return this;
 		}
 		
+		/* INTERFACE flash.events.IEventDispatcher */
+		
+		private function get eventDispatcher():IEventDispatcher
+		{
+			return _eventDispatcher ||= new EventDispatcher;
+		}
+		
+		public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void 
+		{
+			eventDispatcher.addEventListener(type, listener, useCapture, priority, useWeakReference);
+		}
+		
+		public function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void 
+		{
+			eventDispatcher.removeEventListener(type, listener, useCapture);
+		}
+		
+		public function dispatchEvent(event:Event):Boolean 
+		{
+			return eventDispatcher.dispatchEvent(event);
+		}
+		
+		public function hasEventListener(type:String):Boolean 
+		{
+			return eventDispatcher.hasEventListener(type);
+		}
+		
+		public function willTrigger(type:String):Boolean 
+		{
+			return eventDispatcher.willTrigger(type);
+		}
+		
 		
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// INTERNAL
@@ -711,6 +746,11 @@ package orichalcum.animation.tween
 		}
 		
 		private function _setPosition(value:Number, jump:Boolean = false, triggerCallbacks:Boolean = true):void
+		{
+			return _setPosition(_target, value, jump, triggerCallbacks);
+		}
+		
+		override protected function _render(target:Object, value:Number, jump:Boolean = false, triggerCallbacks:Boolean = true):void
 		{
 			// bad landon
 			//jump && (_previousPosition = _position - EPSILON);
