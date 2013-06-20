@@ -67,3 +67,89 @@ if (this.showAnimation)
 	this.showAnimation.target = this;
 	this.showAnimation.play();
 }
+
+
+Animation
+	.delay(1000)
+	.to(this, {})
+	.to(that, {})
+
+animate(this)
+	.and(that)
+	.to({}, 'fast');
+
+animate([this,that])
+	.to({})
+	
+wait(100).
+
+animation(
+	{
+		'0': {target: 'x', to:{}, from:{}, callback:[]}
+	}
+);
+
+animate(this)
+	.to(that, {duration:800, x:90})
+	.from({})
+	.then(that, 900
+	
+	.animate(that)
+	.from({x:90}, 'slowly')
+	
+	.delay()
+	
+	.to({})
+	
+	
+	.yoyo() // set yoyo true
+	.useFrames() // set useFrames true
+	.target()
+	.ease()
+	.onInit()
+	.onUpdate()
+	.onYoyo()
+	.onComplete()
+	
+	// do not track start times but simply add the delay into the tweens
+	// note animations may only be cloned or added to, not removed from (for simplicity)
+	
+	
+animate([target,targets])
+.animate([IAnimation|target,vars,duration]) // aligns at last tween start
+.then([IAnimation|target,vars,duration]) // aligns at last tween end (cursor position)
+.wait(duration) // moves the cursor
+
+animate(target)
+Animation.to/from/then
+
+Animation
+	.delay(duration) // move playhead
+	.call(callback, args)
+	.to(this, {...}) // aligned at time 0
+	.from(that, {...}) // aligned at time 0
+	// not semantic if Animation.then() called directly therefore this should not be a static method : J
+	.then(another, {...}) // aligned at time current total animation duration (set tweens delay to -animation duration)
+	.add(Animation.to(that, {...}), 200) // if 200 not set then align at end like "then" function
+	.onComplete(_onComplete, _arg0, _arg1)
+	.play()
+	
+	// the way target will filter down (if child animation target == null) use parents
+	_render(targets:Array, ...){
+		targets = _targets ? _targets : targets;
+	}
+	
+
+// two factories
+// animation(...animationsAndTimes)
+// 
+	
+animation(
+	animate(this).to(there).wait(time).to(overThere)
+		.yoyo().useFrames().timeScale(2).onYoyo()
+	,animate(that).from(here).wait(time)
+	,400
+	,wait(300)
+	,call(fn)
+	,animate([this,that]).to(start)
+).pause().onComplete(function():void{trace('done');});
