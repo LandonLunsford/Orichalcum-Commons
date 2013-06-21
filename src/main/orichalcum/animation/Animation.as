@@ -12,6 +12,13 @@ package orichalcum.animation
 		static public function create(...args):IAnimation
 		{
 			// similar to tween take target, and options like on complete!
+			/**
+			 * accept and convert [
+			 * [
+			 * 	0, Animation.to({...})
+			 * 	,1, Animation.from({...})
+			 * 	,5, Animation.from
+			 */
 			return new Animation;
 		}
 		
@@ -30,9 +37,9 @@ package orichalcum.animation
 			return create().from.apply(null, args);
 		}
 		
-		static public function delay(duration:Number, useFrames:Boolean = false):IAnimationBuilder 
+		static public function delay(duration:Number):IAnimationBuilder 
 		{
-			return create().delay(duration, useFrames);
+			return create().delay(duration);
 		}
 		
 		static public function call(callback:Function, ...args):IAnimationBuilder 
@@ -40,8 +47,8 @@ package orichalcum.animation
 			return this;
 		}
 		
-		private var _childrenStartPositions:Dictionary = new Dictionary;
-		private var _children:Vector.<AnimationBase>;
+		private var _childrenStartPositions:Vector.<Number> = new Vector.<Number>;
+		private var _children:Vector.<AnimationBase> = new Vector.<AnimationBase>;
 		private var _currentChildIndex:int;
 		private var _target:Object;
 		private var _useFrames:Boolean;
@@ -50,8 +57,11 @@ package orichalcum.animation
 		private var _completeCallback:Function;
 		private var _completeCallbackArguments:Array;
 		
-		//private var _duration:Number = 0; // dynamic?
 		private var _position:Number = 0;
+		
+		private var _duration:Number = 0;
+		
+		//private var _delay:Number = 0;
 		
 		public function Animation() 
 		{
@@ -75,16 +85,18 @@ package orichalcum.animation
 		 */
 		public function get duration():Number 
 		{
-			var duration:Number = 0;
-			for each(var child:AnimationBase in _children)
-			{
-				var endTime:Number = _childrenStartPositions[child] + child.duration;
-				if (endTime > duration)
-				{
-					duration = endTime;
-				}
-			}
-			return duration;
+			//var duration:Number = 0;
+			//for each(var child:AnimationBase in _children)
+			//{
+				//var endTime:Number = _childrenStartPositions[child] + child.duration;
+				//if (endTime > duration)
+				//{
+					//duration = endTime;
+				//}
+			//}
+			//return duration;
+			
+			return _duration;
 		}
 		
 		public function set duration(value:Number):void 
@@ -145,47 +157,54 @@ package orichalcum.animation
 			return !_isPlaying;
 		}
 		
-		public function add(animation:IAnimation, time:Number = NaN):IAnimation 
+		public function add(animation:IAnimation, time:Number = NaN):IAnimationBuilder 
 		{
-			_childrenStartPositions[animation] = isNaN(time) ? duration : time;
-			children.push(animation);
+			var startPosition:Number;
+			
+			if (isNaN(time))
+			{
+				startPosition = _duration;
+				_duration += animation.duration;
+			}
+			else
+			{
+				startPosition = time;
+				if (time + animation.duration > _duration)
+					_duration = time + animation.duration;
+			}
+			
+			_childrenStartPositions.push(startPosition);
+			_children.push(animation);
 			return this;
 		}
 		
-		public function animate(target:Object):IAnimation 
+		public function animate(target:Object):IAnimationBuilder 
 		{
 			_target = target; // must set overide in all child tweens
 			return this;
 		}
 		
-		public function to(...args):IAnimation 
+		public function to(...args):IAnimationBuilder 
 		{
 			throw new IllegalOperationError;
 			return this;
 		}
 		
-		public function from(...args):IAnimation 
+		public function from(...args):IAnimationBuilder 
 		{
 			throw new IllegalOperationError;
 			return this;
 		}
 		
-		public function delay(duration:Number, useFrames:Boolean = false):IAnimation 
+		public function delay(duration:Number):IAnimationBuilder 
 		{
-			throw new IllegalOperationError;
+			delay += duration;
 			return this;
 		}
 		
-		public function call(callback:Function, ...args):IAnimation 
+		public function call(callback:Function, ...args):IAnimationBuilder 
 		{
-			throw new IllegalOperationError;
-			return this;
-		}
-		
-		public function complete(callback:Function, ...args):IAnimation 
-		{
-			_completeCallback = callback == null ? FunctionUtil.noop : callback;
-			_completeCallbackArguments = args;
+			_callbacks.push(new _AnimationCallback(_duration, callback, args));
 			return this;
 		}
 		
@@ -234,10 +253,10 @@ package orichalcum.animation
 		// PRIVATE
 		//////////////////////////////////////////////////////////////////////////////////////////////
 		
-		private function get children():Vector.<AnimationBase> 
-		{
-			return _children ||= new Vector.<AnimationBase>;
-		}
+		//private function get delay():Number
+		//{
+			//return _delay > duration ? _delay : (_delay = duration);
+		//}
 		
 		private function _setIsPlaying(value:Boolean):IAnimation
 		{
@@ -257,6 +276,16 @@ package orichalcum.animation
 		private function _setPosition(value:Number, isJump:Boolean = false, triggerCallbacks:Boolean = true):void
 		{
 			// not sure how to handle with children timescale * parent.timescale and absolute value setting
+			// I would like the timescale to be additive - as that makes sense - but I dont think I can
+			// best alternative is just overriding timescale here
+			
+			_position = value;
+			
+			for (var i:int = 0; i < _children.length; i++)
+			{	
+				var child:AnimationBase = _children[i];
+				child._render(_target || child.target, value - _childrenStartPositions[i], isJump, triggerCallbacks);
+			}
 		}
 		
 		private function _integrate(event:Event):void 
@@ -264,15 +293,17 @@ package orichalcum.animation
 			//_setPosition(_position + (useFrames ? Tween.timeScale : _deltaTime) * timeScale * _step * (yoyo && _position >= 0 ? 2:1));
 			//_setPosition(_position + (useFrames ? 1 : Core.deltaTime) * timeScale);
 			
-			const deltaPosition:Number = _useFrames ? _timeScale : Core.deltaTime * _timeScale;
+			//const deltaPosition:Number = _useFrames ? _timeScale : Core.deltaTime * _timeScale;
 			
-			_position += deltaPosition;
+			//_position += deltaPosition;
 			
-			for each(var child:AnimationBase in _children)
-			{
-				child._render(_target || child.target, child.position - _childrenStartPositions[child] + deltaPosition * child.timeScale, isJump, triggerCallbacks);
-			}
+			//for (var i:int = 0; i < _children.length; i++)
+			//{	
+				//var child:AnimationBase = _children[i];
+				//child._render(_target || child.target, child.position - _childrenStartPositions[i] + deltaPosition * child.timeScale, isJump, triggerCallbacks);
+			//}
 			
+			_setPosition(_position + (_useFrames ? _timeScale : Core.deltaTime * _timeScale));
 		}
 		
 	}

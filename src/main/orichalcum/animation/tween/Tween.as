@@ -635,38 +635,6 @@ package orichalcum.animation.tween
 			}
 		}
 		
-		/*
-		
-		:: ObjectUtil
-		
-		static public function drain(...objects):Object
-		{
-			if (objects.length == 0)
-				return {};
-				
-			if (objects.length == 1)
-				return objects[0];
-			
-			var target:Object = objects[0];
-			
-			for (var i:int = 1; i < objects.length; i++)
-			{
-				var object:Object = objects[i];
-			
-				if (object == null) continue;
-				
-				for (var key:String in object)
-				{
-					if (key in target)
-					{
-						target[key] = object[key];
-						delete object[key];
-					}
-				}
-			}
-		}
-		 */
-		
 		private function _initializeSettings(target:Object = null, duration:Number = 0, to:Object = null, from:Boolean = false):void
 		{
 			this.target = target;
@@ -752,9 +720,12 @@ package orichalcum.animation.tween
 		
 		override protected function _render(target:Object, value:Number, jump:Boolean = false, triggerCallbacks:Boolean = true):void
 		{
+			_previousPosition = _position;
+			
+			
 			// bad landon
 			//jump && (_previousPosition = _position - EPSILON);
-
+			
 			// something changed in here and now mhy numbers are incorrect
 			var endPosition:Number = _endPosition
 				,isComplete:Boolean = value >= endPosition //value >= maximumPosition && _iterations > 0;
@@ -822,14 +793,13 @@ package orichalcum.animation.tween
 			isReflecting && yoyoHandler(jump);
 			isComplete && completeHandler(jump);
 			
-			_previousPosition = _position;
+			
 		}
 		
 		private function _initHandler(jump:Boolean):void 
 		{
-		
 			_isInitialized || _initialize();
-		
+			
 			_onInit.length == 1 ? _onInit(jump) : _onInit();
 			hasEventListener(Event.INIT) && dispatchEvent(new Event(Event.INIT));
 		}

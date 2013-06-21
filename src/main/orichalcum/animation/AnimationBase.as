@@ -89,37 +89,32 @@ package orichalcum.animation
 			throw new IllegalOperationError;
 		}
 		
-		public function add(animation:IAnimation):IAnimation 
+		public function add(animation:IAnimation):IAnimationBuilder 
 		{
 			throw new IllegalOperationError;
 		}
 		
-		public function animate(target:Object):IAnimation 
+		public function animate(target:Object):IAnimationBuilder 
 		{
 			throw new IllegalOperationError;
 		}
 		
-		public function to(...args):IAnimation 
+		public function to(...args):IAnimationBuilder 
 		{
 			throw new IllegalOperationError;
 		}
 		
-		public function from(...args):IAnimation 
+		public function from(...args):IAnimationBuilder 
 		{
 			throw new IllegalOperationError;
 		}
 		
-		public function delay(duration:Number, useFrames:Boolean = false):IAnimation 
+		public function delay(duration:Number):IAnimationBuilder 
 		{
 			throw new IllegalOperationError;
 		}
 		
-		public function call(callback:Function, ...args):IAnimation 
-		{
-			throw new IllegalOperationError;
-		}
-		
-		public function complete(callback:Function, ...args):IAnimation 
+		public function call(callback:Function, ...args):IAnimationBuilder 
 		{
 			throw new IllegalOperationError;
 		}

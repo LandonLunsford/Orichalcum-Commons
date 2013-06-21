@@ -123,6 +123,34 @@ package orichalcum.utility
 			return object1;
 		}
 		
+		static public function drain(...objects):Object
+		{
+			if (objects.length == 0)
+				return {};
+				
+			if (objects.length == 1)
+				return objects[0];
+			
+			var target:Object = objects[0];
+			
+			for (var i:int = 1; i < objects.length; i++)
+			{
+				var object:Object = objects[i];
+			
+				if (object == null) continue;
+				
+				for (var key:String in object)
+				{
+					if (key in target)
+					{
+						target[key] = object[key];
+						delete object[key];
+					}
+				}
+			}
+			return target;
+		}
+		
 		/**
 		 * @param	object The target for property removal
 		 * @return	object The modified object

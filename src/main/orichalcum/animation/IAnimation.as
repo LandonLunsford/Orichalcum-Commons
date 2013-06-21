@@ -46,7 +46,7 @@ package orichalcum.animation
 		//function init(callback:Function, ...args):IAnimation;
 		//function change(callback:Function, ...args):IAnimation;
 		//function yoyo(callback:Function, ...args):IAnimation;
-		function complete(callback:Function, ...args):IAnimation;
+		//function complete(callback:Function, ...args):IAnimation;
 		//function clone():IAnimation; // out of scope for now
 		
 		///////////////////////////////////////////////

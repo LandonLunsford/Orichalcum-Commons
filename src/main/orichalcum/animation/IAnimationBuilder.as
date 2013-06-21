@@ -8,8 +8,9 @@ package orichalcum.animation
 		function animate(target:Object):IAnimationBuilder;
 		function to(...args):IAnimationBuilder;
 		function from(...args):IAnimationBuilder;
-		function delay(duration:Number, useFrames:Boolean = false):IAnimationBuilder;
+		function delay(duration:Number):IAnimationBuilder;
 		function call(callback:Function, ...args):IAnimationBuilder;
+		//function useFrames():IAnimationBuilder to switch on
 		
 		/**
 		 * AnimationBuilder implements IAnimationBuilder,
