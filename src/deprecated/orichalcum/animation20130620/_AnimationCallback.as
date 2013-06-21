@@ -1,4 +1,4 @@
-package orichalcum.animation 
+package orichalcum.animation20130620 
 {
 
 	internal class _AnimationCallback 
@@ -12,6 +12,11 @@ package orichalcum.animation
 			_startPosition = startPosition;
 			_callback = callback;
 			_callbackArguments = callbackArguments;
+			
+		}
+		
+		public function call():Boolean
+		{
 			
 		}
 		
