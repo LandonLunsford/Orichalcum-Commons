@@ -53,8 +53,7 @@ package orichalcum.animation.tweener
 			else if (start is String)
 			{
 				const startAsString:String = start as String;
-				const startAsNumber:Number = parseFloat(FLOAT_DETECTOR.exec(startAsString.replace(EXTRA_SYMBOLS, '')));
-				_start = startAsNumber;
+				_start = parseFloat(FLOAT_DETECTOR.exec(startAsString.replace(EXTRA_SYMBOLS, '')));
 				_round = ROUNDED_DETECTOR.test(startAsString) ? Math.round : RETURN;
 			}
 			else
@@ -81,6 +80,7 @@ package orichalcum.animation.tweener
 		
 		public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*
 		{
+			//trace(_start, _distance, progress, _start + progress * _distance)
 			return _round(_start + progress * _distance);
 		}
 		
@@ -88,6 +88,12 @@ package orichalcum.animation.tweener
 		{
 			return StringUtil.substitute('<number-tweener start="{0}" end="{1}" round="{2}">', _start, _start + _distance, _round == Math.round);
 		}
+		
+		/** @private */
+		//private function parse(value:*):Number
+		//{
+			/** @private */
+		//}
 		
 	}
 

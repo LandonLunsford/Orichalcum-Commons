@@ -10,8 +10,13 @@ package orichalcum.animation
 	import orichalcum.utility.FunctionUtil;
 	
 	/**
-	 * Animation base class
-	 * 		extended by _AnimationTimeline, _Tween
+	 * Abstract animation class
+	 * 	subclasses and differences:
+	 * 	_AnimationTimeline
+	 * 		.stagger(time)
+	 * 	_AnimationTween
+	 * 		.to(values)
+	 * 		.from(values)
 	 * 		
 	 */
 	public class Animation 
@@ -53,11 +58,9 @@ package orichalcum.animation
 		static internal function _createTweener(propertyName:String, propertyValue:*):ITweener
 		{
 			const tweenerForProperty:Class = _tweenersByProperty[propertyName];
-			
 			if (tweenerForProperty) return new tweenerForProperty;
 			
 			const tweenerForClass:Class = _tweenersByClass[getQualifiedClassName(propertyValue)];
-			
 			if (tweenerForClass) return new tweenerForClass;
 			
 			return null;
@@ -93,12 +96,6 @@ package orichalcum.animation
 			
 		}
 		
-		public function invalidate():Animation
-		{
-			_initialized = false;
-			return this;
-		}
-		
 		/////////////////////////////////////////////////////////////////////////////////
 		// Controls
 		/////////////////////////////////////////////////////////////////////////////////
@@ -109,6 +106,7 @@ package orichalcum.animation
 		 */
 		public function play():Animation
 		{
+			_isAtEnd && goto(0); // video feature
 			return _setIsPlaying(true);
 		}
 		
@@ -127,7 +125,7 @@ package orichalcum.animation
 		 */
 		public function toggle():Animation
 		{
-			return _setIsPlaying(!_isPlaying);
+			return _isPlaying ? pause() : play();
 		}
 		
 		/**
@@ -178,11 +176,24 @@ package orichalcum.animation
 			return _setPosition(0, true, triggerCallbacks);
 		}
 		
+		/**
+		 * @todo copy docs
+		 */
 		public function reverse():Animation
 		{
 			_step = -_step;
 			return this;
 		}
+		
+		/**
+		 * @todo copy docs
+		 */
+		public function invalidate():Animation
+		{
+			_initialized = false;
+			return this;
+		}
+		
 		
 		/////////////////////////////////////////////////////////////////////////////////
 		// Accessors and Modifiers
@@ -353,15 +364,19 @@ package orichalcum.animation
 		// Private Parts
 		/////////////////////////////////////////////////////////////////////////////////
 		
-		protected function _integrate(event:Event = null):void
+		protected function get _totalDuration():Number
 		{
-			_isPlaying && _render(_position + (_useFrames ? 1 : Core.deltaTime) * _timeScale * _step * (_yoyo ? 2 : 1), false, true, _target, _ease);
+			return _iterations <= 0 || isNaN(_iterations) ? Infinity : _duration * _iterations * (_yoyo ? 2 : 1);
 		}
 		
-		// target and ease allow parent animation to override these values
-		protected function _render(position:Number, isJump:Boolean, triggerCallbacks:Boolean, target:Object, ease:Function):void
+		protected function get _progress():Number
 		{
-			throw new IllegalOperationError(); // this method must be overriden
+			return _position / _totalDuration;
+		}
+		
+		protected function get _repeat():Number
+		{
+			return _iterations - 1;
 		}
 		
 		protected function get _startPosition():Number
@@ -377,28 +392,11 @@ package orichalcum.animation
 		protected function get _isAtStart():Boolean
 		{
 			return _position <= 0;
-			//return _position <= _delay;
 		}
 		
 		protected function get _isAtEnd():Boolean
 		{
-			//return _position >= _endPosition;
 			return _position >= _totalDuration;
-		}
-		
-		protected function get _progress():Number
-		{
-			return _position / _totalDuration;
-		}
-		
-		protected function get _totalDuration():Number
-		{
-			return _iterations <= 0 || isNaN(_iterations) ? Infinity : _duration * _iterations * (_yoyo ? 2 : 1);
-		}
-		
-		protected function get _repeat():Number
-		{
-			return _iterations - 1;
 		}
 		
 		protected function _setTarget(value:Object):Animation
@@ -415,7 +413,7 @@ package orichalcum.animation
 		
 		protected function _setProgress(value:Number):Animation
 		{
-			_position = value * _totalDuration;
+			_setPosition(value * _totalDuration, true);
 			return this;
 		}
 		
@@ -492,27 +490,38 @@ package orichalcum.animation
 		
 		protected function _initHandler(jump:Boolean):void 
 		{
-			_onInit.length == 1 ? _onInit(jump) : _onInit();
+			_onInit.length == 1 ? _onInit.call(this, jump) : _onInit.call(this);
 		}
 		
 		protected function _changeHandler(jump:Boolean):void 
 		{
-			_onChange.length == 1 ? _onChange(jump) : _onChange();
+			_onChange.length == 1 ? _onChange.call(this, jump) : _onChange.call(this);
 		}
 		
 		protected function _yoyoHandler(jump:Boolean):void 
 		{
-			_onYoyo.length == 1 ? _onYoyo(jump) : _onYoyo();
+			_onYoyo.length == 1 ? _onYoyo.call(this, jump) : _onYoyo.call(this);
 		}
 		
 		protected function _completeHandler(jump:Boolean):void 
 		{
-			_onComplete.length == 1 ? _onComplete(jump) : _onComplete();
+			_onComplete.length == 1 ? _onComplete.call(this, jump) : _onComplete.call(this);
 		}
 		
 		protected function _initialize():void
 		{
-			
+			// abstract
+		}
+		
+		protected function _integrate(event:Event = null):void
+		{
+			_isPlaying && _render(_position + (_useFrames ? 1 : Core.deltaTime) * _timeScale * _step * (_yoyo ? 2 : 1), false, true, _target, _ease);
+		}
+		
+		// target and ease allow parent animation to override these values
+		protected function _render(position:Number, isJump:Boolean, triggerCallbacks:Boolean, target:Object, ease:Function):void
+		{
+			// abstract
 		}
 		
 		

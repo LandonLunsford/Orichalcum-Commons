@@ -4,6 +4,10 @@ package orichalcum.animation.tweener
 
 	public class BooleanTweener implements ITweener
 	{
+		
+		/** @private */
+		static private const THRESHOLD:Number = 1 - 0.0001;
+		
 		/** @private */
 		private var _start:Boolean;
 		
@@ -18,7 +22,8 @@ package orichalcum.animation.tweener
 		
 		public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*
 		{
-			return isEnd ? _end : _start;
+			//return isEnd ? _end : _start; // not true for yoyo, complete can be progress 0
+			return progress > THRESHOLD ? _end : _start;
 		}
 
 		public function toString():String

@@ -40,7 +40,7 @@ package orichalcum.animation
 		
 		override protected function _render(value:Number, jump:Boolean, triggerCallbacks:Boolean, target:Object, ease:Function):void 
 		{
-			trace('v', value, 'p',_position,'pp', _previousPosition);
+			//trace('v', value, 'p',_position,'pp', _previousPosition);
 			_previousPosition = _position;
 			
 			// something changed in here and now mhy numbers are incorrect
@@ -55,13 +55,9 @@ package orichalcum.animation
 			
 			if (isComplete)
 			{
-				// STOP MOVIE
-				invalidate();
-				_setIsPlaying(false);
-				
 				if (_previousPosition == endPosition) return;
 				_position = endPosition;
-				calculatedPosition = (_yoyo && (_iterations & 1)) ? 0 : _duration;
+				calculatedPosition = _yoyo ? 0 : _duration;
 				isMovingForward = _position > _previousPosition;
 			}
 			else
@@ -108,9 +104,11 @@ package orichalcum.animation
 				// should not even be calculated for isComplete == true or position <= 0
 				const progress:Number = (_duration == 0 && _position >= 0) ? 1 : ease(calculatedPosition / _duration, 0, 1, 1);
 				
+				//trace( (_duration == 0 && _position >= 0))
+				//trace( calculatedPosition)
+				
 				for (var property:String in _tweeners)
 				{
-					trace('tween'); // no tweeners on straight goto
 					target[property] = _tweeners[property].tween(target, property, progress, passedZero, isComplete);
 				}
 					
@@ -118,7 +116,14 @@ package orichalcum.animation
 			}
 			
 			isReflecting && yoyoHandler(jump);
-			isComplete && completeHandler(jump);
+			
+			if (isComplete)
+			{
+				// STOP MOVIE
+				_initialized = false;
+				_setIsPlaying(false);
+				completeHandler(jump);
+			}
 		}
 		
 		override protected function _initialize():void
@@ -135,9 +140,6 @@ package orichalcum.animation
 			for (var property:String in values)
 			{
 				const tweener:ITweener = _tweeners[property] ||= Animation._createTweener(property, _target[property]);
-				//tweener && tweener.init(from[property], to[property]);
-				// this is a little more complicated when from is only set because we want
-				//trace('from value', from[property])
 				
 				// boolean tween bug where start isnt set dynamically when in to
 				if (tweener) tweener.init(property in from ? from[property] : _target[property], to[property]);
