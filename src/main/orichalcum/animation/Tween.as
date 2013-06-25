@@ -53,8 +53,11 @@ package orichalcum.animation
 				,yoyoHandler:Function = FunctionUtil.noop
 				,completeHandler:Function = FunctionUtil.noop;
 			
+				trace('is complete?', value, endPosition);
+				
 			if (isComplete)
 			{
+				
 				if (_previousPosition == endPosition) return;
 				_position = endPosition;
 				calculatedPosition = _yoyo ? 0 : _duration;
@@ -91,7 +94,7 @@ package orichalcum.animation
 			// if not in delay interval and position changed
 			if ((_position >= 0 || _previousPosition >= 0) && _position != _previousPosition)
 			{
-				//trace('mov');
+				trace('mov');
 				
 				_initialized || _initialize();
 				

@@ -13,7 +13,7 @@ package orichalcum.animation
 	 * Abstract animation class
 	 * 	subclasses and differences:
 	 * 	_AnimationTimeline
-	 * 		.stagger(time)
+	 * 		.stagger(time) // this will add stagger to all its children
 	 * 	_AnimationTween
 	 * 		.to(values)
 	 * 		.from(values)
@@ -162,7 +162,7 @@ package orichalcum.animation
 		 */
 		public function end(triggerCallbacks:Boolean = true):Animation
 		{
-			return goto(_totalDuration, triggerCallbacks);
+			return goto(totalDuration, triggerCallbacks);
 		}
 		
 		/**
@@ -256,19 +256,19 @@ package orichalcum.animation
 		}
 		
 		/**
-		 * Get or set the total duration of the animation
+		 * Get or set the animation duration in milliseconds
 		 */
-		public function duration(...args):*
+		public function milliseconds(...args):*
 		{
 			return args.length ? _setDuration(args[0]) : _duration;
 		}
 		
 		/**
-		 * Set the animation duration in seconds
+		 * Get or set the animation duration in seconds
 		 */
 		public function seconds(...args):*
 		{
-			return args.length ? _setSeconds(args[0]) : _duration;
+			return args.length ? _setSeconds(args[0]) : _duration * 0.001;
 		}
 		
 		/**
@@ -284,9 +284,7 @@ package orichalcum.animation
 		 */
 		public function quickly():Animation
 		{
-			_duration = DURATIONS.fast;
-			_useFrames = false;
-			return this;
+			return milliseconds(DURATIONS.fast);
 		}
 		
 		/**
@@ -294,9 +292,7 @@ package orichalcum.animation
 		 */
 		public function slowly():Animation
 		{
-			_duration = DURATIONS.slow;
-			_useFrames = false;
-			return this;
+			return milliseconds(DURATIONS.slow);
 		}
 		
 		/**
@@ -364,14 +360,14 @@ package orichalcum.animation
 		// Private Parts
 		/////////////////////////////////////////////////////////////////////////////////
 		
-		protected function get _totalDuration():Number
+		public function get totalDuration():Number
 		{
 			return _iterations <= 0 || isNaN(_iterations) ? Infinity : _duration * _iterations * (_yoyo ? 2 : 1);
 		}
 		
 		protected function get _progress():Number
 		{
-			return _position / _totalDuration;
+			return _position / totalDuration;
 		}
 		
 		protected function get _repeat():Number
@@ -386,7 +382,7 @@ package orichalcum.animation
 		
 		protected function get _endPosition():Number
 		{
-			return _totalDuration;
+			return totalDuration;
 		}
 		
 		protected function get _isAtStart():Boolean
@@ -396,7 +392,7 @@ package orichalcum.animation
 		
 		protected function get _isAtEnd():Boolean
 		{
-			return _position >= _totalDuration;
+			return _position >= totalDuration;
 		}
 		
 		protected function _setTarget(value:Object):Animation
@@ -413,7 +409,7 @@ package orichalcum.animation
 		
 		protected function _setProgress(value:Number):Animation
 		{
-			_setPosition(value * _totalDuration, true);
+			_setPosition(value * totalDuration, true);
 			return this;
 		}
 		

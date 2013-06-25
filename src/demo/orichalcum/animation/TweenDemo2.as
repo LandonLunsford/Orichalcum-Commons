@@ -53,7 +53,9 @@ package orichalcum.animation
 				//a.invalidate().replay()
 				//a.reverse();
 				//a.play();
-				trace('click')
+				//trace('click')
+				//a.end(); // not working
+				a.goto(progress * a.totalDuration);
 			});
 		}
 		
