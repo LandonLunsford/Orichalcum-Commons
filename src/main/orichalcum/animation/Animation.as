@@ -14,6 +14,7 @@ package orichalcum.animation
 	 * 	subclasses and differences:
 	 * 	_AnimationTimeline
 	 * 		.stagger(time) // this will add stagger to all its children
+	 * 		//- ease ?
 	 * 	_AnimationTween
 	 * 		.to(values)
 	 * 		.from(values)
