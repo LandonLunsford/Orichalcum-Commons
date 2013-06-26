@@ -6,7 +6,10 @@ package orichalcum.animation
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.ui.Keyboard;
+	import orichalcum.animation.factory.animate;
+	import orichalcum.animation.factory.call;
 	import orichalcum.animation.factory.tween;
+	import orichalcum.animation.factory.wait;
 	import orichalcum.animation.tweener.plugin.AutoHideTweener;
 
 	public class TweenDemo2 extends Sprite
@@ -22,18 +25,19 @@ package orichalcum.animation
 			
 			//Animation.install(AutoHideTweener, 'alpha')
 			
-			var a:Animation = tween(shape)
+			//var a:Tween = tween(shape)
 				//.from( { x: 200, y: 200 } )
-				.to( { x: '[+=200]', y: 400} )
+				//.to( { x: '[+=200]', y: 400} )
 				//.to( { x: 300, y: 400} )
+				//.to( { x: stage.stageWidth, y: stage.stageHeight} )
 				//.yoyo(true)
 				//.repeat(2) // odd repeats fail
 				//.repeat(1) // odd repeats snap to "to" values
-				.seconds(5)
+				//.seconds(5)
 				//.frames(30)
 				//.timeScale(0.2)
 				//.play();
-				.onComplete(function(isJump:Boolean):void { trace('complete'); } );
+				//.onComplete(function(isJump:Boolean):void { trace('complete'); } );
 				
 			// bug ! yoyo, odd-repeat to-tweens snap to target "to" values on complete
 			
@@ -45,17 +49,24 @@ package orichalcum.animation
 			
 			).stagger
 			*/
+			
+			var a:Animation = animate(
+				wait(1)
+				,call(function():void { trace('called'); } )
+			);
+			
+			
 			stage.addEventListener(MouseEvent.CLICK, function(event:Event):void {
 				var progress:Number = stage.mouseX / stage.stageWidth;
 				//a.progress(progress);
-				//a.toggle()
+				a.toggle()
 				//a.replay()
 				//a.invalidate().replay()
 				//a.reverse();
 				//a.play();
 				//trace('click')
 				//a.end(); // not working
-				a.goto(progress * a.totalDuration);
+				//a.goto(progress * a.totalDuration);
 			});
 		}
 		
