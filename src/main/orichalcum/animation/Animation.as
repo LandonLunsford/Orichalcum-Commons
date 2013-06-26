@@ -1,6 +1,5 @@
 package orichalcum.animation 
 {
-	import flash.errors.IllegalOperationError;
 	import flash.events.Event;
 	import flash.utils.getQualifiedClassName;
 	import orichalcum.animation.tweener.BooleanTweener;
@@ -23,11 +22,13 @@ package orichalcum.animation
 	public class Animation 
 	{
 		
-		static public const DURATIONS:Object = { slow:800, normal:400, fast:200 };
-		static public var pauseAll:Boolean;
+		static public var durations:Object = { slow:800, normal:400, fast:200 };
+		static public var defaultDuration:Number = durations.normal;
 		static public var defaultEase:Function = Ease.quadOut;
-		static public var defaultDuration:Number = DURATIONS.normal;
-		static public const NULL_TARGET:Object = {};
+		static public var pauseAll:Boolean;
+		
+		/** @private */
+		static private const NULL_TARGET:Object = {};
 		
 		/** @private */
 		static private const EPSILON:Number = 0.0001;
@@ -38,22 +39,54 @@ package orichalcum.animation
 		/** @private */
 		static private const _tweenersByClass:Object = {'Boolean': BooleanTweener, 'Number': NumberTweener, 'int': NumberTweener, 'uint': NumberTweener};
 		
+		/** @private */
 		protected var _target:Object = NULL_TARGET;
+		
+		/** @private */
 		protected var _position:Number = 0;
+		
+		/** @private */
 		protected var _previousPosition:Number = -EPSILON;
+		
+		/** @private */
 		protected var _initialized:Boolean;
+		
+		/** @private */
 		protected var _iterations:Number = 1;
+		
+		/** @private */
 		protected var _timeScale:Number = 1;
+		
+		/** @private */
 		protected var _duration:Number = defaultDuration;
+		
+		/** @private */
 		protected var _ease:Function = defaultEase;
+		
+		/** @private */
 		protected var _isPlaying:Boolean;
+		
+		/** @private */
 		protected var _yoyo:Boolean;
+		
+		/** @private */
 		protected var _useFrames:Boolean;
+		
+		/** @private */
 		protected var _onInit:Function = FunctionUtil.noop;
+		
+		/** @private */
 		protected var _onChange:Function = FunctionUtil.noop;
+		
+		/** @private */
 		protected var _onYoyo:Function = FunctionUtil.noop;
+		
+		/** @private */
 		protected var _onComplete:Function = FunctionUtil.noop;
+		
+		/** @private */
 		protected var _step:Number = 1;
+		
 		
 		/** @private */
 		static internal function _createTweener(propertyName:String, propertyValue:*):ITweener
@@ -163,7 +196,7 @@ package orichalcum.animation
 		 */
 		public function end(triggerCallbacks:Boolean = true):Animation
 		{
-			return goto(totalDuration, triggerCallbacks);
+			return goto(_endPosition, triggerCallbacks);
 		}
 		
 		/**
@@ -174,7 +207,7 @@ package orichalcum.animation
 		 */
 		public function goto(position:Number, triggerCallbacks:Boolean = true):Animation
 		{
-			return _setPosition(0, true, triggerCallbacks);
+			return _setPosition(position, true, triggerCallbacks);
 		}
 		
 		/**
@@ -285,7 +318,7 @@ package orichalcum.animation
 		 */
 		public function quickly():Animation
 		{
-			return milliseconds(DURATIONS.fast);
+			return milliseconds(durations.fast);
 		}
 		
 		/**
@@ -293,7 +326,7 @@ package orichalcum.animation
 		 */
 		public function slowly():Animation
 		{
-			return milliseconds(DURATIONS.slow);
+			return milliseconds(durations.slow);
 		}
 		
 		/**
@@ -505,11 +538,6 @@ package orichalcum.animation
 			_onComplete.length == 1 ? _onComplete.call(this, jump) : _onComplete.call(this);
 		}
 		
-		protected function _initialize():void
-		{
-			// abstract
-		}
-		
 		protected function _integrate(event:Event = null):void
 		{
 			_isPlaying && _render(_position + (_useFrames ? 1 : Core.deltaTime) * _timeScale * _step * (_yoyo ? 2 : 1), false, true, _target, _ease);
@@ -518,9 +546,108 @@ package orichalcum.animation
 		// target and ease allow parent animation to override these values
 		protected function _render(position:Number, isJump:Boolean, triggerCallbacks:Boolean, target:Object, ease:Function):void
 		{
+			var endPosition:Number = _endPosition
+				,yoyosCompleted:int = 0
+				,initHandler:Function
+				,changeHandler:Function
+				,yoyoHandler:Function
+				,completeHandler:Function;
+			
+			_previousPosition = _position;
+			_position = Math.min(position, endPosition);
+			
+			const isMovingForward:Boolean = _position > _previousPosition;
+			
+			/**
+			 * Awkward null object pattern usage to avoid duplicate "ifs" for efficiency
+			 */
+			if (triggerCallbacks)
+			{
+				changeHandler = _changeHandler;
+				if (isMovingForward)
+				{
+					initHandler = _initHandler;
+					yoyoHandler = _yoyoHandler;
+					completeHandler = _completeHandler;
+				}
+			}
+			else
+			{
+				initHandler = changeHandler = yoyoHandler = completeHandler = FunctionUtil.noop;
+			}
+			
+			const isComplete:Boolean = _position >= endPosition;
+			
+			// could use strategy pattern "positionCalculator()" if (_repeat == 0) have RETURN fn, else RETURN _p % _d
+			var calculatedPosition:Number = _repeat > 0 ? _position % _duration : _position;
+			
+			// optional failfast
+			//if (isComplete && _previousPosition == endPosition) return;
+			
+			if (_yoyo)
+			{
+				const currentCompletedCycles:int = _position / _duration;
+				yoyosCompleted = ((currentCompletedCycles + 1) >> 1) - (((_previousPosition / _duration) + 1) >> 1);
+				
+				if (currentCompletedCycles & 1 == 1)
+					calculatedPosition = _duration - calculatedPosition;
+			}
+			
+			if (_position != _previousPosition)
+			{
+				const isStart:Boolean = !_initialized;
+				
+				_initialized || _initialize(isJump, initHandler);
+				
+				// should not even be calculated for isComplete == true or position <= 0
+				// this is calculated progress -- the following is computationally efficient
+				// isComplete
+				/*
+				 * isComplete
+				 * 		? yoyo
+				 * 			? 0
+				 * 			: 1
+				 * 		: (_duration == 0 && _position >= 0)
+				 * 			? yoyo
+				 *	 			? 0
+				 *	 			: 1
+				 * 			: ease(calculatedPosition, 0, 1, _duration)
+				 * 
+				 * calculatedProgress = 
+				 */
+				//const progress:Number = (_duration == 0 && _position >= 0) ? 1 : ease(calculatedPosition, 0, 1, _duration);
+				const progress:Number = isComplete || (_duration == 0 && _position >= 0) ? _yoyo ? 0 : 1 : ease(calculatedPosition, 0, 1, _duration);
+				
+				_renderTarget(target, progress, isStart, isComplete);
+				
+				changeHandler(isJump);
+			}
+			
+			while (yoyosCompleted-- > 0)
+			{
+				yoyoHandler(isJump);
+			}
+			
+			if (isComplete)
+			{
+				// STOP MOVIE
+				//_previousPosition = endPosition;
+				//_initialized = false;
+				//_setIsPlaying(false);
+				invalidate().pause();
+				completeHandler(isJump);
+			}
+		}
+		
+		protected function _initialize(isJump:Boolean, callback:Function):void
+		{
 			// abstract
 		}
 		
+		protected function _renderTarget(target:Object, progress:Number, isStart:Boolean, isEnd:Boolean):void
+		{
+			// abstract
+		}
 		
 	}
 
