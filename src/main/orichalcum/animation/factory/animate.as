@@ -8,7 +8,7 @@ package orichalcum.animation.factory
 	 */
 	public function animate(...animations):Animation
 	{
-		return new Animation(...animations);
+		return new Animation(animations);
 	}
 
 }
