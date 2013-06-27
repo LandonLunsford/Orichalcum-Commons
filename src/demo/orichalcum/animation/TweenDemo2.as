@@ -11,6 +11,7 @@ package orichalcum.animation
 	import orichalcum.animation.factory.tween;
 	import orichalcum.animation.factory.wait;
 	import orichalcum.animation.tweener.plugin.AutoHideTweener;
+	import orichalcum.core.Core;
 
 	public class TweenDemo2 extends Sprite
 	{
@@ -52,7 +53,15 @@ package orichalcum.animation
 			
 			var a:Animation = animate(
 				wait(1)
-				,call(function():void { trace('called'); } )
+				,call(function():void { trace(Core.currentTime, 'call 1'); } )
+				,wait(2)
+				,tween(shape)
+					//.from({x:0,y:0})
+					.to( { x: 400, y: 400 } )
+					.seconds(1)
+					.onComplete(function():void { trace(Core.currentTime, 'tween complete'); } )
+				,wait()
+				,call(function():void { trace(Core.currentTime, 'call 2'); } )
 			);
 			
 			
