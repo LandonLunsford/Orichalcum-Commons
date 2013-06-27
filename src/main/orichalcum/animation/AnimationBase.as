@@ -19,63 +19,63 @@ package orichalcum.animation
 	 * 		.from(values)
 	 * 		
 	 */
-	internal class AnimationBase 
+	public class AnimationBase 
 	{
 		
 		
 		/** @private used to avoid if checking target */
-		static private const NULL_TARGET:Object = {};
+		static internal const NULL_TARGET:Object = {};
 		
 		/** @private */
 		static private const EPSILON:Number = 0.0001;
 		
 		/** @private */
-		protected var _target:Object = NULL_TARGET;
+		internal var _target:Object = NULL_TARGET;
 		
 		/** @private */
-		protected var _position:Number = 0;
+		internal var _position:Number = 0;
 		
 		/** @private */
-		protected var _previousPosition:Number = -EPSILON;
+		internal var _previousPosition:Number = -EPSILON;
 		
 		/** @private */
-		protected var _initialized:Boolean;
+		internal var _initialized:Boolean;
 		
 		/** @private */
-		protected var _iterations:Number = 1;
+		internal var _iterations:Number = 1;
 		
 		/** @private */
-		protected var _timeScale:Number = 1;
+		internal var _timeScale:Number = 1;
 		
 		/** @private */
-		protected var _duration:Number = Animation.defaultDuration;
+		internal var _duration:Number = Animation.defaultDuration;
 		
 		/** @private */
-		protected var _ease:Function = Animation.defaultEase;
+		internal var _ease:Function = Animation.defaultEase;
 		
 		/** @private */
-		protected var _isPlaying:Boolean;
+		internal var _isPlaying:Boolean;
 		
 		/** @private */
-		protected var _yoyo:Boolean;
+		internal var _yoyo:Boolean;
 		
 		/** @private */
-		protected var _useFrames:Boolean;
+		internal var _useFrames:Boolean;
 		
 		/** @private */
-		protected var _onInit:Function = FunctionUtil.noop;
+		internal var _onInit:Function = FunctionUtil.noop;
 		
 		/** @private */
-		protected var _onChange:Function = FunctionUtil.noop;
+		internal var _onChange:Function = FunctionUtil.noop;
 		
 		/** @private */
-		protected var _onYoyo:Function = FunctionUtil.noop;
+		internal var _onYoyo:Function = FunctionUtil.noop;
 		
 		/** @private */
-		protected var _onComplete:Function = FunctionUtil.noop;
+		internal var _onComplete:Function = FunctionUtil.noop;
 		
 		/** @private */
-		protected var _step:Number = 1;
+		internal var _step:Number = 1;
 		
 		
 		public function AnimationBase()
@@ -519,12 +519,17 @@ package orichalcum.animation
 		protected function _integrate(event:Event = null):void
 		{
 			// need to use null object pattern to avoid these two if checks
+			// have _positionSetter:Function, set to void() if pauseAll is on
 			Animation.pauseAll || _isPlaying && _render(_position + (_useFrames ? 1 : Core.deltaTime) * _timeScale * _step * (_yoyo ? 2 : 1), false, true, _target, _ease);
 		}
 		
 		// target and ease allow parent animation to override these values
-		protected function _render(position:Number, isJump:Boolean, triggerCallbacks:Boolean, target:Object, ease:Function):void
+		internal function _render(position:Number, isJump:Boolean, triggerCallbacks:Boolean, target:Object, ease:Function):void
 		{
+			// hotfix for animation inclusing and pre-delay
+			if (position < 0 && _previousPosition < 0)
+				return; // fixes animations but not call(), more evidence or reason to split up the class
+			
 			var initHandler:Function = FunctionUtil.noop
 				,changeHandler:Function = FunctionUtil.noop
 				,yoyoHandler:Function = FunctionUtil.noop
@@ -578,6 +583,7 @@ package orichalcum.animation
 					? _yoyo ? 0 : 1
 					: ease(renderedPosition, 0, 1, _duration);
 				
+			
 				_renderTarget(target, renderedProgress, isStart, isComplete);
 				
 				changeHandler(isJump);
@@ -587,6 +593,8 @@ package orichalcum.animation
 			{
 				yoyoHandler(isJump);
 			}
+			
+			//this is Tween && trace(isComplete);
 			
 			if (isComplete)
 			{
