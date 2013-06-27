@@ -8,7 +8,7 @@ package orichalcum.animation.factory
 	 */
 	public function wait(time:Number = NaN):Number
 	{
-		return time;
+		return time * 1000;
 	}
 
 }
