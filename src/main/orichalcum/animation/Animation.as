@@ -44,7 +44,7 @@ package orichalcum.animation
 		private var _children:Array = [];
 		
 		/** @private no wrapper class holding this for efficiency only */
-		private var _childrenStartTimes:Array = [];
+		private var _childrenStartPositions:Array = [];
 		
 		/** @private */
 		private var _insertionTime:Number = 0;
@@ -90,7 +90,7 @@ package orichalcum.animation
 			return null;
 		}
 		
-		public function Animation(animations:Array)
+		public function Animation(animations:Array = null)
 		{
 			_construct(animations);
 		}
@@ -117,16 +117,17 @@ package orichalcum.animation
 		
 		public function add(animation:AnimationBase, time:Number = NaN):Animation 
 		{
-			const insertionTime:Number = isNaN(time)
-				? _insertionTime
-				: time;
-				
-			const endTime:Number = insertionTime + animation.duration;
+			const insertionTime:Number = isNaN(time) ? _insertionTime : time;
+			const endTime:Number = insertionTime + animation._duration;
 			
-			_childrenStartTimes.push(insertionTime);
+			_childrenStartPositions.push(insertionTime);
 			_children.push(animation);
 			
 			_previousEndTime = endTime;
+			if (_duration < endTime)
+				_duration = endTime;
+			
+			trace('adding', animation, 'at time', insertionTime, 'ending', endTime);
 			
 			return this;
 		}
@@ -139,18 +140,49 @@ package orichalcum.animation
 		{
 			// need better way to proxy this over rewriting
 			// need to do backwards if running in reverse too doofy
-			for each(var child:AnimationBase in _children)
+			
+			super._integrate(event);
+			
+			var index:int, count:int = _children.length, step:int;
+			if (_position > _previousPosition)
 			{
-				Animation.pauseAll || _isPlaying && _render(_position - + (_useFrames ? 1 : Core.deltaTime) * _timeScale * _step * (_yoyo ? 2 : 1), false, true, _target, _ease);
+				index = 0;
+				step = 1;
+			}
+			else
+			{
+				index = count - 1;
+				step = -1;
+			}
+			
+			for (; count-- > 0; index += step)
+			{
+				
+				
+				var child:AnimationBase = _children[index];
+				
+				
+				//trace('integrating', child, index);
+				/**
+				 * I need some kind of interface here, IAnimatable
+				 * .duration
+				 * .target
+				 * .ease
+				 * .render()
+				 */
+				
+				child && _isPlaying && child._render(_position - _childrenStartPositions[index] + (_useFrames ? 1 : Core.deltaTime) * _timeScale * _step * (_yoyo ? 2 : 1), false, true, _target != AnimationBase.NULL_TARGET ? _target : child._target, _ease != null ? _ease : child._ease);
+				
+				
 			}
 			
 		}
 		
-		override protected function _renderTarget(target:Object, progress:Number, isStart:Boolean, isEnd:Boolean):void
-		{
+		//override protected function _renderTarget(target:Object, progress:Number, isStart:Boolean, isEnd:Boolean):void
+		//{
 			// abstract
 			
-		}
+		//}
 		
 	}
 
