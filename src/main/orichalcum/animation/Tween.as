@@ -1,5 +1,6 @@
 package orichalcum.animation 
 {
+	import flash.display.Shape;
 	import orichalcum.animation.tweener.ITweener;
 
 	public class Tween extends Animation 
@@ -7,7 +8,7 @@ package orichalcum.animation
 		
 		protected var _to:Object;
 		protected var _from:Object;
-		protected var _tweeners:Object = {};
+		protected var _tweeners:Object;
 		
 		public function Tween(target:Object = null) 
 		{
@@ -49,6 +50,8 @@ package orichalcum.animation
 			
 			for (var property:String in values)
 			{
+				_tweeners ||= {};
+				
 				const tweener:ITweener = _tweeners[property] ||= Animation._createTweener(property, _target[property]);
 				
 				// boolean tween bug where start isnt set dynamically when in to
@@ -68,6 +71,8 @@ package orichalcum.animation
 		// AnimationTimeline should override this and target each child
 		override protected function _renderTarget(target:Object, progress:Number, isStart:Boolean, isEnd:Boolean):void
 		{
+			target is Shape && trace('rendering', target, 'progress', progress);
+			
 			for (var property:String in _tweeners)
 			{
 				target[property] = _tweeners[property].tween(target, property, progress, isStart, isEnd);
