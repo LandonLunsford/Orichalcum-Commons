@@ -1,14 +1,15 @@
 package orichalcum.animation.factory 
 {
+	import orichalcum.animation.AnimationBase;
 	import orichalcum.animation.Tween;
 	
 	/**
 	 * @param	time
 	 * @return
 	 */
-	public function call(callback:Function):Tween
+	public function call(callback:Function):AnimationBase
 	{
-		return tween().onComplete(callback);
+		return tween().onInit(callback).seconds(0);
 	}
 
 }
