@@ -8,9 +8,9 @@ package orichalcum.animation.tweener.plugin
 	{
 		static public var invisibleAlphaThreshhold:Number = 0.01;
 		
-		override public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*
+		override public function tween(target:Object, property:String, progress:Number):*
 		{
-			const value:Number = super.tween(target, property, progress, isStart, isEnd);
+			const value:Number = super.tween(target, property, progress);
 			
 			target is DisplayObject && (target.visible = target.alpha > invisibleAlphaThreshhold);
 			

@@ -20,7 +20,7 @@ package orichalcum.animation.tweener
 			_end = end;
 		}
 		
-		public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*
+		public function tween(target:Object, property:String, progress:Number):*
 		{
 			//return isEnd ? _end : _start; // not true for yoyo, complete can be progress 0
 			return progress > THRESHOLD ? _end : _start;

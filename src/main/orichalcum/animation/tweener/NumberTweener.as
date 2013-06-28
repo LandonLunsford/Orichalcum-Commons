@@ -78,7 +78,7 @@ package orichalcum.animation.tweener
 			}
 		}
 		
-		public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*
+		public function tween(target:Object, property:String, progress:Number):*
 		{
 			//trace(_start, _distance, progress, _start + progress * _distance)
 			return _round(_start + progress * _distance);

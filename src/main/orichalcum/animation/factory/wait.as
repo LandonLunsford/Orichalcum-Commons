@@ -1,14 +1,10 @@
 package orichalcum.animation.factory 
 {
-	import orichalcum.animation.Tween;
-	
-	/**
-	 * @param	time
-	 * @return
-	 */
-	public function wait(time:Number = NaN):Number
+	import orichalcum.animation.AnimationWait;
+
+	public function wait(time:Number = NaN):AnimationWait
 	{
-		return time * 1000;
+		return new AnimationWait(time);
 	}
 
 }

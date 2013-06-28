@@ -8,7 +8,6 @@ package orichalcum.animation
 	import flash.ui.Keyboard;
 	import orichalcum.animation.factory.animate;
 	import orichalcum.animation.factory.call;
-	import orichalcum.animation.factory.tween;
 	import orichalcum.animation.factory.wait;
 	import orichalcum.animation.tweener.plugin.AutoHideTweener;
 	import orichalcum.core.Core;
@@ -53,15 +52,15 @@ package orichalcum.animation
 			
 			var a:Animation = animate(
 				wait(1)
-				,call(function():void { trace(Core.currentTime, 'call 1'); } )
+				,call(function():void { trace(Animation.currentTime, 'call 1'); } )
 				,wait(2)
-				,tween(shape)
+				,animate(shape)
 					//.from({x:0,y:0})
 					.to( { x: 400, y: 400 } )
 					.seconds(1)
-					.onComplete(function():void { trace(Core.currentTime, 'tween complete'); } )
+					.onComplete(function():void { trace(Animation.currentTime, 'tween complete'); } )
 				,wait()
-				,call(function():void { trace(Core.currentTime, 'call 2'); } )
+				,call(function():void { trace(Animation.currentTime, 'call 2'); } )
 			);
 			
 			

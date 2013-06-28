@@ -16,7 +16,7 @@ package orichalcum.animation.tweener.plugin
 			_previousValue = start;
 		}
 		
-		override public function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*
+		override public function tween(target:Object, property:String, progress:Number):*
 		{
 			const nextValue:Number = _round(_start + progress * _distance);
 			const delta:Number = nextValue - _previousValue;

@@ -21,7 +21,7 @@ package orichalcum.animation.tweener
 		 * @param	isEnd Flag indicating that the current tween iteration has is complete
 		 * @return the tweened value of the target's property
 		 */
-		function tween(target:Object, property:String, progress:Number, isStart:Boolean, isEnd:Boolean):*;
+		function tween(target:Object, property:String, progress:Number):*;
 		
 	}
 
