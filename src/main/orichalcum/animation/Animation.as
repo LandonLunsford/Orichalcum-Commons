@@ -8,8 +8,8 @@ package orichalcum.animation
 	import orichalcum.animation.tweener.BooleanTweener;
 	import orichalcum.animation.tweener.ITweener;
 	import orichalcum.animation.tweener.NumberTweener;
-	import orichalcum.core.Core;
 	import orichalcum.utility.FunctionUtil;
+	import orichalcum.utility.MathUtil;
 	
 	public class Animation extends AnimationBase
 	{
@@ -22,17 +22,14 @@ package orichalcum.animation
 		/** The easing function used for all animations if the animation's ease is not explicitly set **/
 		static public var defaultEase:Function = Ease.quadOut;
 		
-		/** @private used to avoid if checking target */
-		static internal const NULL_TARGET:Object = {};
-		
 		/** @private */
 		static private const EPSILON:Number = 0.0001;
 		
 		/** @private */
-		static private const _tweenersByProperty:Object = {};
+		static private var _tweenersByClass:Object = { 'Boolean': BooleanTweener, 'Number': NumberTweener, 'int': NumberTweener, 'uint': NumberTweener };
 		
 		/** @private */
-		static private const _tweenersByClass:Object = { 'Boolean': BooleanTweener, 'Number': NumberTweener, 'int': NumberTweener, 'uint': NumberTweener };
+		static private var _tweenersByProperty:Object = {};
 		
 		/** @private */
 		static private var _currentTime:Number;
@@ -168,18 +165,18 @@ package orichalcum.animation
 		/** @private */
 		private var _stagger:Number = 0;
 		
-		////////////////////////////////////// overhead incurred by polymorphism
+		////////////////////////////////////// overhead incurred by polymorphic API approach
 		
 		/** @private */
 		private var _children:Vector.<AnimationBase> = new Vector.<AnimationBase>;
 		
 		/** @private */
-		private var _insertionTime:Number = 0;
+		private var _childrenPositions:Vector.<Number> = new Vector.<Number>;
 		
 		/** @private */
-		private var _previousEndTime:Number = 0;
+		private var _insertionTime:Number = 0;
 		
-		////////////////////////////////////// overhead incurred by polymorphism
+		////////////////////////////////////// overhead incurred by polymorphic API approach
 		
 		
 		public function Animation(animations:Array = null)
@@ -190,7 +187,11 @@ package orichalcum.animation
 				if (input is AnimationWait)
 				{
 					var time:Number = input._totalDuration; // not duration but total duration
-					_insertionTime = isNaN(time) ? _previousEndTime : _insertionTime + time;
+					var previousEndTime:Number = _insertionTime = isNaN(time) ? _childrenPositions[_children.length-1] + _children[_children.length-1]._totalDuration : _insertionTime + time;
+					if (_duration < previousEndTime)
+						_duration = previousEndTime;
+						
+					//trace('added wait, new duration is:', _duration, _insertionTime, _previousEndTime);
 				}
 				else if (input is AnimationBase)
 				{
@@ -208,18 +209,16 @@ package orichalcum.animation
 			const insertionTime:Number = isNaN(time) ? _insertionTime : time;
 			const endTime:Number = insertionTime + animation._totalDuration;
 			
-			animation._timelinePosition = insertionTime;
+			_childrenPositions.push(insertionTime);
 			_children.push(animation);
 			
-			_previousEndTime = endTime; // @TODO consider stagger
 			if (_duration < endTime)
 				_duration = endTime;
 			
-			trace('adding', animation, 'at time', insertionTime, 'ending', endTime);
+			//trace('adding', animation, 'at time', insertionTime, 'ending', endTime, 'child duration', animation._totalDuration, 'parent duration', _totalDuration);
 			
 			return this;
 		}
-		
 		
 		/////////////////////////////////////////////////////////////////////////////////
 		// Controls
@@ -395,7 +394,7 @@ package orichalcum.animation
 		 */
 		public function duration(...args):*
 		{
-			return args.length ? _setDuration(args[0]) : _duration;
+			return args.length ? _setDuration(args[0]) : _durationWithStagger;
 		}
 		
 		/**
@@ -403,7 +402,7 @@ package orichalcum.animation
 		 */
 		public function milliseconds(...args):*
 		{
-			return args.length ? _setMilliseconds(args[0]) : _duration;
+			return args.length ? _setMilliseconds(args[0]) : _durationWithStagger;
 		}
 		
 		/**
@@ -411,7 +410,7 @@ package orichalcum.animation
 		 */
 		public function seconds(...args):*
 		{
-			return args.length ? _setSeconds(args[0]) : _duration * 0.001;
+			return args.length ? _setSeconds(args[0]) : _durationWithStagger * 0.001;
 		}
 		
 		/**
@@ -419,7 +418,7 @@ package orichalcum.animation
 		 */
 		public function frames(...args):*
 		{
-			return args.length ? _setFrames(args[0]) : _duration;
+			return args.length ? _setFrames(args[0]) : _durationWithStagger;
 		}
 		
 		/**
@@ -505,7 +504,7 @@ package orichalcum.animation
 		
 		override internal function get _totalDuration():Number
 		{
-			return _iterations <= 0 || isNaN(_iterations) ? Infinity : _duration * _iterations * (_yoyo ? 2 : 1);
+			return _iterations <= 0 || isNaN(_iterations) ? Infinity : _durationWithStagger * _iterations * (_yoyo ? 2 : 1);
 		}
 		
 		protected function get _progress():Number
@@ -552,7 +551,7 @@ package orichalcum.animation
 		
 		protected function _setStagger(value:Number):Animation 
 		{
-			_stagger = value;
+			_stagger = value * 1000;
 			return this;
 		}
 		
@@ -677,10 +676,6 @@ package orichalcum.animation
 		}
 		
 		/////////////////////////////////////////////////////////////////////////////////
-		// Private Parts
-		/////////////////////////////////////////////////////////////////////////////////
-		
-		/////////////////////////////////////////////////////////////////////////////////
 		// Overrides
 		/////////////////////////////////////////////////////////////////////////////////
 		
@@ -727,18 +722,8 @@ package orichalcum.animation
 			callback(isJump);
 		}
 		
-		internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true):void
+		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
-			
-			/**
-			 * I can have render take position and progress, if it has progress, it can skip progress calculation
-			 */
-			
-			// hotfix for animation inclusing and pre-delay
-			// fixes animations but not call(), more evidence or reason to split up the class
-			//if (position < 0 && _previousPosition < 0) return;
-				 
-			
 			var initHandler:Function = FunctionUtil.noop
 				,changeHandler:Function = FunctionUtil.noop
 				,yoyoHandler:Function = FunctionUtil.noop
@@ -750,73 +735,47 @@ package orichalcum.animation
 			_position = Math.min(position, endPosition);
 			
 			const isComplete:Boolean = _position >= endPosition;
+			const isMovingForward:Boolean = _position > _previousPosition;
+			var renderedPosition:Number = isComplete
+				? _yoyo ? 0 : endPosition
+				: _position < 0 ? 0 : _position % _durationWithStagger;
 			
 			// optional failfast
 			//if (isComplete && _previousPosition == endPosition) return;
 			
-			const isMovingForward:Boolean = _position > _previousPosition;
-			
-			var renderedPosition:Number = _repeat > 0 ? _position % _duration : _position;
-			
 			if (_yoyo)
 			{
-				const currentCompletedCycles:int = _position / _duration;
+				const currentCompletedCycles:int = _position / _durationWithStagger;
 				
-				yoyosCompleted = ((currentCompletedCycles + 1) >> 1) - (((_previousPosition / _duration) + 1) >> 1);
+				// this happens after yoyo is coming back. thats a problem
+				yoyosCompleted = ((currentCompletedCycles + 1) >> 1) - (((_previousPosition / _durationWithStagger) + 1) >> 1);
 				
 				if (currentCompletedCycles & 1 == 1)
-					renderedPosition = _duration - renderedPosition;
+					renderedPosition = _durationWithStagger - renderedPosition;
 			}
 			
 			/**
-			 * Awkward null object pattern usage to avoid duplicate "if" statements for efficiency
+			 * Akward null object pattern usage to avoid duplicate "if" statements for efficiency
 			 */
 			if (triggerCallbacks)
 			{
 				changeHandler = _changeHandler;
-				if (isMovingForward)
-				{
-					initHandler = _initHandler;
-					yoyoHandler = _yoyoHandler;
-					completeHandler = _completeHandler;
-				}
+				if (isMovingForward){ initHandler = _initHandler; yoyoHandler = _yoyoHandler; completeHandler = _completeHandler; }
 			}
 			
 			if (_position != _previousPosition)
 			{
-				const isStart:Boolean = !_initialized;
-				
 				_initialized || _initialize(isGoto, initHandler);
 				
-				var index:int, count:int = _children.length, step:int;
-				//if (_position > _previousPosition)
-				if (isMovingForward)
-				{
-					index = 0;
-					step = 1;
-				}
-				else
-				{
-					index = count - 1;
-					step = -1;
-				}
-				
-				for (; count-- > 0; index += step)
+				var totalChildren:int = _children.length;
+				if (isMovingForward){ var index:int = 0, step:int = 1; } else { index = totalChildren - 1; step = -1; }
+				for (; totalChildren-- > 0; index += step)
 				{
 					var child:AnimationBase = _children[index];
-					var childPosition:Number = renderedPosition - child._timelinePosition - index * _stagger;
-					// not sure how to add stagger yet considering duration probably jsut have to consider it
-					// when calculating end times on add(animation) additions
+					var childPosition:Number = renderedPosition - _childrenPositions[index] - index * _stagger;
 					
-					// should not have to fork here
-					if (child is Animation)
-					{
-						(child as Animation)._render(childPosition, isGoto, triggerCallbacks);
-					}
-					else
-					{
-						child._tween(childPosition < 0 ? 0 : _ease(childPosition, 0, 1, _duration));
-					}
+					// polymorphic but does unnecessary calls to MathUtil.limit & _ease() when child is nested Animation
+					child._render(childPosition, isGoto, triggerCallbacks, _ease(MathUtil.limit(childPosition/_duration, 0, 1), 0, 1, 1) );
 				}
 				
 				changeHandler(isGoto);
@@ -827,13 +786,22 @@ package orichalcum.animation
 				yoyoHandler(isGoto);
 			}
 			
-			//this is Tween && trace(isComplete);
-			
 			if (isComplete)
 			{
-				invalidate().pause(); // should this be triggered when jumping ?
+				// invalidate screws with child animations
+				//invalidate().pause(); // should this be triggered when jumping ?
+				//hoftix to only invalidate parent animation not nested animations that complete
+				isNaN(progress) && invalidate();
+				pause();
 				completeHandler(isGoto);
 			}
+			
+			//trace(renderedPosition);
+		}
+		
+		private function get _durationWithStagger():Number
+		{
+			return (_children.length - 1) * _stagger + _duration;
 		}
 		
 	}
