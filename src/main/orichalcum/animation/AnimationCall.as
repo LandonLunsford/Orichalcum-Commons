@@ -32,7 +32,7 @@ package orichalcum.animation
 			}
 		}
 		
-		override internal function _tween(progress:Number):void 
+		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
 			_progress = progress;
 			_previousProgress < 0 && _progress >= 0 && _callback.apply(_thisObject, _callbackArguments);
