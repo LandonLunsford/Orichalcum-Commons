@@ -9,8 +9,6 @@ package orichalcum.animation
 	internal class AnimationBase 
 	{
 		
-		internal var _timelinePosition:Number = 0;
-		
 		public function AnimationBase()
 		{
 			
@@ -21,7 +19,7 @@ package orichalcum.animation
 			return 0;
 		}
 		
-		internal function _tween(progress:Number):void
+		internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
 			// abstract
 		}
