@@ -1,4 +1,4 @@
-package orichalcum.animation.tweener.plugin 
+package orichalcum.animation.tweener.plugin.movieclip 
 {
 	import flash.display.MovieClip;
 	import orichalcum.animation.tweener.NumberTweener;

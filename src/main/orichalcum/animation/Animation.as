@@ -79,7 +79,7 @@ package orichalcum.animation
 			});
 		}
 		
-		static public function install(tweener:Class, triggers:*):void
+		static public function install(tweener:Class, triggers:* = null):void
 		{
 			if (tweener == null)
 			{
@@ -98,9 +98,14 @@ package orichalcum.animation
 				for each(var trigger:String in triggers)
 					install(tweener, trigger);
 			}
+			else if ('properties' in tweener)
+			{
+				install(tweener, tweener['properties']);
+			}
 			else
 			{
-				throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Tween" must be one of the following types: String, Class, Array, Vector.<String>, Vector.<Class>.');
+				throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Animation" must specify triggers if no static "properties" member is found on class."');
+				//throw new ArgumentError('Argument "triggers" passed to method "install" of class "orichalcum.animation.Animation" must be one of the following types: String, Class, Array, Vector.<String>, Vector.<Class>.');
 			}
 		}
 		
@@ -691,11 +696,6 @@ package orichalcum.animation
 		// Overrides
 		/////////////////////////////////////////////////////////////////////////////////
 		
-		protected function _integrate(event:Event = null):void 
-		{
-			_isPlaying && _render(_position + (_useFrames ? 1 : deltaTime) * Animation.timeScale * _timeScale * _step * (_yoyo ? 2 : 1), false, true);
-		}
-		
 		protected function _initialize(isJump:Boolean, callback:Function):void
 		{
 			_initialized = true;
@@ -754,6 +754,14 @@ package orichalcum.animation
 			callback(isJump);
 		}
 		
+		protected function _integrate(event:Event = null):void 
+		{
+			trace('playing');
+			
+			
+			_isPlaying && _render(_position + (_useFrames ? 1 : deltaTime) * Animation.timeScale * _timeScale * _step * (_yoyo ? 2 : 1), false, true);
+		}
+		
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
 			var initHandler:Function = FunctionUtil.NULL
@@ -764,7 +772,7 @@ package orichalcum.animation
 				,endPosition:Number = _endPosition;
 			
 			_previousPosition = _position;
-			_position = Math.min(position, endPosition);
+			_position = MathUtil.limit(position, 0, endPosition);// sMath.max(0, Math.min(position, endPosition));
 			
 			const isComplete:Boolean = _position >= endPosition;
 			const isMovingForward:Boolean = _position > _previousPosition;
@@ -813,6 +821,14 @@ package orichalcum.animation
 				changeHandler(isGoto);
 			}
 			
+			//this is Animation && trace('prev > pos', _previousPosition, _position, _previousPosition > _position)
+			
+			if (!isMovingForward && _position <= 0)
+			{
+				isNaN(progress) && invalidate();
+				reverse().pause();
+			}
+			
 			while (yoyosCompleted-- > 0)
 			{
 				yoyoHandler(isGoto);
@@ -827,6 +843,8 @@ package orichalcum.animation
 				pause();
 				completeHandler(isGoto);
 			}
+			
+			
 			
 			//trace(renderedPosition);
 		}

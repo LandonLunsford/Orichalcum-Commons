@@ -9,8 +9,7 @@ package orichalcum.animation
 	import orichalcum.animation.factory.animate;
 	import orichalcum.animation.factory.call;
 	import orichalcum.animation.factory.wait;
-	import orichalcum.animation.tweener.plugin.AutoHideTweener;
-	import orichalcum.animation.tweener.plugin.ScaleTweener;
+	import orichalcum.animation.tweener.plugin.displayobject.ScaleTweener;
 	import orichalcum.core.Core;
 
 	public class TweenDemo3 extends Sprite

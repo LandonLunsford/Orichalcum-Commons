@@ -1,4 +1,4 @@
-package orichalcum.animation.tweener.plugin 
+package orichalcum.animation.tweener.plugin.displayobject 
 {
 	import orichalcum.animation.tweener.NumberTweener;
 
