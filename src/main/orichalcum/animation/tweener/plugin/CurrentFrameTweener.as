@@ -6,9 +6,9 @@ package orichalcum.animation.tweener.plugin
 	public class CurrentFrameTweener extends NumberTweener
 	{
 		
-		override public function init(start:*, end:*):void 
+		override public function initialize(target:Object, property:String, from:Object, to:Object, fromValueIfAny:*, toValueIfAny:*):void 
 		{
-			super.init(start, end);
+			super.init(fromValueIfAny, toValueIfAny);
 			round = true;
 		}
 		

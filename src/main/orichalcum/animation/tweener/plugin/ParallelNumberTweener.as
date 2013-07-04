@@ -10,10 +10,10 @@ package orichalcum.animation.tweener.plugin
 		/** @private */
 		protected var _previousValue:Number;
 		
-		override public function init(start:*, end:*):void
+		override public function initialize(target:Object, property:String, from:Object, to:Object, fromValueIfAny:*, toValueIfAny:*):void 
 		{
-			super.init(start, end);
-			_previousValue = start;
+			super.init(fromValueIfAny, toValueIfAny);
+			_previousValue = fromValueIfAny;
 		}
 		
 		override public function tween(target:Object, property:String, progress:Number):*
@@ -21,7 +21,7 @@ package orichalcum.animation.tweener.plugin
 			const nextValue:Number = _round(_start + progress * _distance);
 			const delta:Number = nextValue - _previousValue;
 			_previousValue = nextValue;
-			return target[property] + delta;
+			target[property] += delta;
 		}
 		
 	}

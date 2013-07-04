@@ -9,7 +9,10 @@ package orichalcum.animation.tweener
 		 * @param	start The initial value of the target's property
 		 * @param	end	The final value desired for the target's property
 		 */
-		function init(start:*, end:*):void;
+		//function init(start:*, end:*):void;
+		
+		
+		function initialize(target:Object, property:String, from:Object, to:Object, fromValueIfAny:*, toValueIfAny:*):void;
 		
 		/**
 		 * Interpolates the targets property based on the following parameters

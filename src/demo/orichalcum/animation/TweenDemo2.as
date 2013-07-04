@@ -51,7 +51,8 @@ package orichalcum.animation
 			*/
 			
 			var a:Animation = animate(
-				wait(1)
+				call(function():void { trace(Animation.currentTime, 'call 0'); } )
+				,wait(1)
 				,call(function():void { trace(Animation.currentTime, 'call 1'); } )
 				,wait(2)
 				,animate(shape)

@@ -4,7 +4,10 @@ package orichalcum.utility
 	public class FunctionUtil
 	{
 		
-		static public const noop:Function = function(...args):* { return undefined; };
+		static public const NULL:Function = function(...args):* { return undefined; };
+		static public const NULL_PIPE:Function = function(a:*):* { return a; };
+		static public const RETURN_TRUE:Function = function(...args):* { return true; };
+		static public const RETURN_FALSE:Function = function(...args):* { return false; };
 		
 		static public function callWith(method:Function, thisObject:Object = null, args:Array = null):*
 		{

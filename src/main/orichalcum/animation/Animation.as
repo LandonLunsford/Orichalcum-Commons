@@ -11,6 +11,11 @@ package orichalcum.animation
 	import orichalcum.utility.FunctionUtil;
 	import orichalcum.utility.MathUtil;
 	
+	/**
+	 * @todo make animations copy(deep:Boolean = true) method
+	 * @todo streamline plugin strategy (init, tween) methods and tweener creation and initialization to be safe for properties that arent on target
+	 * @todo add record() allowing playback of all animations played
+	 */
 	public class Animation extends AnimationBase
 	{
 		
@@ -100,13 +105,20 @@ package orichalcum.animation
 		}
 		
 		/** @private */
-		static internal function _createTweener(propertyName:String, propertyValue:*):ITweener
+		static internal function _createTweener(target:Object, propertyName:String):ITweener
 		{
 			const tweenerForProperty:Class = _tweenersByProperty[propertyName];
-			if (tweenerForProperty) return new tweenerForProperty;
 			
-			const tweenerForClass:Class = _tweenersByClass[getQualifiedClassName(propertyValue)];
-			if (tweenerForClass) return new tweenerForClass;
+			if (tweenerForProperty)
+				return new tweenerForProperty;
+			
+			if (!(propertyName in target))
+				return null;
+				
+			const tweenerForClass:Class = _tweenersByClass[getQualifiedClassName(target[propertyName])];
+			
+			if (tweenerForClass)
+				return new tweenerForClass;
 			
 			return null;
 		}
@@ -142,16 +154,16 @@ package orichalcum.animation
 		internal var _useFrames:Boolean;
 		
 		/** @private */
-		internal var _onInit:Function = FunctionUtil.noop;
+		internal var _onInit:Function = FunctionUtil.NULL;
 		
 		/** @private */
-		internal var _onChange:Function = FunctionUtil.noop;
+		internal var _onChange:Function = FunctionUtil.NULL;
 		
 		/** @private */
-		internal var _onYoyo:Function = FunctionUtil.noop;
+		internal var _onYoyo:Function = FunctionUtil.NULL;
 		
 		/** @private */
-		internal var _onComplete:Function = FunctionUtil.noop;
+		internal var _onComplete:Function = FunctionUtil.NULL;
 		
 		/** @private */
 		internal var _step:Number = 1;
@@ -476,25 +488,25 @@ package orichalcum.animation
 		 */
 		public function onInit(callback:Function):Animation
 		{
-			_onInit = callback == null ? FunctionUtil.noop : callback;
+			_onInit = callback == null ? FunctionUtil.NULL : callback;
 			return this;
 		}
 		
 		public function onChange(callback:Function):Animation
 		{
-			_onChange = callback == null ? FunctionUtil.noop : callback;
+			_onChange = callback == null ? FunctionUtil.NULL : callback;
 			return this;
 		}
 		
 		public function onYoyo(callback:Function):Animation
 		{
-			_onYoyo = callback == null ? FunctionUtil.noop : callback;
+			_onYoyo = callback == null ? FunctionUtil.NULL : callback;
 			return this;
 		}
 		
 		public function onComplete(callback:Function):Animation
 		{
-			_onComplete = callback == null ? FunctionUtil.noop : callback;
+			_onComplete = callback == null ? FunctionUtil.NULL : callback;
 			return this;
 		}
 		
@@ -706,16 +718,36 @@ package orichalcum.animation
 					// for each child
 					child._tweeners ||= {};
 					
-					const tweener:ITweener = child._tweeners[property] ||= _createTweener(property, target[property]);
+					var tweener:ITweener = child._tweeners[property] ||= _createTweener(target, property);
 					
 					// boolean tween bug where start isnt set dynamically when in to
 					if (tweener)
 					{
 						/** the property in? fork fills in the blank for assumed things left out of the other param list **/
-						tweener.init(
-							property in from ? from[property] : target[property]
-							,to[property]
-						);
+						//tweener.init(
+						
+							// this will not work for custom named properties
+							// I need to delegate more to tweener in this regard
+							// tweener.init(target, property, from, to)
+							
+							//property in from ? from[property] : target[property]
+							//,to[property]
+						//);
+						
+						tweener.initialize(
+							target
+							,property
+							,from
+							,to
+							,property in from
+								? from[property]
+								: property in target
+									? target[property]
+									: null
+							,property in to
+								? to[property]
+								: null
+							);
 					}
 				}
 			}
@@ -724,10 +756,10 @@ package orichalcum.animation
 		
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
-			var initHandler:Function = FunctionUtil.noop
-				,changeHandler:Function = FunctionUtil.noop
-				,yoyoHandler:Function = FunctionUtil.noop
-				,completeHandler:Function = FunctionUtil.noop
+			var initHandler:Function = FunctionUtil.NULL
+				,changeHandler:Function = FunctionUtil.NULL
+				,yoyoHandler:Function = FunctionUtil.NULL
+				,completeHandler:Function = FunctionUtil.NULL
 				,yoyosCompleted:int = 0
 				,endPosition:Number = _endPosition;
 			
@@ -801,7 +833,7 @@ package orichalcum.animation
 		
 		private function get _durationWithStagger():Number
 		{
-			return (_children.length - 1) * _stagger + _duration;
+			return _duration + (_children.length - 1) * _stagger;
 		}
 		
 	}

@@ -44,15 +44,15 @@ package orichalcum.animation.tweener
 		
 		/* INTERFACE orichalcum.animation.tweener.ITweener */
 		
-		public function init(start:*, end:*):void
+		public function initialize(target:Object, property:String, from:Object, to:Object, fromValueIfAny:*, toValueIfAny:*):void 
 		{
-			if (start is Number)
+			if (fromValueIfAny is Number)
 			{
-				_start = start;
+				_start = fromValueIfAny;
 			}
-			else if (start is String)
+			else if (fromValueIfAny is String)
 			{
-				const startAsString:String = start as String;
+				const startAsString:String = fromValueIfAny as String;
 				_start = parseFloat(FLOAT_DETECTOR.exec(startAsString.replace(EXTRA_SYMBOLS, '')));
 				_round = ROUNDED_DETECTOR.test(startAsString) ? Math.round : RETURN;
 			}
@@ -60,16 +60,15 @@ package orichalcum.animation.tweener
 			{
 				throw new ArgumentError('Argument "start" passed to method NumberTweener.init() must be a Number or String number representation');
 			}
-			
-			if (end is Number)
+			if (toValueIfAny is Number)
 			{
-				_distance = end - _start;
+				_distance = toValueIfAny - _start;
 			}
-			else if (end is String)
+			else if (toValueIfAny is String)
 			{
-				const endAsString:String = end as String;
+				const endAsString:String = toValueIfAny as String;
 				const endAsNumber:Number = parseFloat(FLOAT_DETECTOR.exec(endAsString.replace(EXTRA_SYMBOLS, '')));
-				_distance = RELATIVE_DETECTOR.test(endAsString) ? endAsNumber : endAsNumber - start;
+				_distance = RELATIVE_DETECTOR.test(endAsString) ? endAsNumber : endAsNumber - fromValueIfAny;
 				_round = ROUNDED_DETECTOR.test(endAsString) ? Math.round : RETURN;
 			}
 			else
@@ -80,7 +79,11 @@ package orichalcum.animation.tweener
 		
 		public function tween(target:Object, property:String, progress:Number):*
 		{
-			//trace(_start, _distance, progress, _start + progress * _distance)
+			return target[property] = interpolate(progress);
+		}
+		
+		public function interpolate(progress:Number):*
+		{
 			return _round(_start + progress * _distance);
 		}
 		
@@ -89,11 +92,6 @@ package orichalcum.animation.tweener
 			return StringUtil.substitute('<number-tweener start="{0}" end="{1}" round="{2}">', _start, _start + _distance, _round == Math.round);
 		}
 		
-		/** @private */
-		//private function parse(value:*):Number
-		//{
-			/** @private */
-		//}
 		
 	}
 

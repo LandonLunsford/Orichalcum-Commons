@@ -23,7 +23,7 @@ package orichalcum.animation
 			for (var property:String in _tweeners)
 			{
 				// wont always want to set here (like for colorTransform)
-				_target[property] = _tweeners[property].tween(_target, property, progress);
+				_tweeners[property].tween(_target, property, progress);
 			}
 		}
 		

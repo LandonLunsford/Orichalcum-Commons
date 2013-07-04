@@ -10,6 +10,7 @@ package orichalcum.animation
 	import orichalcum.animation.factory.call;
 	import orichalcum.animation.factory.wait;
 	import orichalcum.animation.tweener.plugin.AutoHideTweener;
+	import orichalcum.animation.tweener.plugin.ScaleTweener;
 	import orichalcum.core.Core;
 
 	public class TweenDemo3 extends Sprite
@@ -32,9 +33,12 @@ package orichalcum.animation
 				addChild(shape);
 			}
 			i = 0;
+			
+			Animation.install(ScaleTweener, 'scale');
+			
 			var a:Animation = (new Animation(shapes))
 				//.to( { rotationX:360 } )
-				.to( { x:stage.stageWidth, visible:false } )
+				.to( { x:stage.stageWidth, visible:false, scale:3 } )
 				.seconds(2)
 				.onInit(function():void { trace(Animation.currentTime); })
 				.onComplete(function():void { trace(Animation.currentTime); })
@@ -51,17 +55,12 @@ package orichalcum.animation
 			.onYoyo(function():void { trace('there'); })
 			.onComplete(function():void { trace('and back'); })
 			
+			
+			//var a3:Animation =
+			
 			stage.addEventListener(MouseEvent.CLICK, function(event:Event):void {
 				//var progress:Number = stage.mouseX / stage.stageWidth;
-				//a.progress(progress);
-				//a2.toggle()
-				//a.replay()
-				//a.invalidate().replay()
-				//a.reverse();
-				a2.play();
-				//trace('click')
-				//a2.end(); // not working
-				//a.goto(progress * a.totalDuration);
+				a2.isPlaying ? a2.reverse() : a2.play();
 			});
 		}
 		

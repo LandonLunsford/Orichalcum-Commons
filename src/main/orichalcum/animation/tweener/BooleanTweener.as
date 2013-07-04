@@ -14,15 +14,22 @@ package orichalcum.animation.tweener
 		/** @private */
 		private var _end:Boolean;
 		
-		public function init(start:*, end:*):void
+		/* INTERFACE orichalcum.animation.tweener.ITweener */
+		
+		public function initialize(target:Object, property:String, from:Object, to:Object, fromValueIfAny:*, toValueIfAny:*):void 
 		{
-			_start = start;
-			_end = end;
+			_start = fromValueIfAny;
+			_end = toValueIfAny;
 		}
 		
 		public function tween(target:Object, property:String, progress:Number):*
 		{
 			//return isEnd ? _end : _start; // not true for yoyo, complete can be progress 0
+			target[property] = interpolate(progress);
+		}
+		
+		public function interpolate(progress:Number):*
+		{
 			return progress > THRESHOLD ? _end : _start;
 		}
 

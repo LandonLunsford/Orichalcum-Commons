@@ -7,7 +7,7 @@ package orichalcum.animation
 		private var _previousProgress:Number = -0.0001;
 		private var _progress:Number = 0;
 		private var _thisObject:Object;
-		private var _callback:Function = FunctionUtil.noop;
+		private var _callback:Function = FunctionUtil.NULL;
 		private var _callbackArguments:Array;
 		
 		public function AnimationCall(args:Array) 
