@@ -6,15 +6,18 @@ package orichalcum.animation.tweener.plugin.displayobject
 
 	public class AutoHideTweener extends NumberTweener implements ITweener
 	{
+		
+		static public const properties:Array = ['alpha'];
+		
 		static public var invisibleAlphaThreshold:Number = 0.01;
 		
 		override public function tween(target:Object, property:String, progress:Number):*
 		{
-			const value:Number = super.tween(target, property, progress);
+			const value:Number = interpolate(target, property, progress);
 			
 			target is DisplayObject && (target.visible = target.alpha > invisibleAlphaThreshold);
 			
-			return value;
+			return target[property] = value;
 		}
 	}
 }
