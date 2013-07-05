@@ -9,7 +9,7 @@ package orichalcum.animation.tweener.plugin.displayobject
 		
 		override public function tween(target:Object, property:String, progress:Number):* 
 		{
-			const value:Number = super.tween(target, property, progress, isStart, isEnd) % 360;
+			var value:Number = interpolate(progress) % 360;
 			if (value > 180)
 			{
 				value -= 360;
@@ -18,7 +18,7 @@ package orichalcum.animation.tweener.plugin.displayobject
 			{
 				value += 360;
 			}
-			return value;
+			return target[property] = value;
 		}
 		
 		
