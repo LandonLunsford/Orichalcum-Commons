@@ -79,11 +79,26 @@ package orichalcum.animation
 			});
 		}
 		
-		static public function install(tweener:Class, triggers:* = null):void
+		/**
+		 * This function is trying to do too much
+		 * What it should cover is
+		 * 1. default installs of multiple TweenerPlugins in the form of
+		 * install([plugins | ...plugins])
+		 * 2. install single plugin with one or more triggers
+		 * install(plugin, [triggers | ...triggers]
+		 * @param	tweener
+		 * @param	triggers
+		 */
+		static public function install(tweener:Object, triggers:* = null):void
 		{
 			if (tweener == null)
 			{
 				throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Tween" must not be null.');
+			}
+			else if (tweener is Array || tweener is Vector.<Class>)
+			{
+				for each(var plugin:Class in tweener)
+					plugin && install(plugin, null);
 			}
 			else if (triggers is String)
 			{
@@ -96,7 +111,7 @@ package orichalcum.animation
 			else if (triggers is Array || triggers is Vector.<String>)
 			{
 				for each(var trigger:String in triggers)
-					install(tweener, trigger);
+					trigger && install(tweener, trigger);
 			}
 			else if ('properties' in tweener)
 			{
@@ -756,9 +771,6 @@ package orichalcum.animation
 		
 		protected function _integrate(event:Event = null):void 
 		{
-			trace('playing');
-			
-			
 			_isPlaying && _render(_position + (_useFrames ? 1 : deltaTime) * Animation.timeScale * _timeScale * _step * (_yoyo ? 2 : 1), false, true);
 		}
 		
@@ -803,6 +815,12 @@ package orichalcum.animation
 				if (isMovingForward){ initHandler = _initHandler; yoyoHandler = _yoyoHandler; completeHandler = _completeHandler; }
 			}
 			
+			if (_step < 0 && _position <= 0)
+			{
+				isNaN(progress) && invalidate();
+				reverse().pause();
+			}
+			
 			if (_position != _previousPosition)
 			{
 				_initialized || _initialize(isGoto, initHandler);
@@ -821,14 +839,6 @@ package orichalcum.animation
 				changeHandler(isGoto);
 			}
 			
-			//this is Animation && trace('prev > pos', _previousPosition, _position, _previousPosition > _position)
-			
-			if (!isMovingForward && _position <= 0)
-			{
-				isNaN(progress) && invalidate();
-				reverse().pause();
-			}
-			
 			while (yoyosCompleted-- > 0)
 			{
 				yoyoHandler(isGoto);
@@ -843,10 +853,6 @@ package orichalcum.animation
 				pause();
 				completeHandler(isGoto);
 			}
-			
-			
-			
-			//trace(renderedPosition);
 		}
 		
 		private function get _durationWithStagger():Number
