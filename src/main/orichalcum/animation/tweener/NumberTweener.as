@@ -28,7 +28,7 @@ package orichalcum.animation.tweener
 		protected var _start:Number;
 		
 		/** @private */
-		protected var _distance:Number;
+		protected var _delta:Number;
 		
 		/** @private */
 		protected function get round():Boolean
@@ -62,13 +62,13 @@ package orichalcum.animation.tweener
 			}
 			if (toValueIfAny is Number)
 			{
-				_distance = toValueIfAny - _start;
+				_delta = toValueIfAny - _start;
 			}
 			else if (toValueIfAny is String)
 			{
 				const endAsString:String = toValueIfAny as String;
 				const endAsNumber:Number = parseFloat(FLOAT_DETECTOR.exec(endAsString.replace(EXTRA_SYMBOLS, '')));
-				_distance = RELATIVE_DETECTOR.test(endAsString) ? endAsNumber : endAsNumber - fromValueIfAny;
+				_delta = RELATIVE_DETECTOR.test(endAsString) ? endAsNumber : endAsNumber - fromValueIfAny;
 				_round = ROUNDED_DETECTOR.test(endAsString) ? Math.round : RETURN;
 			}
 			else
@@ -84,12 +84,12 @@ package orichalcum.animation.tweener
 		
 		public function interpolate(progress:Number):*
 		{
-			return _round(_start + progress * _distance);
+			return _round(_start + progress * _delta);
 		}
 		
 		public function toString():String
 		{
-			return StringUtil.substitute('<number-tweener start="{0}" end="{1}" round="{2}">', _start, _start + _distance, _round == Math.round);
+			return StringUtil.substitute('<number-tweener start="{0}" end="{1}" round="{2}">', _start, _start + _delta, _round == Math.round);
 		}
 		
 		
