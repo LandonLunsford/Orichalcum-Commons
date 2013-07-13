@@ -19,7 +19,7 @@
 	
 	<groupId>orichalcum-studios</groupId>
 	<artifactId>orichalcum-commons</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 
 	<packaging>swc</packaging>
 	
@@ -50,12 +50,31 @@
 			@see https://docs.sonatype.org/display/FLEXMOJOS/Running+unit+tests
 		-->
 		<flex.flashPlayer.command>C:\Program Files (x86)\FlashDevelop\Tools\flexsdk\runtimes\player\11.1\win\FlashPlayerDebugger.exe</flex.flashPlayer.command>
-	
-		<staging.release.directory>release-repository::default::file:../../release</staging.release.directory>
-		<staging.snapshot.directory>snapshot-repository::default::file:../../snapshot</staging.snapshot.directory>
-		<altDeploymentRepository>${staging.snapshot.directory}</altDeploymentRepository>	
+		
+		<!--
+		<staging.release.directory>release-repository::default::file:../maven-repository/release</staging.release.directory>
+		<staging.snapshot.directory>snapshot-repository::default::file:../maven-repository/snapshot</staging.snapshot.directory>
+		-->
+		<target>snapshot</target>
+		<altDeploymentRepository>${target}-repository::default::file:../maven-repository/${target}</altDeploymentRepository>	
 	</properties>
-	
+	<!--
+	<profiles>
+		<profile>
+			<id></id>
+			<activeByDefault></activeByDefault>
+			<activation>
+				<property>
+					<name>target</name>
+					<value>test</value>
+				</property>
+			</activation>
+			<properties>
+				<appserver.home>/path/to/dev/appserver</appserver.home>
+			</properties>
+		</profile>
+	</profiles>
+	-->
 	<url>https://github.com/LandonLunsford/Orichalcum-Commons</url>
 	<licenses>
 		<license>
@@ -69,7 +88,6 @@
 		<url>scm:git:git@github.com:LandonLunsford/Orichalcum-Commons.git</url>
 		<connection>scm:git:git@github.com:LandonLunsford/Orichalcum-Commons.git</connection>
 		<developerConnection>scm:git:git@github.com:LandonLunsford/Orichalcum-Commons.git</developerConnection>
-		
 		
 		<!--
 		<url>http://github.com/LandonLunsford/Orichalcum-Commons/tree/master</url>
@@ -172,6 +190,8 @@
 		</pluginRepository>
 	</pluginRepositories>
 	
+
+	
 	<build>
 		<sourceDirectory>${basedir}/src/main</sourceDirectory>
 		<testSourceDirectory>${basedir}src/test</testSourceDirectory>
@@ -214,14 +234,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
-					<!--
-					<altDeploymentRepository>orichalcum-studios.github::default::${deploy.target}</altDeploymentRepository>
-					snapshot-repo::default::file:snapshots-->
 					<altDeploymentRepository>${altDeploymentRepository}</altDeploymentRepository>
 				</configuration>
 			</plugin>
-			
-			
 		</plugins>
 	</build>
 
