@@ -19,7 +19,7 @@
 	
 	<groupId>orichalcum-studios</groupId>
 	<artifactId>orichalcum-commons</artifactId>
-	<version>1.0</version>
+	<version>1.0-SNAPSHOT</version>
 
 	<packaging>swc</packaging>
 	
@@ -38,6 +38,8 @@
 	</developers>
 	
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		
 		<flexmojos.version>4.0-RC2</flexmojos.version>
 		<flex.sdk.version>4.5.1.21328</flex.sdk.version>
 		<flexunit.version>4.0-rc-1</flexunit.version>
@@ -216,6 +218,8 @@
 					<altDeploymentRepository>snapshot-repository::default::file:snapshot</altDeploymentRepository>
 				</configuration>
 			</plugin>
+			
+			
 		</plugins>
 	</build>
 

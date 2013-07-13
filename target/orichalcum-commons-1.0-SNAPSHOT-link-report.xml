@@ -195,8 +195,8 @@
       <dep id="ArgumentError" />
       <dep id="AS3" />
       <dep id="orichalcum.utility:StringUtil" />
-      <dep id="XML" />
       <dep id="RegExp" />
+      <dep id="XML" />
       <dep id="flash.system:ApplicationDomain" />
       <dep id="flash.utils:Dictionary" />
       <dep id="Error" />
@@ -307,7 +307,7 @@
       <pre id="Object" />
       <dep id="AS3" />
     </script>
-    <script name="_1020ca9bfe7ac69658fb8200f9f4172c6f89e19c3bb530b8759bab6ef8c534a6_flash_display_Sprite.as" mod="1373686239199" size="1000" optimizedsize="562">
+    <script name="_1020ca9bfe7ac69658fb8200f9f4172c6f89e19c3bb530b8759bab6ef8c534a6_flash_display_Sprite.as" mod="1373690169487" size="1000" optimizedsize="562">
       <def id="_1020ca9bfe7ac69658fb8200f9f4172c6f89e19c3bb530b8759bab6ef8c534a6_flash_display_Sprite" />
       <pre id="flash.display:Sprite" />
       <dep id="flash.system:Security" />
@@ -388,8 +388,8 @@
       <def id="orichalcum.utility:XmlUtil" />
       <pre id="Object" />
       <dep id="AS3" />
-      <dep id="RegExp" />
       <dep id="XML" />
+      <dep id="RegExp" />
     </script>
     <script name="C:\Users\landon\Documents\GitHub\Orichalcum-Commons\src\main\orichalcum\utility\BitmapUtil.as" mod="1362357721832" size="2291" optimizedsize="1443">
       <def id="orichalcum.utility:BitmapUtil" />

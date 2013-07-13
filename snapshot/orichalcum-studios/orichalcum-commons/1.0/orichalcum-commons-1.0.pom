@@ -49,7 +49,7 @@
 		-->
 		<flex.flashPlayer.command>C:\Program Files (x86)\FlashDevelop\Tools\flexsdk\runtimes\player\11.1\win\FlashPlayerDebugger.exe</flex.flashPlayer.command>
 	
-		<deploy.target>http://github.com/orichalcum-studios/maven-repository/release</deploy.target>
+		<altDeploymentRepository>release-repository::default::file:../../release</altDeploymentRepository>
 	</properties>
 	
 	<url>https://github.com/LandonLunsford/Orichalcum-Commons</url>
@@ -62,9 +62,15 @@
 	</licenses>
 
 	<scm>
+		<url>scm:git:git@github.com:LandonLunsford/Orichalcum-Commons.git</url>
+		<connection>scm:git:git@github.com:LandonLunsford/Orichalcum-Commons.git</connection>
+		<developerConnection>scm:git:git@github.com:LandonLunsford/Orichalcum-Commons.git</developerConnection>
+		
+		
+		<!--
 		<url>http://github.com/LandonLunsford/Orichalcum-Commons/tree/master</url>
 		<connection>git://github.com/LandonLunsford/Orichalcum-Commons.git</connection>
-		<!--
+		
 		<url>http://github.com/LandonLunsford/Orichalcum-Commons</url>
 		<connection>scm:git:ssh://github.com/LandonLunsford/Orichalcum-Commons.git</connection>
 		<developerConnection>scm:git:ssh://github.com/LandonLunsford/Orichalcum-Commons.git</developerConnection>
@@ -73,12 +79,14 @@
 	
 	<distributionManagement>
 		<repository>
-			<id>orichalcum-studios-release-repository</id>
-			<url>https://raw.github.com/orichalcum-studios/maven-repository/master/release</url>
+			<id>release-repository</id>
+			<url>https://github.com/orichalcum-studios/maven-repository/raw/master/release</url>
+			<!--<url>https://raw.github.com/orichalcum-studios/maven-repository/master/release</url>-->
 		</repository>
 		<snapshotRepository>
-			<id>orichalcum-studios-snapshot-repository</id>
-			<url>https://raw.github.com/orichalcum-studios/maven-repository/master/snapshot</url>
+			<id>snapshot-repository</id>
+			<url>https://github.com/orichalcum-studios/maven-repository/raw/master/snapshot</url>
+			<!--<url>https://raw.github.com/orichalcum-studios/maven-repository/master/snapshot</url>-->
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -205,7 +213,7 @@
 					<!--
 					<altDeploymentRepository>orichalcum-studios.github::default::${deploy.target}</altDeploymentRepository>
 					snapshot-repo::default::file:snapshots-->
-					<altDeploymentRepository>orichalcum-studios-snapshot-repository::default::file:snapshot</altDeploymentRepository>
+					<altDeploymentRepository>snapshot-repository::default::file:snapshot</altDeploymentRepository>
 				</configuration>
 			</plugin>
 		</plugins>

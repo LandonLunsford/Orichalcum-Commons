@@ -499,7 +499,7 @@
    </includes>
    -->
    <!-- link-report: Output a XML-formatted report of all definitions linked into the application.-->
-   <link-report>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\target\orichalcum-commons-1.0-link-report.xml</link-report>
+   <link-report>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\target\orichalcum-commons-1.0-SNAPSHOT-link-report.xml</link-report>
    <!-- load-config: load a file containing configuration options-->
    <!-- load-config usage:
    <load-config>filename</load-config>
@@ -516,7 +516,7 @@
       <!-- metadata.creator: A creator's name to store in the SWF metadata-->
       <creator>Landon Lunsford</creator>
       <!-- metadata.date: The creation date to store in the SWF metadata-->
-      <date>7/12/13 8:30 PM</date>
+      <date>7/12/13 9:36 PM</date>
       <!-- metadata.description: The default description to store in the SWF metadata-->
       <description>common utilities and collections</description>
       <!-- metadata.language: The language to store in the SWF metadata (i.e. EN, FR)-->
@@ -545,7 +545,7 @@
       <title>Orichalcum Commons</title>
    </metadata>
    <!-- output: the filename of the SWF movie to create-->
-   <output>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\target\orichalcum-commons-1.0.swc</output>
+   <output>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\target\orichalcum-commons-1.0-SNAPSHOT.swc</output>
    <!-- raw-metadata: XML text to store in the SWF metadata (overrides metadata.* configuration)-->
    <!-- raw-metadata usage:
    <raw-metadata>text</raw-metadata>
@@ -590,7 +590,7 @@
       -->
    </runtime-shared-library-settings>
    <!-- size-report: Output an XML-formatted report detailing the size of all code and data linked into the application.-->
-   <size-report>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\target\orichalcum-commons-1.0-size-report.xml</size-report>
+   <size-report>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\target\orichalcum-commons-1.0-SNAPSHOT-size-report.xml</size-report>
    <!-- static-link-runtime-shared-libraries: statically link the libraries specified by the -runtime-shared-libraries-path option.-->
    <!-- static-link-runtime-shared-libraries usage:
    <static-link-runtime-shared-libraries>boolean</static-link-runtime-shared-libraries>
