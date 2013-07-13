@@ -1,4 +1,4 @@
-package enumeration
+package orichalcum.enumeration
 {
 	import flash.ui.Keyboard;
 

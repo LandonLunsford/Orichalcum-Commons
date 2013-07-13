@@ -12,13 +12,13 @@ package orichalcum.animation.tweener.plugin
 		
 		override public function initialize(target:Object, property:String, from:Object, to:Object, fromValueIfAny:*, toValueIfAny:*):void 
 		{
-			super.init(fromValueIfAny, toValueIfAny);
+			super.initialize(target, property, from, to, fromValueIfAny, toValueIfAny);
 			_previousValue = fromValueIfAny;
 		}
 		
 		override public function tween(target:Object, property:String, progress:Number):*
 		{
-			const nextValue:Number = _round(_start + progress * _distance);
+			const nextValue:Number = interpolate(progress);
 			const delta:Number = nextValue - _previousValue;
 			_previousValue = nextValue;
 			target[property] += delta;

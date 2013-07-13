@@ -8,7 +8,7 @@ package orichalcum.animation.tweener.plugin.movieclip
 		
 		override public function initialize(target:Object, property:String, from:Object, to:Object, fromValueIfAny:*, toValueIfAny:*):void 
 		{
-			super.init(fromValueIfAny, toValueIfAny);
+			super.initialize(target, property, from, to, fromValueIfAny, toValueIfAny);
 			round = true;
 		}
 		
@@ -16,7 +16,7 @@ package orichalcum.animation.tweener.plugin.movieclip
 		{
 			if (!(target is MovieClip)) return undefined;
 			
-			const frame:uint = super.tween(target, property, progress);
+			const frame:uint = interpolate(progress);
 			target.currentFrame == frame || target.gotoAndStop(frame);
 			return frame;
 		}

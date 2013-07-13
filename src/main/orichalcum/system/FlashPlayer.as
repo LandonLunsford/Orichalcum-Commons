@@ -6,7 +6,7 @@ package orichalcum.system
 	{
 		static private var _flashPlayer:FlashPlayer;
 		
-		static private function getInstance():FlashPlayer
+		static public function getInstance():FlashPlayer
 		{
 			return _flashPlayer ||= new FlashPlayer;
 		}

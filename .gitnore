@@ -1,3 +1,4 @@
 *.swf
 src/deprecated/
 target/
+lib/

@@ -8,7 +8,7 @@ package orichalcum.collection
 	import org.hamcrest.object.isTrue;
 	import org.hamcrest.object.strictlyEqualTo;
 	
-	public class AbstractListTest 
+	internal class AbstractListTestBase 
 	{
 		
 		private var _empty:IList;

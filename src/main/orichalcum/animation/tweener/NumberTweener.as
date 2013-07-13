@@ -1,7 +1,6 @@
 package orichalcum.animation.tweener
 {
 	import orichalcum.utility.StringUtil;
-	//import orichalcum.utility.StringUtil;
 	
 	public class NumberTweener implements ITweener
 	{

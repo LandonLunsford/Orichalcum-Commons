@@ -9,6 +9,11 @@ package orichalcum.utility
 		static public const RETURN_TRUE:Function = function(...args):* { return true; };
 		static public const RETURN_FALSE:Function = function(...args):* { return false; };
 		
+		static public function nullToEmpty(method:Function):Function
+		{
+			return method == null ? NULL : method;
+		}
+		
 		static public function callWith(method:Function, thisObject:Object = null, args:Array = null):*
 		{
 			if (method == null) return undefined;

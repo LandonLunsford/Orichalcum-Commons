@@ -13,7 +13,7 @@ package orichalcum.animation.tweener.plugin.displayobject
 		
 		override public function tween(target:Object, property:String, progress:Number):*
 		{
-			const value:Number = interpolate(target, property, progress);
+			const value:Number = interpolate(progress);
 			
 			target is DisplayObject && (target.visible = target.alpha > invisibleAlphaThreshold);
 			

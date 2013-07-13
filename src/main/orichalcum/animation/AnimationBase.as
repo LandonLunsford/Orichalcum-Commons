@@ -1,6 +1,5 @@
 package orichalcum.animation 
 {
-	import org.hamcrest.NullDescription;
 	
 	/**
 	 * Later add pipline for ease

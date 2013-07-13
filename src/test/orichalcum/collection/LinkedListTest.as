@@ -1,7 +1,7 @@
 package orichalcum.collection 
 {
 
-	public class LinkedListTest extends AbstractListTest
+	public class LinkedListTest extends AbstractListTestBase
 	{
 
 		override protected function get newEmptyCollection():IList 
