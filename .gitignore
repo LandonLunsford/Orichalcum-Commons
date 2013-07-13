@@ -1,4 +1,6 @@
 *.swf
 src/deprecated/
-target/
 lib/
+target/
+snapshot/
+release/

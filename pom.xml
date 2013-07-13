@@ -51,7 +51,9 @@
 		-->
 		<flex.flashPlayer.command>C:\Program Files (x86)\FlashDevelop\Tools\flexsdk\runtimes\player\11.1\win\FlashPlayerDebugger.exe</flex.flashPlayer.command>
 	
-		<altDeploymentRepository>release-repository::default::file:../../release</altDeploymentRepository>
+		<staging.release.directory>release-repository::default::file:../../release</staging.release.directory>
+		<staging.snapshot.directory>snapshot-repository::default::file:../../snapshot</staging.snapshot.directory>
+		<altDeploymentRepository>${staging.snapshot.directory}</altDeploymentRepository>	
 	</properties>
 	
 	<url>https://github.com/LandonLunsford/Orichalcum-Commons</url>
@@ -215,7 +217,7 @@
 					<!--
 					<altDeploymentRepository>orichalcum-studios.github::default::${deploy.target}</altDeploymentRepository>
 					snapshot-repo::default::file:snapshots-->
-					<altDeploymentRepository>snapshot-repository::default::file:snapshot</altDeploymentRepository>
+					<altDeploymentRepository>${altDeploymentRepository}</altDeploymentRepository>
 				</configuration>
 			</plugin>
 			
