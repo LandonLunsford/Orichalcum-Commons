@@ -144,13 +144,16 @@ package orichalcum.animation
 		}
 		
 		/** @private */
+		internal var _initialized:Boolean;
+		
+		/** @private */
 		internal var _position:Number = 0;
 		
 		/** @private */
 		internal var _previousPosition:Number = -EPSILON;
 		
 		/** @private */
-		internal var _initialized:Boolean;
+		internal var _delay:Number = 0;
 		
 		/** @private */
 		internal var _duration:Number = durations.normal;
@@ -387,6 +390,36 @@ package orichalcum.animation
 			return _isPlaying && _previousPosition > _position;
 		}
 		
+		public function forEach(closure:Function):*
+		{
+			if (closure == null || closure.length < 1 || closure.length > 2)
+				return this;
+				
+			if (closure.length == 0)
+			{
+				for each(var child:AnimationBase in _children)
+				{
+					closure.call(this);
+				}
+			}
+			else if (closure.length == 1)
+			{
+				for each(child in _children)
+				{
+					closure.call(this, child);
+				}
+			}
+			else if (closure.length == 2)
+			{
+				for (var i:int = 0; i < _children.length; i++)
+				{
+					closure.call(this, child, i);
+				}
+			}
+				
+			return this;
+		}
+		
 		public function to(...args):*
 		{
 			return args.length ? _setTo(args[0]) : _to;
@@ -419,6 +452,14 @@ package orichalcum.animation
 		public function stagger(...args):* 
 		{
 			return args.length ? _setStagger(args[0]) : _stagger;
+		}
+		
+		/**
+		 * Get or set the animation delay in frames or seconds
+		 */
+		public function delay(...args):*
+		{
+			return args.length ? _setDelay(args[0]) : _delay;
 		}
 		
 		/**
@@ -599,6 +640,12 @@ package orichalcum.animation
 			return this;
 		}
 		
+		protected function _setDelay(value:Number):Animation 
+		{
+			_delay = value * 1000;
+			return this;
+		}
+		
 		protected function _setDuration(value:*):Animation
 		{
 			if (value is Function)
@@ -774,6 +821,7 @@ package orichalcum.animation
 			_isPlaying && _render(_position + (_useFrames ? 1 : deltaTime) * Animation.timeScale * _timeScale * _step * (_yoyo ? 2 : 1), false, true);
 		}
 		
+		// problem is each needs to track its own yoyo stuff
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
 			var initHandler:Function = FunctionUtil.NULL

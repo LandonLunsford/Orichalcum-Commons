@@ -8,10 +8,10 @@ package orichalcum.animation
 	import orichalcum.animation.factory.wait;
 	import orichalcum.animation.tweener.plugin.displayobject.ScaleTweener;
 
-	public class TweenDemo3 extends Sprite
+	public class WaveDemo extends Sprite
 	{
 		
-		public function TweenDemo3() 
+		public function WaveDemo() 
 		{
 			const totalShapes:int = 10;
 			const shapes:Array = [];
@@ -22,24 +22,21 @@ package orichalcum.animation
 				shape.graphics.drawCircle(0, 0, 25 + 25 * Math.random());
 				shape.graphics.endFill();
 				shape.x = (stage.stageWidth / totalShapes) * i;
-				shape.y = (stage.stageHeight / totalShapes) * i;
+				shape.y = stage.stageHeight * 0.5;
 				shape.name = 'shape_' + i;
 				shapes.push(shape);
 				addChild(shape);
 			}
 			i = 0;
 			
-			Animation.install(ScaleTweener, 'scale');
-			
 			var a:Animation = (new Animation(shapes))
 				//.to( { rotationX:360 } )
-				.to( { x:stage.stageWidth, visible:false, scale:3 } )
+				.to( { y:'-=80' } )
 				.seconds(2)
-				.onInit(function():void { trace(Animation.currentTime); })
-				.onComplete(function():void { trace(Animation.currentTime); })
 				.stagger(4 / totalShapes)
-				//.forEach(function(child:AnimationBase):void { child.yoyo(true); })
+				
 				//.yoyo(true)
+				//.forEach(function(child:Animation):void { child.yoyo(true); })
 				
 			var a2:Animation = animate(
 				wait(1)
@@ -47,13 +44,8 @@ package orichalcum.animation
 				,wait()
 				,wait(1)
 			)
-			.yoyo(true)
-			//
-			.onYoyo(function():void { trace('there'); })
-			.onComplete(function():void { trace('and back'); })
-			
-			
-			//var a3:Animation =
+			//.yoyo(true)
+			//.forEach(function(child:Animation):void { child.yoyo(true); })
 			
 			stage.addEventListener(MouseEvent.CLICK, function(event:Event):void {
 				//var progress:Number = stage.mouseX / stage.stageWidth;
