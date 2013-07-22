@@ -15,6 +15,9 @@ package orichalcum.animation
 	 * @todo make animations copy(deep:Boolean = true) method
 	 * @todo streamline plugin strategy (init, tween) methods and tweener creation and initialization to be safe for properties that arent on target
 	 * @todo add record() allowing playback of all animations played
+	 * @todo add pre/post delay
+	 * @todo defect - no yoyo for each staggered tween
+	 * @todo add wait().call() API, 
 	 */
 	public class Animation extends AnimationBase
 	{
@@ -153,10 +156,13 @@ package orichalcum.animation
 		internal var _previousPosition:Number = -EPSILON;
 		
 		/** @private */
+		internal var _duration:Number = durations.normal;
+		
+		/** @private */
 		internal var _delay:Number = 0;
 		
 		/** @private */
-		internal var _duration:Number = durations.normal;
+		internal var _postDelay:Number = 0;
 		
 		/** @private */
 		internal var _iterations:Number = 1;
@@ -214,29 +220,49 @@ package orichalcum.animation
 		////////////////////////////////////// overhead incurred by polymorphic API approach
 		
 		
-		public function Animation(animations:Array = null)
+		public function Animation(args:Array = null)
 		{
+			if (!args || args.length == 0)
+				return;
+				
+			const arg0:* = args[0];
 			
-			for each(var input:* in animations)
+			if (arg0 is AnimationBase)
 			{
-				if (input is AnimationWait)
+				for each(var animation:AnimationBase in args)
 				{
-					var time:Number = input._totalDuration; // not duration but total duration
-					var previousEndTime:Number = _insertionTime = isNaN(time) ? _childrenPositions[_children.length-1] + _children[_children.length-1]._totalDuration : _insertionTime + time;
-					if (_duration < previousEndTime)
-						_duration = previousEndTime;
-						
-					//trace('added wait, new duration is:', _duration, _insertionTime, _previousEndTime);
-				}
-				else if (input is AnimationBase)
-				{
-					add(input);
-				}
-				else
-				{
-					add(new AnimationChild(input));
+					// bad... I want more polymorph
+					if (animation is AnimationWait)
+					{
+						var time:Number = animation._totalDuration; // not duration but total duration
+						var previousEndTime:Number = _insertionTime = isNaN(time) ? _childrenPositions[_children.length-1] + _children[_children.length-1]._totalDuration : _insertionTime + time;
+						if (_duration < previousEndTime)
+							_duration = previousEndTime;
+							
+						//trace('added wait, new duration is:', _duration, _insertionTime, _previousEndTime);
+					}
+					else if (animation is AnimationBase)
+					{
+						add(animation);
+					}
 				}
 			}
+			else if (arg0 is Object)
+			{
+				for each(var target:Object in args)
+				{
+					add(new AnimationChild(target));
+				}
+			}
+			else
+			{
+				throw new ArgumentError;
+			}
+			
+			/*
+			 * AUTOPLAY
+			 */
+			_setIsPlaying(true);
 		}
 		
 		public function add(animation:AnimationBase, time:Number = NaN):Animation 
@@ -255,6 +281,16 @@ package orichalcum.animation
 			return this;
 		}
 		
+		public function wait(time:Number):Animation
+		{
+			return add(new AnimationWait(time));
+		}
+		
+		public function call(...args):Animation
+		{
+			return add(new AnimationCall(args));
+		}
+		
 		/////////////////////////////////////////////////////////////////////////////////
 		// Controls
 		/////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +301,7 @@ package orichalcum.animation
 		 */
 		public function play():Animation
 		{
-			_isAtEnd && goto(0); // video feature
+			_isAtEnd && rewind(); // video feature
 			return _setIsPlaying(true);
 		}
 		
@@ -311,7 +347,7 @@ package orichalcum.animation
 		 */
 		public function rewind():Animation
 		{
-			return goto(0);
+			return goto(-_delay);
 		}
 		
 		/**
@@ -463,6 +499,14 @@ package orichalcum.animation
 		}
 		
 		/**
+		 * Get or set the animation delay in frames or seconds
+		 */
+		public function postDelay(...args):*
+		{
+			return args.length ? _setPostDelay(args[0]) : _postDelay;
+		}
+		
+		/**
 		 * Get or set the animation duration in milliseconds
 		 */
 		public function duration(...args):*
@@ -577,7 +621,10 @@ package orichalcum.animation
 		
 		override internal function get _totalDuration():Number
 		{
-			return _iterations <= 0 || isNaN(_iterations) ? Infinity : _durationWithStagger * _iterations * (_yoyo ? 2 : 1);
+			//return _iterations <= 0 || isNaN(_iterations) ? Infinity : _durationWithStagger * _iterations * (_yoyo ? 2 : 1);
+			return _iterations <= 0 || isNaN(_iterations)
+				? Infinity
+				: _durationWithStagger * _iterations * (_yoyo ? 2 : 1);
 		}
 		
 		protected function get _progress():Number
@@ -643,6 +690,12 @@ package orichalcum.animation
 		protected function _setDelay(value:Number):Animation 
 		{
 			_delay = value * 1000;
+			return this;
+		}
+		
+		protected function _setPostDelay(value:Number):Animation 
+		{
+			_postDelay = value * 1000;
 			return this;
 		}
 		
@@ -761,6 +814,8 @@ package orichalcum.animation
 		protected function _initialize(isJump:Boolean, callback:Function):void
 		{
 			_initialized = true;
+			//_position = -_delay;
+			//_previousPosition = _position - EPSILON;
 			
 			for each(var kid:* in _children)
 			{
@@ -785,17 +840,6 @@ package orichalcum.animation
 					// boolean tween bug where start isnt set dynamically when in to
 					if (tweener)
 					{
-						/** the property in? fork fills in the blank for assumed things left out of the other param list **/
-						//tweener.init(
-						
-							// this will not work for custom named properties
-							// I need to delegate more to tweener in this regard
-							// tweener.init(target, property, from, to)
-							
-							//property in from ? from[property] : target[property]
-							//,to[property]
-						//);
-						
 						tweener.initialize(
 							target
 							,property
@@ -818,41 +862,25 @@ package orichalcum.animation
 		
 		protected function _integrate(event:Event = null):void 
 		{
+			//trace('int delay', _position, _delay, _position - _delay);
 			_isPlaying && _render(_position + (_useFrames ? 1 : deltaTime) * Animation.timeScale * _timeScale * _step * (_yoyo ? 2 : 1), false, true);
 		}
 		
 		// problem is each needs to track its own yoyo stuff
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
-			var initHandler:Function = FunctionUtil.NULL
-				,changeHandler:Function = FunctionUtil.NULL
-				,yoyoHandler:Function = FunctionUtil.NULL
-				,completeHandler:Function = FunctionUtil.NULL
-				,yoyosCompleted:int = 0
-				,endPosition:Number = _endPosition;
+			var initHandler:Function = FunctionUtil.NULL;
+			var changeHandler:Function = FunctionUtil.NULL;
+			var yoyoHandler:Function = FunctionUtil.NULL;
+			var completeHandler:Function = FunctionUtil.NULL;
+			var yoyosCompleted:int = 0;
+			var endPosition:Number = _endPosition;
+			var renderedPosition:Number;
 			
 			_previousPosition = _position;
-			_position = MathUtil.limit(position, 0, endPosition);// sMath.max(0, Math.min(position, endPosition));
+			_position = MathUtil.limit(position, -_delay, endPosition + _postDelay);
 			
-			const isComplete:Boolean = _position >= endPosition;
 			const isMovingForward:Boolean = _position > _previousPosition;
-			var renderedPosition:Number = isComplete
-				? _yoyo ? 0 : endPosition
-				: _position < 0 ? 0 : _position % _durationWithStagger;
-			
-			// optional failfast
-			//if (isComplete && _previousPosition == endPosition) return;
-			
-			if (_yoyo)
-			{
-				const currentCompletedCycles:int = _position / _durationWithStagger;
-				
-				// this happens after yoyo is coming back. thats a problem
-				yoyosCompleted = ((currentCompletedCycles + 1) >> 1) - (((_previousPosition / _durationWithStagger) + 1) >> 1);
-				
-				if (currentCompletedCycles & 1 == 1)
-					renderedPosition = _durationWithStagger - renderedPosition;
-			}
 			
 			/**
 			 * Akward null object pattern usage to avoid duplicate "if" statements for efficiency
@@ -863,16 +891,56 @@ package orichalcum.animation
 				if (isMovingForward){ initHandler = _initHandler; yoyoHandler = _yoyoHandler; completeHandler = _completeHandler; }
 			}
 			
+			// hotfix
+			if (!_initialized)
+			{
+				_initialize(isGoto, initHandler);
+				_position -= _delay;
+				_previousPosition -= _delay;
+			}
+			
+			const isComplete:Boolean = _position >= endPosition + _postDelay;
+			const isInMiddle:Boolean = _position > 0 && _position < endPosition;
+			
+			if (isComplete || _position >= endPosition)
+			{
+				renderedPosition = _yoyo ? 0 : endPosition;
+			}
+			else if (_position <= 0)
+			{
+				renderedPosition = 0;
+			}
+			else
+			{
+				renderedPosition = _position % _durationWithStagger;
+			}
+			
+			// optional failfast
+			//if (isComplete && _previousPosition == endPosition) return;
+			
+			if (_yoyo && isInMiddle)
+			{
+				const currentCompletedCycles:int = _position / _durationWithStagger;
+				
+				// this happens after yoyo is coming back. thats a problem
+				yoyosCompleted = ((currentCompletedCycles + 1) >> 1) - (((_previousPosition / _durationWithStagger) + 1) >> 1);
+				
+				if (currentCompletedCycles & 1 == 1)
+				{
+					renderedPosition = _durationWithStagger - renderedPosition;
+				}
+			}
+			
+			// not sure this invalidate() should be before the initialize below
 			if (_step < 0 && _position <= 0)
 			{
 				isNaN(progress) && invalidate();
 				reverse().pause();
 			}
 			
+			
 			if (_position != _previousPosition)
 			{
-				_initialized || _initialize(isGoto, initHandler);
-				
 				var totalChildren:int = _children.length;
 				if (isMovingForward){ var index:int = 0, step:int = 1; } else { index = totalChildren - 1; step = -1; }
 				for (; totalChildren-- > 0; index += step)
@@ -901,6 +969,8 @@ package orichalcum.animation
 				pause();
 				completeHandler(isGoto);
 			}
+			
+			
 		}
 		
 		private function get _durationWithStagger():Number
