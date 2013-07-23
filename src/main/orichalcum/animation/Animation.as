@@ -18,6 +18,14 @@ package orichalcum.animation
 	 * @todo add pre/post delay
 	 * @todo defect - no yoyo for each staggered tween
 	 * @todo add wait().call() API, 
+	 * 
+	 * not sure how to do everything
+	 * 
+	 * 
+	 * I want to be able to animate(animations)
+	 * animate(targetA, targetB, targetC).yoyo(true).stagger(0.5) ... do the wave
+	 * and
+	 * animate(animate(targetA,targetB)).yoyo(true) ... yoyo parent only
 	 */
 	public class Animation extends AnimationBase
 	{
@@ -238,8 +246,6 @@ package orichalcum.animation
 						var previousEndTime:Number = _insertionTime = isNaN(time) ? _childrenPositions[_children.length-1] + _children[_children.length-1]._totalDuration : _insertionTime + time;
 						if (_duration < previousEndTime)
 							_duration = previousEndTime;
-							
-						//trace('added wait, new duration is:', _duration, _insertionTime, _previousEndTime);
 					}
 					else if (animation is AnimationBase)
 					{
@@ -969,7 +975,6 @@ package orichalcum.animation
 				pause();
 				completeHandler(isGoto);
 			}
-			
 			
 		}
 		
