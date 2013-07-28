@@ -161,9 +161,6 @@ package orichalcum.animation
 		internal var _position:Number = 0;
 		
 		/** @private */
-		internal var _previousPosition:Number = -EPSILON;
-		
-		/** @private */
 		internal var _duration:Number = durations.normal;
 		
 		/** @private */
@@ -200,19 +197,22 @@ package orichalcum.animation
 		internal var _onYoyo:Function = FunctionUtil.NULL;
 		
 		/** @private */
+		internal var _onIteration:Function = FunctionUtil.NULL;
+		
+		/** @private */
 		internal var _onComplete:Function = FunctionUtil.NULL;
 		
 		/** @private */
 		internal var _step:Number = 1;
 		
 		/** @private */
-		private var _to:Object;
+		internal var _to:Object;
 		
 		/** @private */
-		private var _from:Object;
+		internal var _from:Object;
 		
 		/** @private */
-		private var _stagger:Number = 0;
+		internal var _stagger:Number = 0;
 		
 		////////////////////////////////////// overhead incurred by polymorphic API approach
 		
@@ -224,6 +224,7 @@ package orichalcum.animation
 		
 		/** @private */
 		private var _insertionTime:Number = 0;
+		
 		
 		////////////////////////////////////// overhead incurred by polymorphic API approach
 		
@@ -585,11 +586,19 @@ package orichalcum.animation
 		}
 		
 		/**
-		 * Set or set the number of times the animation will repeat
+		 * Set or set the number of times the animation will play from start to end
+		 */
+		public function iterations(...args):*
+		{
+			return args.length ? _setIterations(args[0]) : _iterations;
+		}
+		
+		/**
+		 * Set or set the number of times the animation will repeat after completion
 		 */
 		public function repeat(...args):*
 		{
-			return args.length ? _setRepeat(args[0]) : _repeat;
+			return args.length ? _setRepeat(args[0]) : _iterations - 1;
 		}
 		
 		/**
@@ -630,7 +639,7 @@ package orichalcum.animation
 			//return _iterations <= 0 || isNaN(_iterations) ? Infinity : _durationWithStagger * _iterations * (_yoyo ? 2 : 1);
 			return _iterations <= 0 || isNaN(_iterations)
 				? Infinity
-				: _durationWithStagger * _iterations * (_yoyo ? 2 : 1);
+				: _durationWithStagger * _iterations;
 		}
 		
 		protected function get _progress():Number
@@ -771,10 +780,15 @@ package orichalcum.animation
 			return this;
 		}
 		
+		protected function _setIterations(value:Number):Animation
+		{
+			_iterations = value;
+			return this;
+		}
+		
 		protected function _setRepeat(value:Number):Animation
 		{
-			_iterations = value + 1;
-			return this;
+			return _setIterations(value + 1);
 		}
 		
 		protected function _setIsPlaying(value:Boolean):Animation
@@ -793,35 +807,13 @@ package orichalcum.animation
 			return this;
 		}
 		
-		protected function _initHandler(jump:Boolean):void 
-		{
-			_onInit.length == 1 ? _onInit.call(this, jump) : _onInit.call(this);
-		}
-		
-		protected function _changeHandler(jump:Boolean):void 
-		{
-			_onChange.length == 1 ? _onChange.call(this, jump) : _onChange.call(this);
-		}
-		
-		protected function _yoyoHandler(jump:Boolean):void 
-		{
-			_onYoyo.length == 1 ? _onYoyo.call(this, jump) : _onYoyo.call(this);
-		}
-		
-		protected function _completeHandler(jump:Boolean):void 
-		{
-			_onComplete.length == 1 ? _onComplete.call(this, jump) : _onComplete.call(this);
-		}
-		
 		/////////////////////////////////////////////////////////////////////////////////
 		// Overrides
 		/////////////////////////////////////////////////////////////////////////////////
 		
-		protected function _initialize(isJump:Boolean, callback:Function):void
+		protected function _initialize():void
 		{
 			_initialized = true;
-			//_position = -_delay;
-			//_previousPosition = _position - EPSILON;
 			
 			for each(var kid:* in _children)
 			{
@@ -863,7 +855,6 @@ package orichalcum.animation
 					}
 				}
 			}
-			callback(isJump);
 		}
 		
 		protected function _integrate(event:Event = null):void 
@@ -873,108 +864,62 @@ package orichalcum.animation
 		}
 		
 		// problem is each needs to track its own yoyo stuff
-		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
+		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true,  parent:Animation = null):void
 		{
-			var initHandler:Function = FunctionUtil.NULL;
-			var changeHandler:Function = FunctionUtil.NULL;
-			var yoyoHandler:Function = FunctionUtil.NULL;
-			var completeHandler:Function = FunctionUtil.NULL;
-			var yoyosCompleted:int = 0;
 			var endPosition:Number = _endPosition;
-			var renderedPosition:Number;
 			
-			_previousPosition = _position;
 			_position = MathUtil.limit(position, -_delay, endPosition + _postDelay);
 			
-			const isMovingForward:Boolean = _position > _previousPosition;
+			trace('pp', _position);
 			
-			/**
-			 * Akward null object pattern usage to avoid duplicate "if" statements for efficiency
-			 */
-			if (triggerCallbacks)
-			{
-				changeHandler = _changeHandler;
-				if (isMovingForward){ initHandler = _initHandler; yoyoHandler = _yoyoHandler; completeHandler = _completeHandler; }
-			}
+			const isMovingForward:Boolean = _position > _previousPosition;
 			
 			// hotfix
 			if (!_initialized)
 			{
-				_initialize(isGoto, initHandler);
+				_initialize();
 				_position -= _delay;
 				_previousPosition -= _delay;
+				triggerCallbacks && FunctionUtil.call(_onInit, this, isGoto);
 			}
 			
 			const isComplete:Boolean = _position >= endPosition + _postDelay;
-			const isInMiddle:Boolean = _position > 0 && _position < endPosition;
-			
-			if (isComplete || _position >= endPosition)
-			{
-				renderedPosition = _yoyo ? 0 : endPosition;
-			}
-			else if (_position <= 0)
-			{
-				renderedPosition = 0;
-			}
-			else
-			{
-				renderedPosition = _position % _durationWithStagger;
-			}
-			
-			// optional failfast
-			//if (isComplete && _previousPosition == endPosition) return;
-			
-			if (_yoyo && isInMiddle)
-			{
-				const currentCompletedCycles:int = _position / _durationWithStagger;
-				
-				// this happens after yoyo is coming back. thats a problem
-				yoyosCompleted = ((currentCompletedCycles + 1) >> 1) - (((_previousPosition / _durationWithStagger) + 1) >> 1);
-				
-				if (currentCompletedCycles & 1 == 1)
-				{
-					renderedPosition = _durationWithStagger - renderedPosition;
-				}
-			}
 			
 			// not sure this invalidate() should be before the initialize below
 			if (_step < 0 && _position <= 0)
 			{
-				isNaN(progress) && invalidate();
+				parent || invalidate();
 				reverse().pause();
 			}
-			
 			
 			if (_position != _previousPosition)
 			{
 				var totalChildren:int = _children.length;
-				if (isMovingForward){ var index:int = 0, step:int = 1; } else { index = totalChildren - 1; step = -1; }
+				if (isMovingForward) { var index:int = 0, step:int = 1; } else { index = totalChildren - 1; step = -1; }
 				for (; totalChildren-- > 0; index += step)
 				{
 					var child:AnimationBase = _children[index];
-					var childPosition:Number = renderedPosition - _childrenPositions[index] - index * _stagger;
+					var childPosition:Number = _position - _childrenPositions[index] - index * _stagger;
 					
 					// polymorphic but does unnecessary calls to MathUtil.limit & _ease() when child is nested Animation
-					child._render(childPosition, isGoto, triggerCallbacks, _ease(MathUtil.limit(childPosition/_duration, 0, 1), 0, 1, 1) );
+					child._render(childPosition, isGoto, triggerCallbacks, this);
 				}
 				
-				changeHandler(isGoto);
-			}
-			
-			while (yoyosCompleted-- > 0)
-			{
-				yoyoHandler(isGoto);
+				triggerCallbacks && FunctionUtil.call(_onChange, this, isGoto);
 			}
 			
 			if (isComplete)
 			{
+				trace('compweet')
 				// invalidate screws with child animations
 				//invalidate().pause(); // should this be triggered when jumping ?
 				//hoftix to only invalidate parent animation not nested animations that complete
-				isNaN(progress) && invalidate();
+				parent || invalidate();
 				pause();
-				completeHandler(isGoto);
+				triggerCallbacks && FunctionUtil.call(_onComplete, this, isGoto);
 			}
+			
+			_previousPosition = _position;
 			
 		}
 		

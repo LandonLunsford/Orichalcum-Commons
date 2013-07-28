@@ -16,7 +16,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'7/21/2013'</value>
+      <value>'7/27/2013'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -43,7 +43,7 @@
     </library-path>
   </compiler>
   <file-specs>
-    <path-element>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\src\demo\orichalcum\animation\TweenDemo5.as</path-element>
+    <path-element>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\src\demo\orichalcum\animation\AnimationDemo_0.as</path-element>
   </file-specs>
   <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>

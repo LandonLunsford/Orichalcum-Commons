@@ -7,6 +7,7 @@ package orichalcum.animation
 	 */
 	internal class AnimationBase 
 	{
+		internal var _previousPosition:Number = -0.0001;
 		
 		public function AnimationBase()
 		{
@@ -18,7 +19,7 @@ package orichalcum.animation
 			return 0;
 		}
 		
-		internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
+		internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, parent:Animation = null):void
 		{
 			// abstract
 		}

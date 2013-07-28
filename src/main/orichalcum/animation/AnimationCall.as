@@ -4,7 +4,6 @@ package orichalcum.animation
 
 	public class AnimationCall extends AnimationBase
 	{
-		private var _previousPosition:Number = -0.0001;
 		private var _thisObject:Object;
 		private var _callback:Function = FunctionUtil.NULL;
 		private var _callbackArguments:Array;
@@ -31,7 +30,7 @@ package orichalcum.animation
 			}
 		}
 		
-		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
+		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, parent:Animation = null):void
 		{
 			_previousPosition < 0 && position >= 0 && _callback.apply(_thisObject, _callbackArguments);
 			_previousPosition = position;

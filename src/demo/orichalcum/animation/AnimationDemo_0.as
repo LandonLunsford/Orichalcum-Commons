@@ -8,12 +8,12 @@ package orichalcum.animation
 	import orichalcum.animation.factory.wait;
 	import orichalcum.animation.tweener.plugin.displayobject.ScaleTweener;
 
-	public class TweenDemo5 extends Sprite
+	public class AnimationDemo_0 extends Sprite
 	{
 		
-		public function TweenDemo5() 
+		public function AnimationDemo_0() 
 		{
-			const totalShapes:int = 10;
+			const totalShapes:int = 2;
 			const shapes:Array = [];
 			for (var i:int = 0; i < totalShapes; i++)
 			{
@@ -32,20 +32,18 @@ package orichalcum.animation
 			Animation.install(ScaleTweener, 'scale');
 			
 			var a:Animation = (new Animation(shapes))
+				//.to( { rotationX:360 } )
 				.to( { x:stage.stageWidth, scale:3 } )
-				.stagger(4 / totalShapes)
-				//.delay(2)
-				.seconds(1)
-				//.postDelay(2)
-				.yoyo(true) // no yoyo first
-				//.repeat(1)
-				.onInit(function():void { trace('init', Animation.currentTime); })
-				.onYoyo(function():void { trace('yoyo', Animation.currentTime); })
-				.onComplete(function():void { trace('complete', Animation.currentTime); })
+				.seconds(2)
+				.iterations(2)
+				.onInit(function():void { trace(Animation.currentTime); })
+				.onComplete(function():void { trace(Animation.currentTime); } )
+				.yoyo(true)
+				.stagger(1) // stagger ruins it
 				
-				//.forEach(function(child:AnimationBase):void { child.yoyo(true); })
 			
 			stage.addEventListener(MouseEvent.CLICK, function(event:Event):void {
+				//var progress:Number = stage.mouseX / stage.stageWidth;
 				a.isPlaying ? a.reverse() : a.play();
 			});
 		}
