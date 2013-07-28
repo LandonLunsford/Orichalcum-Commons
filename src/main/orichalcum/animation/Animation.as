@@ -608,25 +608,31 @@ package orichalcum.animation
 		 */
 		public function onInit(callback:Function):Animation
 		{
-			_onInit = callback == null ? FunctionUtil.NULL : callback;
+			_onInit = FunctionUtil.nullToEmpty(callback);
 			return this;
 		}
 		
 		public function onChange(callback:Function):Animation
 		{
-			_onChange = callback == null ? FunctionUtil.NULL : callback;
+			_onChange = FunctionUtil.nullToEmpty(callback);
 			return this;
 		}
 		
 		public function onYoyo(callback:Function):Animation
 		{
-			_onYoyo = callback == null ? FunctionUtil.NULL : callback;
+			_onYoyo = FunctionUtil.nullToEmpty(callback);
+			return this;
+		}
+		
+		public function onIteration(callback:Function):Animation
+		{
+			_onIteration = FunctionUtil.nullToEmpty(callback);
 			return this;
 		}
 		
 		public function onComplete(callback:Function):Animation
 		{
-			_onComplete = callback == null ? FunctionUtil.NULL : callback;
+			_onComplete = FunctionUtil.nullToEmpty(callback);
 			return this;
 		}
 		
@@ -870,7 +876,7 @@ package orichalcum.animation
 			
 			_position = MathUtil.limit(position, -_delay, endPosition + _postDelay);
 			
-			trace('pp', _position);
+			//trace('pp', _position);
 			
 			const isMovingForward:Boolean = _position > _previousPosition;
 			
@@ -900,7 +906,6 @@ package orichalcum.animation
 				{
 					var child:AnimationBase = _children[index];
 					var childPosition:Number = _position - _childrenPositions[index] - index * _stagger;
-					
 					// polymorphic but does unnecessary calls to MathUtil.limit & _ease() when child is nested Animation
 					child._render(childPosition, isGoto, triggerCallbacks, this);
 				}
@@ -910,7 +915,7 @@ package orichalcum.animation
 			
 			if (isComplete)
 			{
-				trace('compweet')
+				//trace('compweet')
 				// invalidate screws with child animations
 				//invalidate().pause(); // should this be triggered when jumping ?
 				//hoftix to only invalidate parent animation not nested animations that complete

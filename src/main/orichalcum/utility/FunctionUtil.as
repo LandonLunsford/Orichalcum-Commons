@@ -27,6 +27,14 @@ package orichalcum.utility
 			return callWith(method, thisObject, args);
 		}
 		
+		static public function multiCall(times:int, method:Function, thisObject:Object = null, ...args):*
+		{
+			while (times-- > 0)
+			{
+				call(method, thisObject, args);
+			}
+		}
+		
 	}
 
 }

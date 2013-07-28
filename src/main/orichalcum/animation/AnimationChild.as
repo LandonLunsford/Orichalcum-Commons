@@ -23,14 +23,14 @@ package orichalcum.animation
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, parent:Animation = null):void
 		{
 			var yoyosCompleted:int;
-			var _ease:Function = parent._ease;
-			var _yoyo:Boolean = parent._yoyo;
-			var _duration:Number = parent._duration * (_yoyo ? 0.5 : 1);
+			var iterationsCompleted:int;
+			const _ease:Function = parent._ease;
+			const _yoyo:Boolean = parent._yoyo;
+			const _duration:Number = parent._duration * (_yoyo ? 0.5 : 1);
 			//var _duration:Number = parent._duration;
-			var endPosition:Number = parent._totalDuration; // wrong needs to be parents ep;
+			//var endPosition:Number = parent._totalDuration; // wrong needs to be parents ep;
+			const endPosition:Number = parent._duration * parent._iterations; // wrong needs to be parents ep;
 			var renderedPosition:Number = MathUtil.limit(position, 0, endPosition);
-			
-			trace('p/d', position, endPosition);
 			
 			const isComplete:Boolean = position >= endPosition + 0;
 			const isInMiddle:Boolean = position > 0 && position < endPosition;
@@ -61,6 +61,11 @@ package orichalcum.animation
 				}
 			}
 			
+			if (parent._onIteration != null)
+			{
+				iterationsCompleted = ((position / parent._duration) >> 0) - (((_previousPosition / parent._duration)) >> 0);
+			}
+			
 			var progress:Number = _ease(MathUtil.limit(renderedPosition / _duration, 0, 1), 0, 1, 1);
 			
 			// what remains of original
@@ -72,16 +77,12 @@ package orichalcum.animation
 			
 			if (triggerCallbacks)
 			{
-				while (yoyosCompleted-- > 0)
-				{
-					FunctionUtil.call(parent._onChange, parent, isGoto);
-				}
+				FunctionUtil.multiCall(yoyosCompleted, parent._onYoyo, parent, isGoto);
+				FunctionUtil.multiCall(iterationsCompleted, parent._onIteration, parent, isGoto);
 			}
 			
 			_previousPosition = position;
 		}
-		
-		
 		
 	}
 

@@ -13,7 +13,7 @@ package orichalcum.animation
 		
 		public function AnimationDemo_0() 
 		{
-			const totalShapes:int = 2;
+			const totalShapes:int = 1;
 			const shapes:Array = [];
 			for (var i:int = 0; i < totalShapes; i++)
 			{
@@ -36,10 +36,13 @@ package orichalcum.animation
 				.to( { x:stage.stageWidth, scale:3 } )
 				.seconds(2)
 				.iterations(2)
-				.onInit(function():void { trace(Animation.currentTime); })
-				.onComplete(function():void { trace(Animation.currentTime); } )
+				//.onInit(function():void { trace(Animation.currentTime); })
+				//.onComplete(function():void { trace(Animation.currentTime); } )
+				.onYoyo(function():void { trace('yoyo', Animation.currentTime); })
+				.onIteration(function():void { trace('iter', Animation.currentTime); })
 				.yoyo(true)
-				.stagger(1) // stagger ruins it
+				//.stagger(1) // stagger ruins it
+				.timeScale(0.5)
 				
 			
 			stage.addEventListener(MouseEvent.CLICK, function(event:Event):void {
