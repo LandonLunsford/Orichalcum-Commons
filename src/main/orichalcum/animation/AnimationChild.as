@@ -22,13 +22,12 @@ package orichalcum.animation
 		
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, parent:Animation = null):void
 		{
+			trace('rendering?')
 			var yoyosCompleted:int;
 			var iterationsCompleted:int;
 			const _ease:Function = parent._ease;
 			const _yoyo:Boolean = parent._yoyo;
 			const _duration:Number = parent._duration * (_yoyo ? 0.5 : 1);
-			//var _duration:Number = parent._duration;
-			//var endPosition:Number = parent._totalDuration; // wrong needs to be parents ep;
 			const endPosition:Number = parent._duration * parent._iterations; // wrong needs to be parents ep;
 			var renderedPosition:Number = MathUtil.limit(position, 0, endPosition);
 			
@@ -48,14 +47,14 @@ package orichalcum.animation
 				renderedPosition = position % _duration;
 			}
 			
-			if (_yoyo && isInMiddle)
+			if (_yoyo)
 			{
 				const currentCompletedCycles:int = position / _duration;
 				
 				// this happens after yoyo is coming back. thats a problem
 				yoyosCompleted = ((currentCompletedCycles + 1) >> 1) - (((_previousPosition / _duration) + 1) >> 1);
 				
-				if (currentCompletedCycles & 1 == 1)
+				if ((currentCompletedCycles & 1 == 1) && isInMiddle)
 				{
 					renderedPosition = _duration - renderedPosition;
 				}
@@ -75,10 +74,27 @@ package orichalcum.animation
 				_tweeners[property].tween(_target, property, progress);
 			}
 			
+			/*
+			 * If the animation has stagger it makes sense to shoot an event for every target
+			 * not sure otherwise if I should do that
+			 * Also I think I should set the parent's target property then pass it to the client
+			 */
 			if (triggerCallbacks)
 			{
-				FunctionUtil.multiCall(yoyosCompleted, parent._onYoyo, parent, isGoto);
-				FunctionUtil.multiCall(iterationsCompleted, parent._onIteration, parent, isGoto);
+				// BUG, needs to go yoyo, iter, yoyo, iter -- when integrating
+				//FunctionUtil.multiCall(yoyosCompleted, parent._onYoyo, parent, isGoto);
+				//FunctionUtil.multiCall(iterationsCompleted, parent._onIteration, parent, isGoto);
+				while (yoyosCompleted + iterationsCompleted > 0)
+				{
+					if (yoyosCompleted-- > 0)
+					{
+						FunctionUtil.call(parent._onYoyo, parent, isGoto);
+					}
+					if (iterationsCompleted-- > 0)
+					{
+						FunctionUtil.call(parent._onIteration, parent, isGoto);
+					}
+				}
 			}
 			
 			_previousPosition = position;

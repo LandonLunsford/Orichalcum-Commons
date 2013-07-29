@@ -5,6 +5,7 @@ package orichalcum.animation
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import orichalcum.animation.factory.animate;
+	import orichalcum.animation.factory.delay;
 	import orichalcum.animation.factory.wait;
 	import orichalcum.animation.tweener.plugin.displayobject.ScaleTweener;
 
@@ -36,19 +37,29 @@ package orichalcum.animation
 				.to( { x:stage.stageWidth, scale:3 } )
 				.seconds(2)
 				.iterations(2)
-				//.onInit(function():void { trace(Animation.currentTime); })
-				//.onComplete(function():void { trace(Animation.currentTime); } )
+				.onInit(function():void { trace('init', Animation.currentTime); })
 				.onYoyo(function():void { trace('yoyo', Animation.currentTime); })
-				.onIteration(function():void { trace('iter', Animation.currentTime); })
+				.onIteration(function():void { trace('iteration', Animation.currentTime); } )
+				.onComplete(function():void { trace('complete', Animation.currentTime); } )
 				.yoyo(true)
 				//.stagger(1) // stagger ruins it
 				.timeScale(0.5)
+				.pause()
 				
 			
 			stage.addEventListener(MouseEvent.CLICK, function(event:Event):void {
 				//var progress:Number = stage.mouseX / stage.stageWidth;
-				a.isPlaying ? a.reverse() : a.play();
+				//a.isPlaying ? a.reverse() : a.play();
+				//a.end(); // yoyo not called on skip....
+				
+				
 			});
+			
+			// no call?
+			delay(2)
+				.onInit(function():void { trace('pooooooooooooop') } )
+				.play() // y need play?
+				//.onComplete(function():void{trace('pooooooooooooop')});
 		}
 		
 	}
