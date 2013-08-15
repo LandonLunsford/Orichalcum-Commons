@@ -18,8 +18,6 @@
     <verbose-stacktraces>false</verbose-stacktraces>
     <source-path>
       <path-element>c:\users\landon\documents\github\orichalcum-commons\src\main</path-element>
-      <path-element>c:\users\landon\documents\github\orichalcum-commons\src\test</path-element>
-      <path-element>c:\users\landon\documents\github\orichalcum-commons\src\demo</path-element>
     </source-path>
     <library-path>
       <path-element>c:\users\landon\documents\github\orichalcum-commons\lib\flexunit-4.1.0-8-as3_4.1.0.16076.swc</path-element>
@@ -35,6 +33,7 @@
     <class>orichalcum.animation.Ease</class>
     <class>orichalcum.animation.factory.animate</class>
     <class>orichalcum.animation.factory.call</class>
+    <class>orichalcum.animation.factory.delay</class>
     <class>orichalcum.animation.factory.wait</class>
     <class>orichalcum.animation.tweener.BooleanTweener</class>
     <class>orichalcum.animation.tweener.ITweener</class>
@@ -48,16 +47,15 @@
     <class>orichalcum.animation.tweener.plugin.displayobject.RotationTweener</class>
     <class>orichalcum.animation.tweener.plugin.displayobject.ScaleTweener</class>
     <class>orichalcum.animation.tweener.plugin.movieclip.CurrentFrameTweener</class>
-    <class>orichalcum.audio.ISound</class>
-    <class>orichalcum.audio.Sound</class>
-    <class>orichalcum.audio.VariableSound</class>
+    <class>orichalcum.audio.AudioClip</class>
+    <class>orichalcum.audio._NullSound</class>
+    <class>orichalcum.audio._NullSoundChannel</class>
     <class>orichalcum.collection.AbstractList</class>
     <class>orichalcum.collection.ArrayList</class>
     <class>orichalcum.collection.ICollection</class>
     <class>orichalcum.collection.IList</class>
     <class>orichalcum.collection.LinkedList</class>
     <class>orichalcum.collection.LinkedListNode</class>
-    <class>orichalcum.core.Core</class>
     <class>orichalcum.enumeration.Direction</class>
     <class>orichalcum.lifecycle.IDisposable</class>
     <class>orichalcum.logging.ILog</class>
@@ -74,6 +72,8 @@
     <class>orichalcum.reflection.IReflector</class>
     <class>orichalcum.reflection.Reflector</class>
     <class>orichalcum.system.FlashPlayer</class>
+    <class>orichalcum.transform.MatrixTransformer</class>
+    <class>orichalcum.transform.ViewTransformer</class>
     <class>orichalcum.utility.ArrayUtil</class>
     <class>orichalcum.utility.BitmapUtil</class>
     <class>orichalcum.utility.ColorUtil</class>
@@ -84,16 +84,5 @@
     <class>orichalcum.utility.Random</class>
     <class>orichalcum.utility.StringUtil</class>
     <class>orichalcum.utility.XmlUtil</class>
-    <class>TestRunner</class>
-    <class>TestSuite</class>
-    <class>orichalcum.collection.AbstractListTest</class>
-    <class>orichalcum.collection.ArrayListTest</class>
-    <class>orichalcum.collection.LinkedListTest</class>
-    <class>orichalcum.utility.FunctionUtilTest</class>
-    <class>orichalcum.animation.ContinuousTweenDemo</class>
-    <class>orichalcum.animation.TweenDemo</class>
-    <class>orichalcum.animation.TweenDemo2</class>
-    <class>orichalcum.animation.TweenDemo3</class>
-    <class>orichalcum.command.CommandDemo</class>
   </include-classes>
 </flex-config>

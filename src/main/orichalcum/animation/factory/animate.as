@@ -4,8 +4,8 @@ package orichalcum.animation.factory
 	
 	public function animate(...animations):Animation
 	{
-		return animations.length == 1 && animations is Array
-			? new Animation(animations[0]);
+		return (animations.length == 1 && animations[0] is Array)
+			? new Animation(animations[0])
 			: new Animation(animations);
 	}
 

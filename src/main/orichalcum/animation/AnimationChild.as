@@ -22,7 +22,6 @@ package orichalcum.animation
 		
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, parent:Animation = null):void
 		{
-			trace('rendering?')
 			var yoyosCompleted:int;
 			var iterationsCompleted:int;
 			const _ease:Function = parent._ease;
