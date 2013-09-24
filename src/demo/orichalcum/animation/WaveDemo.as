@@ -4,8 +4,10 @@ package orichalcum.animation
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.filters.BlurFilter;
 	import orichalcum.animation.factory.animate;
 	import orichalcum.animation.factory.wait;
+	import orichalcum.animation.tweener.plugin.displayobject.MotionBlurTweener;
 	import orichalcum.animation.tweener.plugin.displayobject.ScaleTweener;
 
 	public class WaveDemo extends Sprite
@@ -26,24 +28,28 @@ package orichalcum.animation
 				shape.name = 'shape_' + i;
 				shapes.push(shape);
 				addChild(shape);
+				
+				//shape.filters = [new BlurFilter()];
 			}
 			i = 0;
 			
+			Animation.install(MotionBlurTweener);
+			
 			var a:Animation = (new Animation(shapes))
 				//.to( { rotationX:360 } )
-				.to( { y:'-=80' } )
-				.seconds(2)
+				.to( { y:'-=200' , motionBlur:true} )
+				.seconds(1)
 				.stagger(4 / totalShapes)
-				
-				//.yoyo(true)
+				.yoyo(true)
 				//.forEach(function(child:Animation):void { child.yoyo(true); })
-				
-			var a2:Animation = animate(
-				wait(1)
-				,a
-				,wait()
-				,wait(1)
-			)
+				// duration *2 midway
+			var a2:Animation = a;
+			//var a2:Animation = animate(
+				//wait(1)
+				//,a
+				//,wait()
+				//,wait(1)
+			//)
 			//.yoyo(true)
 			//.forEach(function(child:Animation):void { child.yoyo(true); })
 			

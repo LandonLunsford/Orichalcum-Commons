@@ -25,12 +25,12 @@ package orichalcum.transform
 			_matrixTransformer = matrixTransformer;
 		}
 		
-		public function reflect(view:DisplayObject):DisplayObject
+		public function translate(view:DisplayObject):DisplayObject
 		{
 			return flipVertically(flipHorizontally(view));
 		}
 		
-		public function reflectAt(view:DisplayObject, x:Number, y:Number):DisplayObject
+		public function translateAt(view:DisplayObject, x:Number, y:Number):DisplayObject
 		{
 			view.transform.matrix = _matrixTransformer.scaleAboutPoint(view.transform.matrix, x, y, -1, -1);
 			return view;
@@ -62,13 +62,19 @@ package orichalcum.transform
 		
 		public function zoomAt(view:DisplayObject, x:Number, y:Number, scaleIncrement:Number):DisplayObject
 		{
-			return scaleAt(view, x, y, 1 + scaleIncrement);
+			return setScaleAt(view, x, y, view.scaleX + scaleIncrement);
+			//return scaleAt(view, x, y, 1 + scaleIncrement);
 		}
 		
-		public function scaleAt(view:DisplayObject, x:Number, y:Number, scale:Number):DisplayObject
+		public function scaleAt(view:DisplayObject, x:Number, y:Number, factor:Number):DisplayObject
 		{
-			view.transform.matrix = _matrixTransformer.scaleAboutPoint(view.transform.matrix, x, y, scale, scale);
+			view.transform.matrix = _matrixTransformer.scaleAboutPoint(view.transform.matrix, x, y, factor, factor);
 			return view;
+		}
+		
+		public function setScaleAt(view:DisplayObject, x:Number, y:Number, scale:Number):DisplayObject
+		{
+			return scaleAt(view, x, y, scale / view.scaleX);
 		}
 		
 		public function rotateAt(view:DisplayObject, x:Number, y:Number, angle:Number):DisplayObject

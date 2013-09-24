@@ -12,6 +12,15 @@ package orichalcum.transform
 			return _instance ||= new MatrixTransformer;
 		}
 		
+		public function setScaleAboutPoint(matrix:Matrix, x:Number, y:Number, scaleX:Number, scaleY:Number):Matrix
+		{
+			matrix.translate( -x, -y);
+			matrix.a = scaleX;
+			matrix.d = scaleY;
+			matrix.translate(x, y);
+			return matrix;
+		}
+		
 		public function scaleAboutPoint(matrix:Matrix, x:Number, y:Number, scaleX:Number, scaleY:Number):Matrix
 		{
 			matrix.translate( -x, -y);

@@ -16,6 +16,7 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src\main" />
+    <class path="src\demo" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -72,7 +73,7 @@
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <compile path="src\demo\orichalcum\animation\AnimationDemo_0.as" />
+    <compile path="src\demo\orichalcum\animation\WaveDemo.as" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>

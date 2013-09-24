@@ -83,7 +83,8 @@ package orichalcum.animation
 		
 		{
 			_currentTime = getTimer();
-			eventDispatcher.addEventListener(Event.ENTER_FRAME, function(event:Event):void {
+			eventDispatcher.addEventListener(Event.ENTER_FRAME, function(event:Event):void
+			{
 				const previousTime:Number = _currentTime;
 				_currentTime = getTimer();
 				_deltaTime = (_currentTime - previousTime) * _timeScale;
