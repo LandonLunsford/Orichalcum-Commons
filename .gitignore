@@ -1,4 +1,5 @@
 *.swf
+bin/
 src/deprecated/
 lib/
 target/
