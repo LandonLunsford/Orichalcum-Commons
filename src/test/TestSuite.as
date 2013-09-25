@@ -2,6 +2,7 @@ package
 {
 	import orichalcum.collection.ArrayListTest;
 	import orichalcum.collection.LinkedListTest;
+	import orichalcum.datastructure.GraphTest;
 	import orichalcum.utility.FunctionUtilTest;
 
 	[Suite]
@@ -12,6 +13,8 @@ package
 		public var linkedListTest:LinkedListTest;
 		
 		public var functionUtilTest:FunctionUtilTest;
+		
+		public var graphTest:GraphTest;
 	}
 
 }
