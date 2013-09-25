@@ -1,4 +1,4 @@
-package orichalcum.collection 
+package orichalcum.datastructure 
 {
 	import flash.utils.flash_proxy;
 	import orichalcum.utility.StringUtil;

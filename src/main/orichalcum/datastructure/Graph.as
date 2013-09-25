@@ -46,7 +46,7 @@ package orichalcum.datastructure
 			return clone;
 		}
 		
-		public function concat(graph:DirectGraph = null):Graph
+		public function concat(graph:Graph = null):Graph
 		{
 			const concatination:Graph = clone();
 			// TODO
@@ -295,6 +295,9 @@ package orichalcum.datastructure
 	}
 
 }
+
+
+
 /*
  * 
 

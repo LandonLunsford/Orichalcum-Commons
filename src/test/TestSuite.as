@@ -1,8 +1,8 @@
 package  
 {
-	import orichalcum.collection.ArrayListTest;
-	import orichalcum.collection.LinkedListTest;
+	import orichalcum.datastructure.ArrayListTest;
 	import orichalcum.datastructure.GraphTest;
+	import orichalcum.datastructure.LinkedListTest;
 	import orichalcum.utility.FunctionUtilTest;
 
 	[Suite]

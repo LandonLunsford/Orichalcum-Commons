@@ -1,4 +1,4 @@
-package orichalcum.collection 
+package orichalcum.datastructure 
 {
 	import flash.errors.IllegalOperationError;
 	import org.flexunit.asserts.fail;
@@ -7,6 +7,7 @@ package orichalcum.collection
 	import org.hamcrest.object.isFalse;
 	import org.hamcrest.object.isTrue;
 	import org.hamcrest.object.strictlyEqualTo;
+	import orichalcum.datastructure.IList;
 	
 	internal class AbstractListTestBase 
 	{

@@ -1,4 +1,4 @@
-package orichalcum.collection 
+package orichalcum.datastructure 
 {
 
 	internal class LinkedListNode

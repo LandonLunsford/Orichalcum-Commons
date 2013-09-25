@@ -1,4 +1,4 @@
-package orichalcum.collection 
+package orichalcum.datastructure 
 {
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Proxy;

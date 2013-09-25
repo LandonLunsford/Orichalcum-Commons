@@ -1,17 +1,17 @@
-package orichalcum.collection 
+package orichalcum.datastructure 
 {
 
-	public class LinkedListTest extends AbstractListTestBase
+	public class ArrayListTest extends AbstractListTestBase
 	{
 
 		override protected function get newEmptyCollection():IList 
 		{
-			return new LinkedList;
+			return new ArrayList;
 		}
 		
 		override protected function get newFilledCollection():IList 
 		{
-			return new LinkedList(0,1,2);
+			return new ArrayList(0,1,2);
 		}
 		
 	}
