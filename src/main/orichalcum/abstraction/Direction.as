@@ -1,4 +1,4 @@
-package orichalcum.enumeration
+package orichalcum.abstraction
 {
 	import flash.ui.Keyboard;
 
