@@ -34,6 +34,11 @@ package orichalcum.datastructure
 			return true;
 		}
 		
+		public function get vertices():Dictionary 
+		{
+			return _vertices;
+		}
+		
 		public function empty():Graph
 		{
 			for (var vertex:* in _vertices)

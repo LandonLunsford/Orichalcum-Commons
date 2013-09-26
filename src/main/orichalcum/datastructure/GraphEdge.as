@@ -1,8 +1,7 @@
 package orichalcum.datastructure 
 {
-	import mx.core.EdgeMetrics;
 	
-	public class GraphEdge 
+	internal class GraphEdge 
 	{
 		
 		private var _a:GraphVertex;
