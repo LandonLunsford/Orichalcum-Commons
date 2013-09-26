@@ -169,7 +169,7 @@ package orichalcum.datastructure
 					  
 			http://www.actionscript.org/forums/showthread.php3?t=77709
 		*/
-		public function shortestPath(a:GraphVertex, b:GraphVertex, flyweight:Array = null):Array
+		public function shortestPath(a:GraphVertex, b:GraphVertex, ignoreWeight:Boolean = false, flyweight:Array = null):Array
 		{
 			if (!hasVertex(a))
 				throw new ArgumentError('Cannot find shortest path to vertex ' + a + ' because it is not on the graph.');
@@ -177,9 +177,15 @@ package orichalcum.datastructure
 			if (!hasVertex(b))
 				throw new ArgumentError('Cannot find shortest path to vertex ' + b + ' because it is not on the graph.');
 			
+			const path:Array = flyweight || [];
+			
+			if (ignoreWeight)
+				return _shortestUnweightedPath(a, b, path);
+			
+			
 			const distances:Dictionary = new Dictionary;
 			const visited:Dictionary = new Dictionary;
-			const path:Array = flyweight || [];
+			
 			
 			distances[a] = 0;
 			while (true)
@@ -218,6 +224,12 @@ package orichalcum.datastructure
 				
 			}
 			
+			return path;
+		}
+		
+		private function _shortestUnweightedPath(a:GraphVertex, b:GraphVertex, path:Array):Array
+		{
+			// USE BFS
 			return path;
 		}
 		
