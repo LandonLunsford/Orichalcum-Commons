@@ -1,10 +1,20 @@
 package orichalcum.datastructure
 {
 	import flash.utils.Dictionary;
+	import orichalcum.utility.FunctionUtil;
 
 	public class Graph
 	{
+		/**
+		 * Flyweights for iteration in dfs and bfs traversal
+		 */
+		static private var _arrays:Pool = new Pool(
+			function():Array { return []; },
+			function(array:Array):void { array.length = 0; }
+		);
+		
 		private var _vertices:Dictionary;
+		//private var _vertexById:Array;
 		
 		private var _totalVertices:int;
 		private var _totalEdges:int;
@@ -12,6 +22,7 @@ package orichalcum.datastructure
 		public function Graph() 
 		{
 			_vertices = new Dictionary;
+			//_vertexById = [];
 		}
 		
 		public function get isEmpty():Boolean
@@ -25,11 +36,10 @@ package orichalcum.datastructure
 		
 		public function empty():Graph
 		{
-			for (var id:* in _vertices)
+			for (var vertex:* in _vertices)
 			{
-				const vertex:GraphNode = _vertices[id];
 				vertex.dispose();
-				delete _vertices[id];
+				delete _vertices[vertex];
 			}
 			return this;
 		}
@@ -37,409 +47,310 @@ package orichalcum.datastructure
 		public function clone():Graph
 		{
 			const clone:Graph = new Graph;
-			for (var id:* in _vertices)
+			for (var vertex:* in _vertices)
 			{
-				clone._vertices[id] = _vertices[id].clone();
+				clone._vertices[vertex] = vertex.clone();
 			}
-			clone._totalVertices = _totalVertices;
-			clone._totalEdges = _totalEdges;
+			//clone._totalVertices = _totalVertices;
+			//clone._totalEdges = _totalEdges;
 			return clone;
 		}
 		
 		public function concat(graph:Graph = null):Graph
 		{
 			const concatination:Graph = clone();
-			// TODO
+			//TODO
 			return concatination;
 		}
 		
-		public function removeEdgesOf(id:*):Graph
+		public function removeEdgesOf(vertex:GraphVertex):Graph
 		{
-			const vertex:GraphNode = _getVertex(id);
 			// need to modify _totalEdges
-			vertex && vertex.removeAdjacencies();
+			vertex && vertex.removeEdges();
 			return this;
 		}
 		
-		public function hasVertex(id:*):Boolean
+		public function hasVertex(vertex:GraphVertex):Boolean
 		{
-			return _vertices[id] != null;
+			return _vertices[vertex] != null;
 		}
 		
-		public function addVertex(id:*):Graph
+		public function addVertex(vertex:GraphVertex):Graph
 		{
-			_vertices[id] = new GraphNode(id);
-			return this;
-		}
-		
-		public function removeVertex(id:*):Graph
-		{
-			if (id in _vertices)
+			if (!_vertices[vertex])
 			{
-				delete _vertices[id];
-				for each(var vertex:GraphNode in _vertices)
+				//_vertexById[i++._id
+				_vertices[vertex] = vertex;
+			}
+			
+			return this;
+		}
+		
+		public function removeVertex(vertex:GraphVertex):Graph
+		{
+			if (vertex in _vertices)
+			{
+				delete _vertices[vertex];
+				for each(var otherVertex:* in _vertices)
 				{
 					// need to modify totalEdges/totalVertices
-					vertex.removeAdjacency(id);
+					otherVertex.removeEdge(vertex);
 				}
 			}
 			return this;
 		}
 		
-		private function _getVertex(id:*):GraphNode
+		public function hasEdge(a:GraphVertex, b:GraphVertex, inBothDirections:Boolean = false):Boolean
 		{
-			return _vertices[id];
+			return inBothDirections
+				? a && a.hasEdge(b) && b.hasEdge(a)
+				: a && a.hasEdge(b);
 		}
 		
-		private function _getOrCreateVertex(id:*):GraphNode
+		public function addEdge(a:GraphVertex, b:GraphVertex, weight:Number = 1, inBothDirections:Boolean = false):Graph
 		{
-			const vertex:GraphNode = _vertices[id];
-			if (!_vertices[id])
-			{
-				_totalVertices++;
-				return _vertices[id] = new GraphNode(id);
-			}
-			return vertex;
+			if (!a || !b || a == b) return this;
+			a.addEdge(b, weight);
+			inBothDirections && b.addEdge(a, weight);
+			return addVertex(a).addVertex(b);
 		}
 		
-		public function hasEdge(vertexA:*, vertexB:*, undirected:Boolean = false):Boolean
+		public function removeEdge(a:GraphVertex, b:GraphVertex, inBothDirections:Boolean = false, removeOrphans:Boolean = true):Graph
 		{
-			return undirected
-				? _hasDirectedEdge(vertexA, vertexB) && _hasDirectedEdge(vertexB, vertexA)
-				: _hasDirectedEdge(vertexA, vertexB);
+			return inBothDirections
+				? _removeUndirectedEdge(a, b, removeOrphans)
+				: _removeDirectedEdge(a, b, removeOrphans);
 		}
 		
-		public function addEdge(vertexA:*, vertexB:*, undirected:Boolean = false):Graph
+		public function depthFirstTraverse(from:GraphVertex, closure:Function):Graph
 		{
-			return undirected
-				? _addUndirectedEdge(vertexA, vertexB)
-				: _addDirectedEdge(vertexA, vertexB);
-		}
-		
-		public function removeEdge(vertexA:*, vertexB:*, undirected:Boolean = false, removeOrphans:Boolean = true):Graph
-		{
-			return undirected
-				? _removeUndirectedEdge(vertexA, vertexB)
-				: _removeDirectedEdge(vertexA, vertexB);
-		}
-		
-		private function _hasDirectedEdge(vertexA:*, vertexB:*):Boolean
-		{
-			return hasVertex(vertexA) && _getVertex(vertexA).hasAdjacency(vertexB);
-		}
-		
-		private function _addDirectedEdge(vertexA:*, vertexB:*):Graph
-		{
-			_getOrCreateVertex(vertexA).addAdjacency(vertexB);
-			_getOrCreateVertex(vertexB);
+			isEmpty || _depthFirstRecurse(closure == null ? FunctionUtil.NULL : closure, from);
+			_unmarkVisited();
 			return this;
 		}
 		
-		private function _addUndirectedEdge(vertexA:*, vertexB:*):Graph
+		public function breadthFirstTraverse(from:GraphVertex, closure:Function):Graph
 		{
-			_getOrCreateVertex(vertexA).addAdjacency(vertexB);
-			_getOrCreateVertex(vertexB).addAdjacency(vertexA);
+			const a:Array = _arrays.getInstance();
+			isEmpty || _breadthFirstTraverse(closure == null ? FunctionUtil.NULL : closure, from, a);
+			_arrays.returnInstance(a);
+			_unmarkVisited();
 			return this;
 		}
 		
-		public function depthFirstTraverse(fromVertex:*, closure:Function):Graph
+		public function isAdjacent(a:GraphVertex, b:GraphVertex):Boolean
 		{
-			isEmpty || _depthFirstRecurse(closure /* == null ? FunctionUtil.null : closure */, fromVertex, []); // use array pool
-			return this;
-		}
-		
-		public function breadthFirstTraverse(fromVertex:*, closure:Function):Graph
-		{
-			isEmpty || _breadthFirstTraverse(closure /* == null ? FunctionUtil.null : closure */, fromVertex, [], []); // use array pool
-			return this;
-		}
-		
-		public function isAdjacent(x:*, y:*):Boolean
-		{
-			const vertexA:GraphNode = _getVertex(x);
-			return vertexA && vertexA.hasAdjacency(y);
+			return a && a.hasEdge(b);
 		}
 		
 		/**
 			http://www.geeksforgeeks.org/greedy-algorithms-set-7-dijkstras-algorithm-for-adjacency-list-representation/
-		 */
-		public function shortestPath(x:*, y:*):Array
-		{
-			if (!hasVertex(x))
-				throw new ArgumentError('Cannot find shortest path to vertex ' + x + ' because it is not on the graph.');
-				
-			if (!hasVertex(x))
-				throw new ArgumentError('Cannot find shortest path to vertex ' + y + ' because it is not on the graph.');
+			http://www.signalsondisplay.com/blog/wp-content/uploads/as3/algorithms/dijkstra/srcview/
 			
-			return [];
-		}
-		
-		private function _depthFirstVertexCount(vertex:*, visited:Array):int
+			http://mochiland.com/articles/flash-game-developer-tutorial-pathfinding-with-dijkstras-algorithm
+			Set all verticies as not known, and with infinity distance
+			Set s.distance to 0
+			while true
+			  set v to be the vertex with the smallest distance, that isn't known
+			  if v is null
+				break
+			  set v.known to true
+			  for each w adjacent to v
+				if w.known is false
+				  //costVW is the distance from vertex v to vertex w
+					if v.distance + costVW < w.distance
+					  w.distance = v.distance + costVW
+					  w.path = v 
+					  
+			http://www.actionscript.org/forums/showthread.php3?t=77709
+		*/
+		public function shortestPath(a:GraphVertex, b:GraphVertex, flyweight:Array = null):Array
 		{
-			//hmmm... no worky even when trying to conpensate for nulls inbetween
-			var count:int = _vertices[vertex] ? 1 : 0;
-			visited[vertex] = true;
-			for each(var adjacentVertex:int in _getVertex(vertex).adjacencies)
+			if (!hasVertex(a))
+				throw new ArgumentError('Cannot find shortest path to vertex ' + a + ' because it is not on the graph.');
+				
+			if (!hasVertex(b))
+				throw new ArgumentError('Cannot find shortest path to vertex ' + b + ' because it is not on the graph.');
+			
+			const distances:Dictionary = new Dictionary;
+			const visited:Dictionary = new Dictionary;
+			const path:Array = flyweight || [];
+			
+			distances[a] = 0;
+			while (true)
 			{
-				if (!visited[adjacentVertex])
+				var j:Number = Number.MAX_VALUE;
+				var v:GraphVertex = null;
+				for (var k:* in _vertices)
 				{
-					count += _depthFirstVertexCount(adjacentVertex, visited);
+					trace(k.data, distances[k], j);
+					if (!visited[k] && distances[k] < j)
+					{
+						j = distances[k];
+						v = k;
+					}
 				}
+				
+				if (!v) break;
+				
+				visited[v] = true;
+				
+				for each(var edge:GraphEdge in v.edges)
+				{
+					var w:GraphVertex = edge.b;
+					if (!visited[w])
+					{
+						trace('ew', edge.weight);
+						trace('dist?', distances[v] + edge.weight, distances[w]);
+						if (distances[v] + edge.weight < distances[w])
+						{
+							trace('adding', v);
+							distances[w] = distances[v] + edge.weight;
+							path[path.length] = v;
+						}
+					}
+				}
+				
 			}
-			return count;
+			
+			return path;
 		}
 		
-		private function _depthFirstRecurse(closure:Function, vertex:*, visited:Array):void
+		//private function _depthFirstVertexCount(vertex:*, visited:Array):int
+		//{
+			//hmmm... no worky even when trying to conpensate for nulls inbetween
+			//var count:int = _vertices[vertex] ? 1 : 0;
+			//visited[vertex] = true;
+			//for each(var adjacentVertex:int in _getVertex(vertex).edges)
+			//{
+				//if (!visited[adjacentVertex])
+				//{
+					//count += _depthFirstVertexCount(adjacentVertex, visited);
+				//}
+			//}
+			//return count;
+		//}
+		
+		private function _depthFirstRecurse(closure:Function, vertex:GraphVertex):void
 		{
-			/* FunctionUtil.call(closure, vertex, false) */
-			closure(vertex, false);
-			visited[vertex] = true;
-			for each(var adjacentVertex:* in _getVertex(vertex).adjacencies)
-			{
-				visited[adjacentVertex] || _depthFirstRecurse(closure, adjacentVertex, visited);
-			}
-			/* FunctionUtil.call(closure, vertex, true) */
 			closure(vertex, true);
+			vertex._visited = true;
+			for each(var edge:GraphEdge in vertex.edges)
+			{
+				edge.b._visited || _depthFirstRecurse(closure, edge.b);
+			}
+			closure(vertex, false);
 		}
 		
-		private function _breadthFirstTraverse(closure:Function, fromVertex:*, queue:Array, queued:Array):void
+		private function _breadthFirstTraverse(closure:Function, from:GraphVertex, queue:Array):void
 		{
-			queued[fromVertex] = true;
-			queue.unshift(_getVertex(fromVertex));
+			from._visited = true;
+			queue.unshift(from);
 			
 			while (queue.length > 0)
 			{
-				var vertex:GraphNode = queue.pop();
+				var vertex:GraphVertex = queue.pop();
 				/*
-					O(n) -- this can be avoided with GraphNode class having id/index property
+					O(n) -- this can be avoided with GraphVertex class having id/index property
 				 */
-				closure(vertex.id);
+				closure(vertex);
 				
-				for each(var adjacentVertex:* in vertex.adjacencies)
+				for each(var edge:GraphEdge in vertex.edges)
 				{
-					if (!queued[adjacentVertex])
+					if (!edge.b._visited)
 					{
-						queued[adjacentVertex] = true;
-						queue.unshift(_getVertex(adjacentVertex));
+						edge.b._visited = true;
+						queue.unshift(edge.b);
 					}
 				}
 			}
 		}
 		
-		private function _removeUndirectedEdge(vertexA:*, vertexB:*, removeOrphans:Boolean = true):Graph 
+		private function _removeUndirectedEdge(a:GraphVertex, b:GraphVertex, removeOrphans:Boolean = true):Graph 
 		{
-			const a:GraphNode = _getVertex(vertexA);
-			const b:GraphNode = _getVertex(vertexB);
 			if (a == null || b == null) return this;
-			a.removeAdjacency(vertexB);
-			b.removeAdjacency(vertexA);
+			a.removeEdge(b);
+			b.removeEdge(a);
 			if (removeOrphans)
 			{
 				if (!a.isConnected)
 				{
 					_totalVertices--;
-					delete _vertices[vertexA];
+					delete _vertices[a];
 				}
 				if (!b.isConnected)
 				{
 					_totalVertices--;
-					delete _vertices[vertexB];
+					delete _vertices[b];
 				}
 			}
 			return this;
 		}
 		
-		private function _removeDirectedEdge(vertexA:*, vertexB:*, removeOrphans:Boolean = true):Graph 
+		private function _removeDirectedEdge(a:GraphVertex, b:GraphVertex, removeOrphans:Boolean = true):Graph 
 		{
-			const a:GraphNode = _getVertex(vertexA);
-			if (a == null) return this;
-			a.removeAdjacency(vertexB);
+			if (a == null || b == null) return this;
+			a.removeEdge(b);
 			if (removeOrphans)
 			{
-				if (!a.isConnected) delete _vertices[vertexA];
-				const b:GraphNode = _getVertex(vertexB);
-				if (b && !b.isConnected) delete _vertices[vertexB];
+				if (!a.isConnected)
+				{
+					_totalVertices--;
+					delete _vertices[a];
+				}
+				
+				if (!b.isConnected)
+				{
+					_totalVertices--;
+					delete _vertices[b];
+				}
 			}
 			return this;
+		}
+		
+		private function _unmarkVisited():void 
+		{
+			for each(var vertex:GraphVertex in _vertices)
+			{
+				vertex._visited = false;
+			}
 		}
 		
 		public function toString():String
 		{
-			return JSON.stringify(this);
+			return _vertices.toString();
+			//return JSON.stringify(this);
 		}
 		
-		public function toJSON(k:*):*
-		{
-			const o:Object = {};
-			for (var key:* in _vertices)
-			{
-				o[key] = _vertices[key];
-			}
-			return o;
-		}
+		//public function toJSON(k:*):*
+		//{
+			// need index all vertices with id
+			//const a:Array = [];
+			//var i:int = 0;
+			//for (var vertex:* in _vertices)
+			//{
+				//a[i++] = vertex;
+			//}
+			//return a;
+		//}
 		
-		static public function fromJSON(json:String):Graph
-		{
-			const graph:Graph = new Graph;
-			const object:Object = JSON.parse(json);
-			for (var vertex:String in object)
-			{
-				for each(var adjacency:String in object[vertex])
-				{
-					graph.addEdge(vertex, adjacency);
-				}
-			}
-			return graph;
-		}
+		//static public function fromJSON(json:String):Graph
+		//{
+			//const graph:Graph = new Graph;
+			//const a:Array = JSON.parse(json);
+			//for each(var vertexVO:Object in a)
+			//{
+				//var vertex:GraphVertex = new GraphVertex(vertexVO.data, vertexVO.weight);
+				//for each(var edge:Object in vertexVO.edges)
+				//{
+					//vertex.addEdge(
+				//}
+				//graph.addVertex(vertex);
+			//}
+			//return graph;
+		//}
 		
 	}
 
 }
 
-
-
-/*
- * 
-
- 
- // The main function that calulates distances of shortest paths from src to all
-// vertices. It is a O(ELogV) function
-void dijkstra(struct Graph* graph, int src)
-{
-    int V = graph->V;// Get the number of vertices in graph
-    int dist[V];      // dist values used to pick minimum weight edge in cut
- 
-    // minHeap represents set E
-    struct MinHeap* minHeap = createMinHeap(V);
- 
-    // Initialize min heap with all vertices. dist value of all vertices 
-    for (int v = 0; v < V; ++v)
-    {
-        dist[v] = INT_MAX;
-        minHeap->array[v] = newMinHeapNode(v, dist[v]);
-        minHeap->pos[v] = v;
-    }
- 
-    // Make dist value of src vertex as 0 so that it is extracted first
-    minHeap->array[src] = newMinHeapNode(src, dist[src]);
-    minHeap->pos[src]   = src;
-    dist[src] = 0;
-    decreaseKey(minHeap, src, dist[src]);
- 
-    // Initially size of min heap is equal to V
-    minHeap->size = V;
- 
-    // In the followin loop, min heap contains all nodes
-    // whose shortest distance is not yet finalized.
-    while (!isEmpty(minHeap))
-    {
-        // Extract the vertex with minimum distance value
-        struct MinHeapNode* minHeapNode = extractMin(minHeap);
-        int u = minHeapNode->v; // Store the extracted vertex number
- 
-        // Traverse through all adjacent vertices of u (the extracted
-        // vertex) and update their distance values
-        struct AdjListNode* pCrawl = graph->array[u].head;
-        while (pCrawl != NULL)
-        {
-            int v = pCrawl->dest;
- 
-            // If shortest distance to v is not finalized yet, and distance to v
-            // through u is less than its previously calculated distance
-            if (isInMinHeap(minHeap, v) && dist[u] != INT_MAX && 
-                                          pCrawl->weight + dist[u] < dist[v])
-            {
-                dist[v] = dist[u] + pCrawl->weight;
- 
-                // update distance value in min heap also
-                decreaseKey(minHeap, v, dist[v]);
-            }
-            pCrawl = pCrawl->next;
-        }
-    }
- 
-    // print the calculated shortest distances
-    printArr(dist, V);
-}
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-int ShortestPath(Node AdjacencyList[], int n, int v, int w)
-{
-	// AdjacencyList -- adjacency list of nodes in graph
-	// n -- number of nodes in the graph (6)
-	// v -- number of the starting vertex (1..6)
-	// w -- number of the destination vertex (1..6)
-	int		MinDistance;
-	int		ShortestDist[MAXVERTICES];
-	int		W[MAXVERTICES];
-	int		nextWIdx = 0;
-	int		i;
-	int		wNode;		// Index of node being considered
-	int		tempIdx;	// Temporary use index
-	StatusType	status[MAXVERTICES];
-
-	// -------------------- INITIALIZATION SECTION -------------------- 
-	for(i = 0; i < MAXVERTICES; i++)
-	{
-		W[i] = -1;                   // Init W to empty
-		ShortestDist[i] = MAXINT;    // Init shortest dists to infinity
-		status[i] = unseen;          // Init all nodes to unseen
-	}
-	// ------------------------ SETUP SECTION -------------------------
-	W[nextWIdx] = v;         // Add first node to W 
-	nextWIdx++;              // Increment index into W
-	ShortestDist[v-1] = 0;   // Set shortest dist from v to v
-	status[v-1] = intree;    // Set status of v in W
-
-	// Set shortest distance and status from v to all nodes adjacent to it
-	for(i = 0; i < MAXLINKS; i++)
-	{
-		ShortestDist[AdjacencyList[v-1].links[i].link - 1] =
-			AdjacencyList[v-1].links[i].weight;
-		status[AdjacencyList[v-1].links[i].link - 1] = fringe;
-	}
-	// ---------------------- MAIN lOOP SECTION -----------------------
-	// Repeatedly enlarge W until it includes all vertices in the graph
-	while(nextWIdx < MAXVERTICES)
-	{
-		// Find the vertex n in V - W at the minimum distance from v
-		MinDistance = MAXINT;
-		for(i = 0; i < MAXVERTICES; i++)
-		{
-			if(status[i] == fringe)
-			{
-				if(ShortestDist[i] < MinDistance)
-				{
-					MinDistance = ShortestDist[i];
-					wNode = i + 1;	// Convert index to node number
-				}
-			}
-		}
-
-		// Add w to W
-		W[nextWIdx] = wNode;
-		status[wNode - 1] = intree;
-		nextWIdx++;
-
-		// Update the shortest distances to vertices in V - W
-		for(i = 0; i < MAXLINKS; i++)
-		{
-			tempIdx = AdjacencyList[wNode -1].links[i].link - 1;
-			ShortestDist[tempIdx] = Minimum(ShortestDist[tempIdx],
-				ShortestDist[wNode - 1] + AdjacencyList[wNode - 1].links[i].weight);
-			status[tempIdx] = fringe;
-		}
-	} // End while
-	return(ShortestDist[w - 1]);
-}
-*/
