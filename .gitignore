@@ -1,4 +1,6 @@
 *.swf
+*.as3proj
+obj/
 bin/
 src/deprecated/
 lib/
