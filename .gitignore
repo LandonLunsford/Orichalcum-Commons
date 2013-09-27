@@ -1,5 +1,6 @@
 *.swf
 *.as3proj
+*.lxml
 obj/
 bin/
 src/deprecated/
