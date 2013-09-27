@@ -14,6 +14,7 @@ package orichalcum.datastructure
 		 */
 		internal var _visited:Boolean;
 		internal var _id:int;
+		internal var _path:GraphVertex;
 		
 		public function GraphVertex(weight:Number = 1, data:* = null) 
 		{
@@ -84,14 +85,9 @@ package orichalcum.datastructure
 			return false;
 		}
 		
-		public function addEdge(vertex:GraphVertex, weight:Number = 1):void
+		public function addEdge(edge:GraphEdge):void
 		{
-			for each(var edge:GraphEdge in _edges)
-			{
-				if (edge.b == vertex)
-					return;
-			}
-			_edges[_edges.length] = new GraphEdge(this, vertex, weight);
+			_edges[_edges.length] = edge;
 		}
 		
 		public function removeEdge(vertex:GraphVertex):void
