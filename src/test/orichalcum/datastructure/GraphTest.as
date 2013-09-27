@@ -131,14 +131,20 @@ package orichalcum.datastructure
 			const b:GraphVertex = new GraphVertex(1, 'b');
 			const c:GraphVertex = new GraphVertex(1, 'c');
 			const d:GraphVertex = new GraphVertex(1, 'd');
+			const e:GraphVertex = new GraphVertex(1, 'e');
+			const f:GraphVertex = new GraphVertex(1, 'f');
+			const g:GraphVertex = new GraphVertex(1, 'g');
 			const expectedPath:Array = [a, b, d];
 			var i:int;
 			
 			_graph.addEdge(a, b);
 			_graph.addEdge(a, c);
 			_graph.addEdge(b, d);
+			_graph.addEdge(c, e);
+			_graph.addEdge(e, d);
+			_graph.addEdge(d, f);
 			
-			trace(_graph.shortestPath(a, d));
+			trace(_graph.shortestPath(a, f, true).map(function(a:*,b:*,c:*):*{return a.data}));
 		}
 		
 		
