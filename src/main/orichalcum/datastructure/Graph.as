@@ -234,9 +234,8 @@ package orichalcum.datastructure
 		private function _removeUndirectedEdge(a:GraphVertex, b:GraphVertex, removeOrphans:Boolean = true):Graph 
 		{
 			if (a == null || b == null) return this;
-			//delete _edges[a.removeEdge(b)];
-			a.removeEdge(b);
-			b.removeEdge(a);
+			delete _edges[a.removeEdge(b)];
+			delete _edges[b.removeEdge(a)];
 			if (removeOrphans)
 			{
 				if (!a.isConnected)
@@ -257,12 +256,7 @@ package orichalcum.datastructure
 		{
 			if (a == null || b == null) return this;
 			
-			const removedEdge:GraphEdge = a.removeEdge(b);
-			//delete _edges[removedEdge];
-			//if (!b.hasEdge(a))
-			//{
-				//delete _uniqueEdges[removedEdge];
-			//}
+			delete _edges[a.removeEdge(b)];
 				
 			if (removeOrphans)
 			{
