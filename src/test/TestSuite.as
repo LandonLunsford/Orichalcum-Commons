@@ -11,9 +11,7 @@ package
 	{
 		public var arrayListTest:ArrayListTest;
 		public var linkedListTest:LinkedListTest;
-		
 		public var functionUtilTest:FunctionUtilTest;
-		
 		public var graphTest:GraphTest;
 	}
 

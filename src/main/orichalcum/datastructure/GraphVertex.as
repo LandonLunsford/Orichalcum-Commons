@@ -1,25 +1,24 @@
 package orichalcum.datastructure 
 {
 
-	public class GraphVertex 
+	public class GraphVertex
 	{
 		
 		private var _data:*;
 		private var _edges:Array;
-		private var _weight:Number;
 		
 		/**
 		 * Imposes concurrecy limitation but runtime efficiency
 		 * Create ConcurrentDirectedGraph
 		 */
-		internal var _visited:Boolean;
 		internal var _id:int;
-		internal var _path:GraphVertex;
+		internal var _visited:Boolean;
+		internal var _parent:GraphVertex;
+		internal var _weight:Number;
 		
-		public function GraphVertex(weight:Number = 1, data:* = null) 
+		public function GraphVertex(data:* = null) 
 		{
 			_data = data;
-			_weight = weight;
 			_edges = [];
 		}
 		
@@ -40,16 +39,6 @@ package orichalcum.datastructure
 			_data = value;
 		}
 		
-		public function get weight():Number 
-		{
-			return _weight;
-		}
-		
-		public function set weight(value:Number):void 
-		{
-			_weight = value;
-		}
-		
 		public function get edges():Array
 		{
 			return _edges;
@@ -67,7 +56,7 @@ package orichalcum.datastructure
 		
 		public function clone():GraphVertex
 		{
-			const clone:GraphVertex = new GraphVertex(data, weight);
+			const clone:GraphVertex = new GraphVertex(data);
 			for each(var edge:GraphEdge in _edges)
 			{
 				clone._edges.push(edge.clone());
@@ -90,7 +79,7 @@ package orichalcum.datastructure
 			_edges[_edges.length] = edge;
 		}
 		
-		public function removeEdge(vertex:GraphVertex):void
+		public function removeEdge(vertex:GraphVertex):GraphEdge
 		{
 			for (var i:int = _edges.length - 1; i >= 0; i--)
 			{
@@ -98,14 +87,14 @@ package orichalcum.datastructure
 				if (edge.b == vertex)
 				{
 					_edges.splice(i, 1);
-					break;
+					return edge;
 				}
 			}
 		}
 		
 		public function toJSON(k:*):*
 		{
-			return {data:data, weight:weight, edges:edges};
+			return {data:data, edges:edges};
 		}
 		
 	}

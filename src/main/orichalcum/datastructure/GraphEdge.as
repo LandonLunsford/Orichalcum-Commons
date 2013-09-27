@@ -1,7 +1,7 @@
 package orichalcum.datastructure 
 {
 	
-	internal class GraphEdge 
+	public class GraphEdge 
 	{
 		
 		private var _a:GraphVertex;

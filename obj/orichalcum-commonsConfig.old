@@ -16,7 +16,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'9/24/2013'</value>
+      <value>'9/26/2013'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -33,7 +33,6 @@
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
       <path-element>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\src\main</path-element>
-      <path-element>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\src\demo</path-element>
       <path-element>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\src\test</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
@@ -43,7 +42,7 @@
     </library-path>
   </compiler>
   <file-specs>
-    <path-element>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\src\demo\orichalcum\animation\WaveDemo.as</path-element>
+    <path-element>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\src\test\TestRunner.as</path-element>
   </file-specs>
   <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>

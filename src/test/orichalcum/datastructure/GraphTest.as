@@ -2,6 +2,7 @@ package orichalcum.datastructure
 {
 	import org.flexunit.asserts.fail;
 	import org.hamcrest.assertThat;
+	import org.hamcrest.object.equalTo;
 	import org.hamcrest.object.isFalse;
 	import org.hamcrest.object.isTrue;
 	
@@ -77,10 +78,10 @@ package orichalcum.datastructure
 		[Test]
 		public function depthFirst():void
 		{
-			const a:GraphVertex = new GraphVertex(1, 'a');
-			const b:GraphVertex = new GraphVertex(1, 'b');
-			const c:GraphVertex = new GraphVertex(1, 'c');
-			const d:GraphVertex = new GraphVertex(1, 'd');
+			const a:GraphVertex = new GraphVertex('a');
+			const b:GraphVertex = new GraphVertex('b');
+			const c:GraphVertex = new GraphVertex('c');
+			const d:GraphVertex = new GraphVertex('d');
 			const forwardPath:Array = [a, b, d, c];
 			const reversePath:Array = [d, b, c, a];
 			
@@ -106,10 +107,10 @@ package orichalcum.datastructure
 		[Test]
 		public function breadthFirst():void
 		{
-			const a:GraphVertex = new GraphVertex(1, 'a');
-			const b:GraphVertex = new GraphVertex(1, 'b');
-			const c:GraphVertex = new GraphVertex(1, 'c');
-			const d:GraphVertex = new GraphVertex(1, 'd');
+			const a:GraphVertex = new GraphVertex('a');
+			const b:GraphVertex = new GraphVertex('b');
+			const c:GraphVertex = new GraphVertex('c');
+			const d:GraphVertex = new GraphVertex('d');
 			const forwardPath:Array = [a, b, c, d];
 			
 			_graph.addEdge(a, b);
@@ -127,14 +128,14 @@ package orichalcum.datastructure
 		[Test]
 		public function shortestPath():void
 		{
-			const a:GraphVertex = new GraphVertex(1, 'a');
-			const b:GraphVertex = new GraphVertex(1, 'b');
-			const c:GraphVertex = new GraphVertex(1, 'c');
-			const d:GraphVertex = new GraphVertex(1, 'd');
-			const e:GraphVertex = new GraphVertex(1, 'e');
-			const f:GraphVertex = new GraphVertex(1, 'f');
-			const g:GraphVertex = new GraphVertex(1, 'g');
-			const expectedPath:Array = [a, b, d];
+			const a:GraphVertex = new GraphVertex('a');
+			const b:GraphVertex = new GraphVertex('b');
+			const c:GraphVertex = new GraphVertex('c');
+			const d:GraphVertex = new GraphVertex('d');
+			const e:GraphVertex = new GraphVertex('e');
+			const f:GraphVertex = new GraphVertex('f');
+			const g:GraphVertex = new GraphVertex('g');
+			const expectedPath:Array = [a, b, d, f];
 			var i:int;
 			
 			_graph.addEdge(a, b);
@@ -144,7 +145,8 @@ package orichalcum.datastructure
 			_graph.addEdge(e, d);
 			_graph.addEdge(d, f);
 			
-			trace(_graph.shortestPath(a, f, true).map(function(a:*,b:*,c:*):*{return a.data}));
+			assertThat(_graph.shortestPath(a, f), equalTo(expectedPath));
+			
 		}
 		
 		
