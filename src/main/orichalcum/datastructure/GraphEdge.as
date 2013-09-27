@@ -50,6 +50,16 @@ package orichalcum.datastructure
 			return new GraphEdge(a, b, weight);
 		}
 		
+		public function equals(edge:GraphEdge):Boolean
+		{
+			return edge && edge.a == a && edge.b == b;
+		}
+		
+		public function isComplement(edge:GraphEdge):Boolean
+		{
+			return edge && edge.a == b && edge.b == a;
+		}
+		
 		public function toJSON(k:*):*
 		{
 			return {a:a, b:b, weight:weight};
