@@ -55,7 +55,7 @@ package orichalcum.datastructure
 			return edge && edge.a == a && edge.b == b;
 		}
 		
-		public function isComplement(edge:GraphEdge):Boolean
+		public function complements(edge:GraphEdge):Boolean
 		{
 			return edge && edge.a == b && edge.b == a;
 		}
