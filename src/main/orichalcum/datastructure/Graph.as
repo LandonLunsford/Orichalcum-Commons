@@ -3,6 +3,7 @@ package orichalcum.datastructure
 	import flash.utils.Dictionary;
 	import orichalcum.utility.FunctionUtil;
 
+	/* helped by : http://www.signalsondisplay.com/blog/wp-content/uploads/as3/algorithms/dijkstra/srcview/ */
 	public class Graph
 	{
 		/**
