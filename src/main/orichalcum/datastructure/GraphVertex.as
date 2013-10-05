@@ -90,6 +90,7 @@ package orichalcum.datastructure
 					return edge;
 				}
 			}
+			return null;
 		}
 		
 		public function toJSON(k:*):*

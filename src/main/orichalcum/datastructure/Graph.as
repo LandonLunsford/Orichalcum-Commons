@@ -87,6 +87,10 @@ package orichalcum.datastructure
 			if (!_vertices[vertex])
 			{
 				_vertices[vertex] = vertex;
+				for each(var edge:GraphEdge in edges)
+					_edges[edge] = edge;
+					
+				// need to restore other edges inward vertices but cant
 			}
 			
 			return this;
@@ -96,11 +100,15 @@ package orichalcum.datastructure
 		{
 			if (vertex in _vertices)
 			{
+				for each(var edge:GraphEdge in vertex.edges)
+					delete _edges[edge];
 				delete _vertices[vertex];
+				
 				for each(var otherVertex:* in _vertices)
 				{
 					// need to modify totalEdges/totalVertices
-					otherVertex.removeEdge(vertex);
+					delete _edges[otherVertex.removeEdge(vertex)];
+					// this backward bridge cannot be restored...
 				}
 			}
 			return this;
