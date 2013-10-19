@@ -48,6 +48,13 @@ package orichalcum.animation
 		/** @private */
 		static private var _timeScale:Number = 1;
 		
+		/** @private */
+		static private var _currentFrame:uint;
+		
+		static public function get currentFrame():uint
+		{
+			return _currentFrame;
+		}
 		
 		static public function get currentTime():Number
 		{
@@ -77,6 +84,7 @@ package orichalcum.animation
 			_currentTime = getTimer();
 			eventDispatcher.addEventListener(Event.ENTER_FRAME, function(event:Event):void {
 				const previousTime:Number = _currentTime;
+				_currentFrame++;
 				_currentTime = getTimer();
 				_deltaTime = (_currentTime - previousTime) * _timeScale;
 			});
