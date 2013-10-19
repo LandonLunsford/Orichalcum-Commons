@@ -6,6 +6,7 @@ package orichalcum.ui.filter
 	{
 		/**
 		 * Applies the parallax effect on an ordered collection of layers
+		 * For a nice effect try eaasing the focusX and focusY
 		 * @param	layers Array of DisplayObjects
 		 * @param	focusX The x coordinate between 0 and the provided width (usually stage.mouseX)
 		 * @param	focusY The y coordinate between 0 and the provided height (usually stage.mouseY)
@@ -14,6 +15,7 @@ package orichalcum.ui.filter
 		 * @example	stage.addEventListener(Event.ENTER_FRAME, function(event:Event):void {
 		 * 			_parralaxFilter.apply([layerA, layerB], stage.mouseX, stage.mouseY, stage.stageWidth, stage.stageHeight);
 		 *		});
+		 * 
 		 */
 		public function apply(layers:Array, focusX:Number, focusY:Number, width:Number, height:Number):void
 		{
