@@ -52,6 +52,7 @@
     <class>orichalcum.datastructure.AbstractList</class>
     <class>orichalcum.datastructure.ArrayList</class>
     <class>orichalcum.datastructure.Dijkstra</class>
+    <class>orichalcum.datastructure.FallbackMap</class>
     <class>orichalcum.datastructure.Graph</class>
     <class>orichalcum.datastructure.GraphEdge</class>
     <class>orichalcum.datastructure.GraphVertex</class>

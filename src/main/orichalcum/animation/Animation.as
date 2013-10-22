@@ -466,12 +466,12 @@ package orichalcum.animation
 		
 		public function to(...args):*
 		{
-			return args.length ? _setTo(args[0]) : _to;
+			return args.length ? _setTo(args[0]) : (_to ||= {});
 		}
 		
 		public function from(...args):*
 		{
-			return args.length ? _setFrom(args[0]) : _to;
+			return args.length ? _setFrom(args[0]) : (_from ||= {});
 		}
 		
 		/**
@@ -717,6 +717,10 @@ package orichalcum.animation
 			{
 				_duration = durations[value] ? durations[value] : durations.normal;
 				_useFrames = false;
+			}
+			else if (value is Number)
+			{
+				_duration = MathUtil.limit(value, 0, Number.MAX_VALUE);
 			}
 			else
 			{
