@@ -5,7 +5,7 @@ package orichalcum.animation
 	 * Later add pipline for ease
 	 * Later add timeScale for addative integration
 	 */
-	internal class AnimationBase 
+	public class AnimationBase 
 	{
 		
 		public function AnimationBase()
@@ -21,6 +21,11 @@ package orichalcum.animation
 		internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
 			// abstract
+		}
+		
+		internal function _equals(animation:AnimationBase):Boolean
+		{
+			return this === animation;
 		}
 		
 	}

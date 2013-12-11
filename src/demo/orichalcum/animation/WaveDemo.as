@@ -31,19 +31,20 @@ package orichalcum.animation
 			
 			var a:Animation = (new Animation(shapes))
 				//.to( { rotationX:360 } )
-				.to( { y:'-=80' } )
-				.seconds(2)
-				.stagger(4 / totalShapes)
+				.to( { y:80 } )
+				.seconds(1)
+				.stagger(2 / totalShapes)
+				.yoyo(true)
 				
 				//.yoyo(true)
 				//.forEach(function(child:Animation):void { child.yoyo(true); })
 				
 			var a2:Animation = animate(
-				wait(1)
-				,a
+				wait(0.5)
+				,a.onComplete(function():void {trace('done')})
 				,wait()
-				,wait(1)
-			)
+				,wait(0.5)
+			).onComplete(function():void {trace('done')})
 			//.yoyo(true)
 			//.forEach(function(child:Animation):void { child.yoyo(true); })
 			

@@ -10,6 +10,7 @@ package orichalcum.animation
 	import orichalcum.animation.tweener.NumberTweener;
 	import orichalcum.utility.FunctionUtil;
 	import orichalcum.utility.MathUtil;
+	import orichalcum.utility.ObjectUtil;
 	
 	/**
 	 * @todo make animations copy(deep:Boolean = true) method
@@ -164,7 +165,7 @@ package orichalcum.animation
 		internal var _previousPosition:Number = -EPSILON;
 		
 		/** @private */
-		internal var _duration:Number = durations.normal;
+		internal var _duration:Number = 0; // = durations.normal; bad for building animations from scratch
 		
 		/** @private */
 		internal var _delay:Number = 0;
@@ -214,18 +215,14 @@ package orichalcum.animation
 		/** @private */
 		private var _stagger:Number = 0;
 		
-		////////////////////////////////////// overhead incurred by polymorphic API approach
+		/** @private */
+		protected var _children:Vector.<AnimationBase> = new Vector.<AnimationBase>;
 		
 		/** @private */
-		private var _children:Vector.<AnimationBase> = new Vector.<AnimationBase>;
+		protected var _childrenPositions:Vector.<Number> = new Vector.<Number>;
 		
 		/** @private */
-		private var _childrenPositions:Vector.<Number> = new Vector.<Number>;
-		
-		/** @private */
-		private var _insertionTime:Number = 0;
-		
-		////////////////////////////////////// overhead incurred by polymorphic API approach
+		protected var _insertionTime:Number = 0;
 		
 		
 		public function Animation(args:Array = null)
@@ -239,15 +236,13 @@ package orichalcum.animation
 			{
 				for each(var animation:AnimationBase in args)
 				{
-					// bad... I want more polymorph
+					// this isn't the best... should be more polymorphic
 					if (animation is AnimationWait)
 					{
 						var time:Number = animation._totalDuration; // not duration but total duration
 						var previousEndTime:Number = _insertionTime = isNaN(time) ? _childrenPositions[_children.length-1] + _children[_children.length-1]._totalDuration : _insertionTime + time;
 						if (_duration < previousEndTime)
 							_duration = previousEndTime;
-							
-						//trace('added wait, new duration is:', _duration, _insertionTime, _previousEndTime);
 					}
 					else if (animation is AnimationBase)
 					{
@@ -268,9 +263,38 @@ package orichalcum.animation
 			}
 			
 			/*
-			 * AUTOPLAY
+				AUTOPLAY
 			 */
 			_setIsPlaying(true);
+		}
+		
+		public function clone():Animation
+		{
+			const clone:Animation = new Animation;
+			clone._initialized = false;
+			clone._position = _position;
+			clone._previousPosition = _previousPosition;
+			clone._duration = _duration;
+			clone._delay = _delay;
+			clone._postDelay = _postDelay;
+			clone._iterations = _iterations;
+			clone._timeScale = _timeScale;
+			clone._ease = _ease;
+			clone._isPlaying = false;
+			clone._yoyo = _yoyo;
+			clone._useFrames = _useFrames;
+			clone._onInit = _onInit;
+			clone._onChange = _onChange;
+			clone._onYoyo = _onYoyo;
+			clone._onComplete = _onComplete;
+			clone._step = _step;
+			clone._to = ObjectUtil.clone(_to);
+			clone._from = ObjectUtil.clone(_from);
+			clone._stagger = _stagger;
+			clone._children = _children.concat();
+			clone._childrenPositions = _childrenPositions.concat();
+			clone._insertionTime = _insertionTime;
+			return clone;
 		}
 		
 		public function add(animation:AnimationBase, time:Number = NaN):Animation 
@@ -284,8 +308,59 @@ package orichalcum.animation
 			if (_duration < endTime)
 				_duration = endTime;
 			
-			//trace('adding', animation, 'at time', insertionTime, 'ending', endTime, 'child duration', animation._totalDuration, 'parent duration', _totalDuration);
+			return this;
+		}
+		
+		public function clip(startTime:Number = 0, endTime:Number = Number.MAX_VALUE):Animation
+		{
+			const newChildren:Vector.<AnimationBase>  = new Vector.<AnimationBase>;
+			for (var i:int = 0; i < _children.length; i++)
+			{
+				var child:AnimationBase = _children[i];
+				var childPosition:Number = _childrenPositions[i];
+				if (childPosition >= startTime && childPosition <= endTime)
+				{
+					newChildren.push(child);
+				}
+				else
+				{
+					delete _childrenPositions[child];
+				}
+			}
+			_children = newChildren;
+			return this;
+		}
+		
+		public function remove(animation:AnimationBase):Animation
+		{
+			if (_children.length == 0)
+			{
+				return this;
+			}
 			
+			if (animation._equals(_children[0]))
+			{
+				
+			}
+			else if (animation._equals(_children[_children.length - 1]))
+			{
+				
+			}
+			else
+			{
+				
+			}
+			//
+			//
+			//
+			//for (var i:int = 0; i < _children.length; i++)
+			//{
+				//var child:AnimationBase = _children[i];
+				//
+			//}
+			//
+			//
+			//
 			return this;
 		}
 		
@@ -376,6 +451,7 @@ package orichalcum.animation
 		 */
 		public function goto(position:Number, triggerCallbacks:Boolean = true):Animation
 		{
+			trace('goto?')
 			return _setPosition(position, true, triggerCallbacks);
 		}
 		
@@ -475,11 +551,27 @@ package orichalcum.animation
 		}
 		
 		/**
-		 * Get or set the current position of the animation in time or frames
+		 * Get previous position
 		 */
-		public function position(...args):*
+		public function get previousPosition():Number
 		{
-			return args.length ? _setPosition(args[0]) : _position;
+			return _previousPosition;
+		}
+		
+		/**
+		 * Get the current position of the animation in time or frames
+		 */
+		public function get position():Number
+		{
+			return _position;
+		}
+		
+		/**
+		 * Get the most recent change in position
+		 */
+		public function get lastPositionChange():Number
+		{
+			return position - previousPosition;
 		}
 		
 		/**
@@ -568,6 +660,14 @@ package orichalcum.animation
 		public function timeScale(...args):*
 		{
 			return args.length ? _setTimeScale(args[0]) : _timeScale;
+		}
+		
+		/**
+		 * Get or set whether or not the animation uses frames instead of seconds
+		 */
+		public function useFrames(...args):*
+		{
+			return args.length ? _setUseFrames(args[0]) : _timeScale;
 		}
 		
 		/**
@@ -754,6 +854,12 @@ package orichalcum.animation
 			return this;
 		}
 		
+		protected function _setUseFrames(value:Boolean):Animation 
+		{
+			_useFrames = value;
+			return this;
+		}
+		
 		protected function _setEase(value:*):Animation
 		{
 			if (value is Function)
@@ -787,7 +893,8 @@ package orichalcum.animation
 		{
 			if (_isPlaying != value)
 			{
-				if (_isPlaying = value)
+				_isPlaying = value
+				if (value)
 				{
 					eventDispatcher.addEventListener(Event.ENTER_FRAME, _integrate);
 				}
@@ -801,29 +908,37 @@ package orichalcum.animation
 		
 		protected function _initHandler(jump:Boolean):void 
 		{
-			_onInit.length == 1 ? _onInit.call(this, jump) : _onInit.call(this);
-		}
+			_onInit.length == 1
+				? _onInit.call(this, jump)
+				: _onInit.call(this)
+	}
 		
 		protected function _changeHandler(jump:Boolean):void 
 		{
-			_onChange.length == 1 ? _onChange.call(this, jump) : _onChange.call(this);
+			_onChange.length == 1
+				? _onChange.call(this, jump)
+				: _onChange.call(this)
 		}
 		
 		protected function _yoyoHandler(jump:Boolean):void 
 		{
-			_onYoyo.length == 1 ? _onYoyo.call(this, jump) : _onYoyo.call(this);
+			_onYoyo.length == 1
+				? _onYoyo.call(this, jump)
+				: _onYoyo.call(this)
 		}
 		
 		protected function _completeHandler(jump:Boolean):void 
 		{
-			_onComplete.length == 1 ? _onComplete.call(this, jump) : _onComplete.call(this);
+			_onComplete.length == 1
+				? _onComplete.call(this, jump)
+				: _onComplete.call(this)
 		}
 		
 		/////////////////////////////////////////////////////////////////////////////////
 		// Overrides
 		/////////////////////////////////////////////////////////////////////////////////
 		
-		protected function _initialize(isJump:Boolean, callback:Function):void
+		protected function _initialize():void
 		{
 			_initialized = true;
 			//_position = -_delay;
@@ -869,22 +984,25 @@ package orichalcum.animation
 					}
 				}
 			}
-			callback(isJump);
 		}
 		
 		protected function _integrate(event:Event = null):void 
 		{
-			//trace('int delay', _position, _delay, _position - _delay);
 			_isPlaying && _render(_position + (_useFrames ? 1 : deltaTime) * Animation.timeScale * _timeScale * _step * (_yoyo ? 2 : 1), false, true);
 		}
 		
 		// problem is each needs to track its own yoyo stuff
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
-			var initHandler:Function = FunctionUtil.NULL;
-			var changeHandler:Function = FunctionUtil.NULL;
-			var yoyoHandler:Function = FunctionUtil.NULL;
-			var completeHandler:Function = FunctionUtil.NULL;
+			var initHandler:Function;
+			var changeHandler:Function;
+			var yoyoHandler:Function;
+			var completeHandler:Function;
+			initHandler = FunctionUtil.NULL;
+			changeHandler = FunctionUtil.NULL;
+			yoyoHandler = FunctionUtil.NULL;
+			completeHandler = FunctionUtil.NULL;
+			
 			var yoyosCompleted:int = 0;
 			var endPosition:Number = _endPosition;
 			var renderedPosition:Number;
@@ -896,17 +1014,31 @@ package orichalcum.animation
 			
 			/**
 			 * Akward null object pattern usage to avoid duplicate "if" statements for efficiency
+			 * Truly I should convert this class implementation to use the state pattern to avoid many other if statements
 			 */
 			if (triggerCallbacks)
 			{
 				changeHandler = _changeHandler;
-				if (isMovingForward){ initHandler = _initHandler; yoyoHandler = _yoyoHandler; completeHandler = _completeHandler; }
+				//if (isMovingForward)
+				//{
+					initHandler = _initHandler;
+					yoyoHandler = _yoyoHandler;
+					completeHandler = _completeHandler;
+				//}
+			}
+			else
+			{
+				initHandler = FunctionUtil.NULL;
+				changeHandler = FunctionUtil.NULL;
+				yoyoHandler = FunctionUtil.NULL;
+				completeHandler = FunctionUtil.NULL;
 			}
 			
 			// hotfix
 			if (!_initialized)
 			{
-				_initialize(isGoto, initHandler);
+				_initialize();
+				initHandler(isGoto);
 				_position -= _delay;
 				_previousPosition -= _delay;
 			}
@@ -988,6 +1120,11 @@ package orichalcum.animation
 		private function get _durationWithStagger():Number
 		{
 			return _duration + (_children.length - 1) * _stagger;
+		}
+		
+		protected function _timeOf(animation:AnimationBase):Number
+		{
+			return _childrenPositions[animation];
 		}
 		
 	}

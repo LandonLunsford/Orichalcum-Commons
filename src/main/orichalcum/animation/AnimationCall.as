@@ -31,10 +31,27 @@ package orichalcum.animation
 			}
 		}
 		
+		/**
+		 * Should use animations previous position to integrate not its own
+		 */
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
-			_previousPosition < 0 && position >= 0 && _callback.apply(_thisObject, _callbackArguments);
+			//if (triggerCallbacks) trace('call?', _previousPosition, position)
+			if (triggerCallbacks
+			&& (
+				(_previousPosition < 0 && position >= 0)
+				|| (_previousPosition >= 0 && position <= 0))
+			)
+			{
+				//trace('yes')
+				_callback.apply(_thisObject, _callbackArguments);
+			}
 			_previousPosition = position;
+		}
+		
+		override internal function _equals(animation:AnimationBase):Boolean 
+		{
+			return animation is AnimationCall && (animation as AnimationCall)._callback === _callback;
 		}
 		
 	}

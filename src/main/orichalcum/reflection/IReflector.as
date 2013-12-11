@@ -9,6 +9,7 @@ package orichalcum.reflection
 		function isComplexType(qualifiedClassName:String):Boolean;
 		function isNativeType(qualifiedClassName:String):Boolean;
 		
+		function getTypeDefinition(classOrInstance:*):Class;
 		function getType(qualifiedClassName:String):Class;
 		function getTypeName(classOrInstance:*):String;
 		function getTypeDescription(classOrInstance:*):XML;

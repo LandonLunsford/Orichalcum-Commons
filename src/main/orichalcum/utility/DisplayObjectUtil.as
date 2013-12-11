@@ -21,9 +21,16 @@ package orichalcum.utility
 			return false;
 		}
 
-		static public function isAncestor(object:DisplayObject, ancestor:DisplayObject):Boolean
+		static public function isAncestor(object:DisplayObject, of:DisplayObject):Boolean
 		{
-			throw new IllegalOperationError('DisplayObjectUtil.isAncenstor() is not implemented');
+			var parent:DisplayObjectContainer = of.parent;
+			while (parent != null)
+			{
+				if (parent === object)
+					return true;
+				parent = parent.parent;
+			}
+			return false;
 		}
 		
 		static public function isDecendant(object:DisplayObject, decendant:DisplayObject):Boolean

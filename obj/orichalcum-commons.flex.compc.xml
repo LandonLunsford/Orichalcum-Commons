@@ -24,7 +24,6 @@
     </library-path>
   </compiler>
   <include-classes>
-    <class>orichalcum.abstraction.Direction</class>
     <class>orichalcum.animation.Animation</class>
     <class>orichalcum.animation.AnimationBase</class>
     <class>orichalcum.animation.AnimationCall</class>
@@ -77,6 +76,8 @@
     <class>orichalcum.reflection.IReflector</class>
     <class>orichalcum.reflection.Reflector</class>
     <class>orichalcum.system.FlashPlayer</class>
+    <class>orichalcum.transform.MatrixTransformer</class>
+    <class>orichalcum.transform.ViewTransformer</class>
     <class>orichalcum.utility.ArrayUtil</class>
     <class>orichalcum.utility.BitmapUtil</class>
     <class>orichalcum.utility.ColorUtil</class>

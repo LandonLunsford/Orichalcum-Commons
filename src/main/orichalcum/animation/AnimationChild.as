@@ -27,8 +27,6 @@ package orichalcum.animation
 			}
 		}
 		
-		
-		
 	}
 
 }

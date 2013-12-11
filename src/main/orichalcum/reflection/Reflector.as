@@ -29,8 +29,6 @@ package orichalcum.reflection
 			_describeTypeRequiresSacrifice = FlashPlayer.getInstance().version < 10.1;
 		}
 		
-		/* INTERFACE orichalcum.lifecycle.IDisposable */
-		
 		public function dispose():void
 		{
 			_applicationDomain = null;
@@ -39,8 +37,6 @@ package orichalcum.reflection
 			_primitiveTypes = null;
 			this === _instance && (_instance = null);
 		}
-		
-		/* INTERFACE orichalcum.reflection.IReflector */
 		
 		public function isNativeType(qualifiedClassName:String):Boolean
 		{
@@ -60,6 +56,11 @@ package orichalcum.reflection
 		public function isType(qualifiedClassName:String):Boolean
 		{
 			return _applicationDomain.hasDefinition(qualifiedClassName);
+		}
+		
+		public function getTypeDefinition(classOrInstance:*):Class 
+		{
+			return getType(getTypeName(classOrInstance));
 		}
 		
 		public function getType(qualifiedClassName:String):Class
