@@ -195,6 +195,9 @@ package orichalcum.animation
 		internal var _onInit:Function = FunctionUtil.NULL;
 		
 		/** @private */
+		internal var _beforeChange:Function = FunctionUtil.NULL;
+		
+		/** @private */
 		internal var _onChange:Function = FunctionUtil.NULL;
 		
 		/** @private */
@@ -284,6 +287,7 @@ package orichalcum.animation
 			clone._yoyo = _yoyo;
 			clone._useFrames = _useFrames;
 			clone._onInit = _onInit;
+			clone._beforeChange = _beforeChange;
 			clone._onChange = _onChange;
 			clone._onYoyo = _onYoyo;
 			clone._onComplete = _onComplete;
@@ -451,7 +455,6 @@ package orichalcum.animation
 		 */
 		public function goto(position:Number, triggerCallbacks:Boolean = true):Animation
 		{
-			trace('goto?')
 			return _setPosition(position, true, triggerCallbacks);
 		}
 		
@@ -705,6 +708,12 @@ package orichalcum.animation
 			return this;
 		}
 		
+		public function beforeChange(callback:Function):Animation
+		{
+			_beforeChange = callback == null ? FunctionUtil.NULL : callback;
+			return this;
+		}
+		
 		public function onChange(callback:Function):Animation
 		{
 			_onChange = callback == null ? FunctionUtil.NULL : callback;
@@ -911,7 +920,14 @@ package orichalcum.animation
 			_onInit.length == 1
 				? _onInit.call(this, jump)
 				: _onInit.call(this)
-	}
+		}
+		
+		protected function _preChangeHandler(jump:Boolean):void 
+		{
+			_beforeChange.length == 1
+				? _beforeChange.call(this, jump)
+				: _beforeChange.call(this)
+		}
 		
 		protected function _changeHandler(jump:Boolean):void 
 		{
@@ -995,13 +1011,10 @@ package orichalcum.animation
 		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
 		{
 			var initHandler:Function;
+			var preChangeHandler:Function;
 			var changeHandler:Function;
 			var yoyoHandler:Function;
 			var completeHandler:Function;
-			initHandler = FunctionUtil.NULL;
-			changeHandler = FunctionUtil.NULL;
-			yoyoHandler = FunctionUtil.NULL;
-			completeHandler = FunctionUtil.NULL;
 			
 			var yoyosCompleted:int = 0;
 			var endPosition:Number = _endPosition;
@@ -1018,6 +1031,7 @@ package orichalcum.animation
 			 */
 			if (triggerCallbacks)
 			{
+				preChangeHandler = _preChangeHandler;
 				changeHandler = _changeHandler;
 				//if (isMovingForward)
 				//{
@@ -1029,6 +1043,7 @@ package orichalcum.animation
 			else
 			{
 				initHandler = FunctionUtil.NULL;
+				preChangeHandler = FunctionUtil.NULL;
 				changeHandler = FunctionUtil.NULL;
 				yoyoHandler = FunctionUtil.NULL;
 				completeHandler = FunctionUtil.NULL;
@@ -1085,6 +1100,8 @@ package orichalcum.animation
 			
 			if (_position != _previousPosition)
 			{
+				preChangeHandler(isGoto);
+				
 				var totalChildren:int = _children.length;
 				if (isMovingForward){ var index:int = 0, step:int = 1; } else { index = totalChildren - 1; step = -1; }
 				for (; totalChildren-- > 0; index += step)

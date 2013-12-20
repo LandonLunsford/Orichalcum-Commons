@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <flex-config xmlns="http://www.adobe.com/2006/flex-config">
-  <output>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\.\bin\orichalcum-commons-1.0.swc</output>
+  <output>C:\Users\landon\Documents\GitHub\Orichalcum-Commons\.\bin\orichalcum-commons.swc</output>
   <use-network>true</use-network>
   <warnings>true</warnings>
   <benchmark>false</benchmark>
@@ -24,6 +24,7 @@
     </library-path>
   </compiler>
   <include-classes>
+    <class>orichalcum.abstraction.Direction</class>
     <class>orichalcum.animation.Animation</class>
     <class>orichalcum.animation.AnimationBase</class>
     <class>orichalcum.animation.AnimationCall</class>
@@ -61,18 +62,9 @@
     <class>orichalcum.datastructure.LinkedList</class>
     <class>orichalcum.datastructure.LinkedListNode</class>
     <class>orichalcum.datastructure.Pool</class>
+    <class>orichalcum.datastructure.Sets</class>
+    <class>orichalcum.datastructure.SetSpectrum</class>
     <class>orichalcum.lifecycle.IDisposable</class>
-    <class>orichalcum.logging.ILog</class>
-    <class>orichalcum.logging.ILogFormatter</class>
-    <class>orichalcum.logging.ILogTarget</class>
-    <class>orichalcum.logging.Log</class>
-    <class>orichalcum.logging.LogLevel</class>
-    <class>orichalcum.logging.format.ALogFormatter</class>
-    <class>orichalcum.logging.format.StandardFormatter</class>
-    <class>orichalcum.logging.target.ALogTarget</class>
-    <class>orichalcum.logging.target.FileStreamTarget</class>
-    <class>orichalcum.logging.target.TextFieldTarget</class>
-    <class>orichalcum.logging.target.TraceTarget</class>
     <class>orichalcum.reflection.IReflector</class>
     <class>orichalcum.reflection.Reflector</class>
     <class>orichalcum.system.FlashPlayer</class>

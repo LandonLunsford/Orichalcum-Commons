@@ -41,6 +41,7 @@ package orichalcum.audio
 		/** @private the function called when the sound completes */
 		protected var _onComplete:Function = FunctionUtil.NULL;
 		
+		
 		public function AudioClip(sound:Sound = null)
 		{
 			_sound = sound ? sound : NULL_SOUND;
