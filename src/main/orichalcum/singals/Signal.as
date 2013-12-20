@@ -13,11 +13,6 @@ package orichalcum.signals
 		
 		private var _listeners:Vector.<SignalListener>;
 		
-		public function Signal()
-		{
-			_listeners = new Vector.<SignalListener>;
-		}
-		
 		public function dispose():void
 		{
 			_listeners = null;
@@ -25,7 +20,10 @@ package orichalcum.signals
 		
 		protected function get listeners():Vector.<SignalListener>
 		{
-			return _listeners;
+			/*
+				Uses lazy creation because some signals go unlistened to
+			*/
+			return _listeners ||= new Vector.<SignalListener>;
 		}
 		
 		protected function set listeners(value:Vector.<SignalListener>):void
@@ -40,7 +38,7 @@ package orichalcum.signals
 	
 		public function hasListener(callback:Function):Boolean
 		{
-			return _listeners.lastIndexOf(callback) >= 0;
+			return _listeners && _listeners.lastIndexOf(callback) >= 0;
 		}
 		
 		public function addListener(callback:Function):ISignalListener
@@ -55,31 +53,33 @@ package orichalcum.signals
 				I can add them to a limbo list to add later on call()
 			 */
 			
-			_listeners[_listeners.length] = listenerPool.getInstance().compose(callback);
+			listeners.push(listenerPool.getInstance().compose(callback));
 		}
 		
 		public function removeListener(callback:Function):void
 		{
+			if (!_listeners) return;
 			const index:int = _listeners.lastIndexOf(callback);
 			index < 0 || _removeListenerAt(i);
 		}
 		
 		public function dispatch():void
 		{
-			if (hasListeners)
-			{
-				/*
-					later add listeners in limbo here
-				*/
-				_callListeners();
-				_cleanListeners();
-			}
+			if (!_listeners) return;
+			
+			/*
+				later add listeners in limbo here
+			*/
+			_callListeners();
+			_cleanListeners();
 		}
 		
 		public function removeListeners():void
 		{
+			if (!_listeners) return;
 			listenerPool.add.apply(_listeners);
 			_listeners.length = 0;
+			_listeners = null;
 		}
 		
 		private function _cleanListeners():void
