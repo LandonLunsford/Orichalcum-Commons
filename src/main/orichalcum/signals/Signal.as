@@ -33,7 +33,7 @@ package orichalcum.signals
 		
 		public function hasListeners():Boolean
 		{
-			return totalListeners > 0;
+			return _listeners && _listeners.length > 0;
 		}
 	
 		public function hasListener(callback:Function):Boolean
@@ -45,22 +45,23 @@ package orichalcum.signals
 		{
 			if (callback == null)
 			{
-				throw new NullArgumentError();
+				throw new ArgumentError('Argument "callback" passed to method "Signal.addListener()" must not be null.');
 			}
 			
 			/*
 				To prevent infinite chaining of callbacks adding callbacks 
 				I can add them to a limbo list to add later on call()
 			 */
-			
-			listeners.push(listenerPool.getInstance().compose(callback));
+			const listener:SignalListener = listenerPool.getInstance().compose(callback);
+			listeners.push(listener);
+			return listener;
 		}
 		
 		public function removeListener(callback:Function):void
 		{
 			if (!_listeners) return;
 			const index:int = _listeners.lastIndexOf(callback);
-			index < 0 || _removeListenerAt(i);
+			index < 0 || _removeListenerAt(index);
 		}
 		
 		public function dispatch():void
@@ -77,7 +78,7 @@ package orichalcum.signals
 		public function removeListeners():void
 		{
 			if (!_listeners) return;
-			listenerPool.add.apply(_listeners);
+			listenerPool.returnInstance.apply(_listeners);
 			_listeners.length = 0;
 			_listeners = null;
 		}
@@ -102,7 +103,7 @@ package orichalcum.signals
 		
 		private function _removeListenerAt(index:int):void
 		{
-			listenerPool.add(_listener[index]);
+			listenerPool.returnInstance(_listeners[index]);
 			_listeners[index] = null;
 		}
 		

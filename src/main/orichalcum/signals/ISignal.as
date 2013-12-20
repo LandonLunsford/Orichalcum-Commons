@@ -1,5 +1,7 @@
 package orichalcum.signals
 {
+	
+	import orichalcum.lifecycle.IDisposable;
 
 	public interface ISignal extends IDisposable
 	{

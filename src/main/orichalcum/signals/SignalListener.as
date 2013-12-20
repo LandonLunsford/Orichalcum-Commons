@@ -1,4 +1,4 @@
-package orichalcum.framework.signal
+package orichalcum.signals
 {
 
 	public class SignalListener implements ISignalListener

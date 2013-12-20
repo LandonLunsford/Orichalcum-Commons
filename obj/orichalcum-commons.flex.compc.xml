@@ -67,6 +67,10 @@
     <class>orichalcum.lifecycle.IDisposable</class>
     <class>orichalcum.reflection.IReflector</class>
     <class>orichalcum.reflection.Reflector</class>
+    <class>orichalcum.signals.ISignal</class>
+    <class>orichalcum.signals.ISignalListener</class>
+    <class>orichalcum.signals.Signal</class>
+    <class>orichalcum.signals.SignalListener</class>
     <class>orichalcum.system.FlashPlayer</class>
     <class>orichalcum.transform.MatrixTransformer</class>
     <class>orichalcum.transform.ViewTransformer</class>
