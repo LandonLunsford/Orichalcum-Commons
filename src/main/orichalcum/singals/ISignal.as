@@ -1,7 +1,7 @@
 package orichalcum.signals
 {
 
-	public class Signal implements ISignal extends IDisposable
+	public interface ISignal extends IDisposable
 	{
 	
 		function hasListeners():Boolean
