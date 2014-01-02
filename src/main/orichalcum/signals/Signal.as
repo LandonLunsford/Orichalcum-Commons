@@ -12,10 +12,27 @@ package orichalcum.signals
 		);
 		
 		private var _listeners:Vector.<SignalListener>;
+		private var _listenerArgumentClasses:Vector.<Class>;
+		
+		
+		public function Signal(...listenerArgumentClasses)
+		{
+			if (listenerArgumentClasses.length > 1)
+			{
+				this.listenerArgumentClasses = Vector.<Class>(
+					listenerArgumentClasses.length == 1
+					&& (listenerArgumentClasses[0] is Array
+					|| listenerArgumentClasses[0] is Vector.<Class>)
+						? listenerArgumentClasses[0]
+						: listenerArgumentClasses
+				);
+			}
+		}
 		
 		public function dispose():void
 		{
 			_listeners = null;
+			_listenerArgumentClasses = null;
 		}
 		
 		protected function get listeners():Vector.<SignalListener>
@@ -29,6 +46,31 @@ package orichalcum.signals
 		protected function set listeners(value:Vector.<SignalListener>):void
 		{
 			_listeners = value;
+		}
+		
+		protected function get listenerArgumentClasses():Vector.<SignalListener>
+		{
+			return _listenerArgumentClasses;
+		}
+		
+		protected function set listenerArgumentClasses(value:Vector.<Class>):void
+		{
+			/*
+			_listenerArgumentClasses = new Vector.<Class>;
+			for each(var listenerArgumentClass:* in listenerArgumentClasses)
+			{
+				if (listenerArgumentClass is Class || listenerArgumentClass == null)
+				{
+					_listenerArgumentClasses[_listenerArgumentClasses.length] = listenerArgumentClasse;
+				}
+				else
+				{
+					throw new ArgumentError('Value found in argument "listenerArgumentClasses" must be null or of type "Class".');
+				}
+			}
+			*/
+		
+			_listenerArgumentClasses = value;
 		}
 		
 		public function hasListeners():Boolean
@@ -64,9 +106,16 @@ package orichalcum.signals
 			index < 0 || _removeListenerAt(index);
 		}
 		
-		public function dispatch():void
+		public function dispatch(...listenerArguments):void
 		{
 			if (!_listeners) return;
+			if (_listenerArgumentClasses)
+			{
+				/*
+					Execute argument length check ?
+					Execute argument type check
+				*/
+			}
 			
 			/*
 				later add listeners in limbo here
