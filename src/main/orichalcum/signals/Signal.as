@@ -122,6 +122,42 @@ package orichalcum.signals
 			*/
 			_callListeners();
 			_cleanListeners();
+			
+			/*
+			// If valueClasses is empty, value objects are not type-checked. 
+				const numValueClasses:int = _valueClasses.length;
+				const numValueObjects:int = valueObjects.length;
+
+				// Cannot dispatch fewer objects than declared classes.
+				if (numValueObjects < numValueClasses)
+				{
+						throw new ArgumentError('Incorrect number of arguments. '+
+								'Expected at least '+numValueClasses+' but received '+
+								numValueObjects+'.');
+				}
+				
+				// Cannot dispatch differently typed objects than declared classes.
+				for (var i:int = 0; i < numValueClasses; i++)
+				{
+						// Optimized for the optimistic case that values are correct.
+						if (valueObjects[i] is _valueClasses[i] || valueObjects[i] === null) 
+								continue;
+								
+						throw new ArgumentError('Value object <'+valueObjects[i]
+								+'> is not an instance of <'+_valueClasses[i]+'>.');
+				}
+
+				// Broadcast to listeners.
+				var slotsToProcess:SlotList = slots;
+				if(slotsToProcess.nonEmpty)
+				{
+						while (slotsToProcess.nonEmpty)
+						{
+								slotsToProcess.head.execute(valueObjects);
+								slotsToProcess = slotsToProcess.tail;
+						}
+				}
+			*/
 		}
 		
 		public function removeListeners():void
