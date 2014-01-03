@@ -249,12 +249,16 @@ package orichalcum.animation
 					}
 					else if (animation is AnimationBase)
 					{
+						if (animation is Animation)
+							(animation as Animation).pause();
 						add(animation);
 					}
 				}
 			}
 			else if (arg0 is Object)
 			{
+				trace('this doesnt work...')
+				
 				for each(var target:Object in args)
 				{
 					add(new AnimationChild(target));
@@ -262,7 +266,7 @@ package orichalcum.animation
 			}
 			else
 			{
-				throw new ArgumentError;
+				throw new ArgumentError();
 			}
 			
 			/*
@@ -354,17 +358,7 @@ package orichalcum.animation
 			{
 				
 			}
-			//
-			//
-			//
-			//for (var i:int = 0; i < _children.length; i++)
-			//{
-				//var child:AnimationBase = _children[i];
-				//
-			//}
-			//
-			//
-			//
+			
 			return this;
 		}
 		
@@ -481,6 +475,14 @@ package orichalcum.animation
 		// Accessors and Modifiers
 		/////////////////////////////////////////////////////////////////////////////////
 		
+		/**
+		 * Get or set the current progress of the animation (position/duration)
+		 */
+		public function target(...args):*
+		{
+			return args.length ? _setTarget(args[0]) : _getTarget();
+		}
+		 
 		/**
 		 * True if the animation is stopped.
 		 */
@@ -774,6 +776,34 @@ package orichalcum.animation
 			return _position >= _totalDuration;
 		}
 		
+		protected function _getTarget():*
+		{
+			if (_children.length == 0) return null;
+			if (_children.length == 1) return 0;
+			const targets:Array = [];
+			for each(var animationChild:AnimationChild in _children)
+			{
+				animationChild && targets.push(animationChild._target);
+			}
+			return targets;
+		}
+		
+		protected function _setTarget(arg:*):Animation
+		{
+			// not sure how to get this working with children<AnimationBase> and all
+			//if (arg)
+			//{
+				//if ('length' in arg)
+				//{
+					//for each(var target:Object in arg)
+					//{
+						//add(new AnimationChild(
+					//}
+				//}
+			//}
+			return this;
+		}
+		
 		protected function _setTo(value:Object):Animation 
 		{
 			_to = value;
@@ -983,6 +1013,7 @@ package orichalcum.animation
 					// boolean tween bug where start isnt set dynamically when in to
 					if (tweener)
 					{
+						
 						tweener.initialize(
 							target
 							,property
@@ -1110,6 +1141,7 @@ package orichalcum.animation
 					var childPosition:Number = renderedPosition - _childrenPositions[index] - index * _stagger;
 					
 					// polymorphic but does unnecessary calls to MathUtil.limit & _ease() when child is nested Animation
+					// THIS IS CAUSING ISSUE WITH Ease.elasticOut + yoyo, it looks like only a portion is integrated
 					child._render(childPosition, isGoto, triggerCallbacks, _ease(MathUtil.limit(childPosition/_duration, 0, 1), 0, 1, 1) );
 				}
 				

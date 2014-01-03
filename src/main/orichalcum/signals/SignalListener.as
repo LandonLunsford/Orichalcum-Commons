@@ -25,14 +25,19 @@ package orichalcum.signals
 			_callOnce = true;
 		}
 		
-		public function call():void
+		public function get callback():Function 
 		{
-			_callback();
+			return _callback;
 		}
 		
 		public function get remove():Boolean
 		{
 			return _callOnce;
+		}
+		
+		public function equals(callback:Function):Boolean
+		{
+			return _callback == callback;
 		}
 		
 	}

@@ -4,8 +4,10 @@ package orichalcum.animation
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.filters.ColorMatrixFilter;
 	import orichalcum.animation.factory.animate;
 	import orichalcum.animation.factory.wait;
+	import orichalcum.animation.tweener.plugin.displayobject.ColorTransformTweener;
 	import orichalcum.animation.tweener.plugin.displayobject.ScaleTweener;
 
 	public class WaveDemo extends Sprite
@@ -13,6 +15,9 @@ package orichalcum.animation
 		
 		public function WaveDemo() 
 		{
+			Animation.install(ColorTransformTweener, ColorTransformTweener.properties);
+			
+			
 			const totalShapes:int = 10;
 			const shapes:Array = [];
 			for (var i:int = 0; i < totalShapes; i++)
@@ -35,8 +40,6 @@ package orichalcum.animation
 				.seconds(1)
 				.stagger(2 / totalShapes)
 				.yoyo(true)
-				
-				//.yoyo(true)
 				//.forEach(function(child:Animation):void { child.yoyo(true); })
 				
 			var a2:Animation = animate(
@@ -45,13 +48,13 @@ package orichalcum.animation
 				,wait()
 				,wait(0.5)
 			).onComplete(function():void {trace('done')})
-			//.yoyo(true)
-			//.forEach(function(child:Animation):void { child.yoyo(true); })
+			
 			
 			stage.addEventListener(MouseEvent.CLICK, function(event:Event):void {
 				//var progress:Number = stage.mouseX / stage.stageWidth;
 				a2.isPlaying ? a2.reverse() : a2.play();
 			});
+			
 		}
 		
 	}

@@ -3,6 +3,7 @@ package
 	import orichalcum.datastructure.ArrayListTest;
 	import orichalcum.datastructure.GraphTest;
 	import orichalcum.datastructure.LinkedListTest;
+	import orichalcum.signals.SignalTest;
 	import orichalcum.utility.FunctionUtilTest;
 
 	[Suite]
@@ -13,6 +14,7 @@ package
 		public var linkedListTest:LinkedListTest;
 		public var functionUtilTest:FunctionUtilTest;
 		public var graphTest:GraphTest;
+		public var signalTest:SignalTest;
 	}
 
 }

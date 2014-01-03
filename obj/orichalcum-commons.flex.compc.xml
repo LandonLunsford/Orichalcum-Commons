@@ -40,6 +40,7 @@
     <class>orichalcum.animation.tweener.plugin.ParallelNumberTweener</class>
     <class>orichalcum.animation.tweener.plugin.displayobject.AutoHideTweener</class>
     <class>orichalcum.animation.tweener.plugin.displayobject.BlurFilterTweener</class>
+    <class>orichalcum.animation.tweener.plugin.displayobject.ColorMatrixFilterTweener</class>
     <class>orichalcum.animation.tweener.plugin.displayobject.ColorTransformTweener</class>
     <class>orichalcum.animation.tweener.plugin.displayobject.MatrixTweener</class>
     <class>orichalcum.animation.tweener.plugin.displayobject.MotionBlurTweener</class>
