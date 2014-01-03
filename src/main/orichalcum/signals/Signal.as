@@ -16,9 +16,16 @@ package orichalcum.signals
 		private var _listeners:Vector.<SignalListener>;
 		private var _listenerArgumentClasses:Vector.<Class>;
 		
+<<<<<<< HEAD
 		public function Signal(...listenerArgumentClasses)
 		{
 			if (listenerArgumentClasses.length > 0)
+=======
+		
+		public function Signal(...listenerArgumentClasses)
+		{
+			if (listenerArgumentClasses.length > 1)
+>>>>>>> 08a33d06af5054be6b24061667c31e40e4de409d
 			{
 				this.listenerArgumentClasses = Vector.<Class>(
 					listenerArgumentClasses.length == 1
@@ -49,7 +56,36 @@ package orichalcum.signals
 			_listeners = value;
 		}
 		
+<<<<<<< HEAD
 		protected function get listenerArgumentClasses():Vector.<Class>
+=======
+		protected function get listenerArgumentClasses():Vector.<SignalListener>
+		{
+			return _listenerArgumentClasses;
+		}
+		
+		protected function set listenerArgumentClasses(value:Vector.<Class>):void
+		{
+			/*
+			_listenerArgumentClasses = new Vector.<Class>;
+			for each(var listenerArgumentClass:* in listenerArgumentClasses)
+			{
+				if (listenerArgumentClass is Class || listenerArgumentClass == null)
+				{
+					_listenerArgumentClasses[_listenerArgumentClasses.length] = listenerArgumentClasse;
+				}
+				else
+				{
+					throw new ArgumentError('Value found in argument "listenerArgumentClasses" must be null or of type "Class".');
+				}
+			}
+			*/
+		
+			_listenerArgumentClasses = value;
+		}
+		
+		public function hasListeners():Boolean
+>>>>>>> 08a33d06af5054be6b24061667c31e40e4de409d
 		{
 			return _listenerArgumentClasses;
 		}
@@ -149,9 +185,29 @@ package orichalcum.signals
 		
 		public function removeListener(callback:Function):void
 		{
+<<<<<<< HEAD
+=======
+			if (!_listeners) return;
+			const index:int = _listeners.lastIndexOf(callback);
+			index < 0 || _removeListenerAt(index);
+		}
+		
+		public function dispatch(...listenerArguments):void
+		{
+			if (!_listeners) return;
+			if (_listenerArgumentClasses)
+			{
+				/*
+					Execute argument length check ?
+					Execute argument type check
+				*/
+			}
+			
+>>>>>>> 08a33d06af5054be6b24061667c31e40e4de409d
 			/*
 				O( totalListeners )
 			*/
+<<<<<<< HEAD
 			if (_listeners)
 			{
 				for (var i:int = 0; i < _listeners.length; i++)
@@ -162,6 +218,46 @@ package orichalcum.signals
 					}
 				}
 			}
+=======
+			_callListeners();
+			_cleanListeners();
+			
+			/*
+			// If valueClasses is empty, value objects are not type-checked. 
+				const numValueClasses:int = _valueClasses.length;
+				const numValueObjects:int = valueObjects.length;
+
+				// Cannot dispatch fewer objects than declared classes.
+				if (numValueObjects < numValueClasses)
+				{
+						throw new ArgumentError('Incorrect number of arguments. '+
+								'Expected at least '+numValueClasses+' but received '+
+								numValueObjects+'.');
+				}
+				
+				// Cannot dispatch differently typed objects than declared classes.
+				for (var i:int = 0; i < numValueClasses; i++)
+				{
+						// Optimized for the optimistic case that values are correct.
+						if (valueObjects[i] is _valueClasses[i] || valueObjects[i] === null) 
+								continue;
+								
+						throw new ArgumentError('Value object <'+valueObjects[i]
+								+'> is not an instance of <'+_valueClasses[i]+'>.');
+				}
+
+				// Broadcast to listeners.
+				var slotsToProcess:SlotList = slots;
+				if(slotsToProcess.nonEmpty)
+				{
+						while (slotsToProcess.nonEmpty)
+						{
+								slotsToProcess.head.execute(valueObjects);
+								slotsToProcess = slotsToProcess.tail;
+						}
+				}
+			*/
+>>>>>>> 08a33d06af5054be6b24061667c31e40e4de409d
 		}
 		
 		public function removeListeners():void
