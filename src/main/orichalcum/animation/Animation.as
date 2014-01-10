@@ -257,7 +257,7 @@ package orichalcum.animation
 			}
 			else if (arg0 is Object)
 			{
-				trace('this doesnt work...')
+				//trace('this doesnt work...')
 				
 				for each(var target:Object in args)
 				{

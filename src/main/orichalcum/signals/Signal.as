@@ -4,17 +4,21 @@ package orichalcum.signals
 	import flash.utils.getQualifiedClassName;
 	import orichalcum.datastructure.Pool;
 	import orichalcum.utility.Strings;
-
+	
+	/**
+	 * Signal implementation with Once-fire signals
+	 * With this implementation comes the following overhead:
+	 * signal listener object wrappers
+	 * signal listener pool transactions
+	 */
 	public class Signal implements ISignal
 	{
-	
-		static public const listenerPool:Pool = new Pool(
-			function():SignalListener { return new SignalListener; },
-			function(instance:SignalListener):SignalListener { return instance.dispose(); }
-		);
 		
-		private var _listeners:Vector.<SignalListener>;
+		static private const NULL_LISTENER:Function = function(...args):void { };
+		private var _totalListeners:int;
+		private var _listeners:Vector.<Function>;
 		private var _listenerArgumentClasses:Vector.<Class>;
+		
 		
 		public function Signal(...listenerArgumentClasses)
 		{
@@ -36,148 +40,88 @@ package orichalcum.signals
 			_listenerArgumentClasses = null;
 		}
 		
-		protected function get listeners():Vector.<SignalListener>
+		public function get listeners():Vector.<Function>
 		{
-			/*
-				Uses lazy creation because some signals go unlistened to
-			*/
-			return _listeners ||= new Vector.<SignalListener>;
+			return Vector.<Function>(_listeners);
 		}
 		
-		protected function set listeners(value:Vector.<SignalListener>):void
+		public function set listeners(value:Vector.<Function>):void
 		{
-			_listeners = value;
+			_listeners = Vector.<Function>(value);
 		}
 		
-		protected function get listenerArgumentClasses():Vector.<Class>
+		public function get listenerArgumentClasses():Vector.<Class>
 		{
-			return _listenerArgumentClasses;
+			return Vector.<Class>(_listenerArgumentClasses);
 		}
 		
-		protected function set listenerArgumentClasses(value:Vector.<Class>):void
+		public function set listenerArgumentClasses(value:Vector.<Class>):void
 		{
-			_listenerArgumentClasses = value;
+			_listenerArgumentClasses = Vector.<Class>(value);
 		}
 		
-		protected function get totalListenerArgumentClasses():int
+		public function get totalListenerArgumentClasses():int
 		{
 			return _listenerArgumentClasses ? _listenerArgumentClasses.length : 0;
 		}
 		
 		public function get totalListeners():int
 		{
-			/*
-				O( totalListeners )
-				because of null storage in _listeners for "concurrent" dispatch / remove
-			*/
-			if (_listeners)
-			{
-				
-				var totalListeners:int = 0;
-				for each(var listener:SignalListener in _listeners)
-				{
-					if (listener != null)
-					{
-						totalListeners++;
-					}
-				}
-				return totalListeners;
-			}
-			return 0;
+			return _totalListeners;
+		}
+		
+		public function get isEmpty():Boolean
+		{
+			return totalListeners == 0;
 		}
 		
 		public function get hasListeners():Boolean
 		{
-			/*
-				O( totalListeners )
-			*/
 			return totalListeners > 0;
 		}
 	
-		public function hasListener(callback:Function):Boolean
+		public function has(listener:Function):Boolean
 		{
-			/*
-				O( totalListeners )
-			*/
-			if (_listeners)
+			if (isEmpty || listener == null) return false;
+			
+			for each(var callback:Function in _listeners)
 			{
-				for each(var listener:SignalListener in _listeners)
+				if (callback == listener)
 				{
-					if (listener && listener.equals(callback))
-					{
-						return true;
-					}
+					
+					return true;
 				}
 			}
+			
 			return false;
 		}
 		
-		public function addListener(callback:Function):ISignalListener
+		public function add(listener:Function):void
 		{
-			/*
-				O( constant )
-			*/
-			if (callback == null)
-			{
-				throw new ArgumentError(Strings.interpolate(
-					'Argument "{}" passed to method "{}#{}" must not be null.',
-					'callback',
-					getQualifiedClassName(this),
-					'addListener'
-				));
-			}
-			
-			if (callback.length > totalListenerArgumentClasses)
-			{
-				throw new ArgumentError(Strings.interpolate(
-					'Argument "{}" passed to method "{}#{}" must accept {} arguments.',
-					'callback',
-					getQualifiedClassName(this),
-					'addListener',
-					totalListenerArgumentClasses
-				));
-			}
-			
-			/*
-				To prevent infinite chaining of callbacks adding callbacks 
-				I can add them to a limbo list to add later on call()
-			 */
-			const listener:SignalListener = listenerPool.getInstance().compose(callback);
-			listeners.push(listener);
-			return listener;
+			_add(listener);
 		}
 		
-		public function removeListener(callback:Function):void
+		public function remove(listener:Function):void
 		{
-			/*
-				O( totalListeners )
-			*/
-			if (_listeners)
+			if (isEmpty) return;
+			for (var i:int = 0; i < _listeners.length; i++)
 			{
-				for (var i:int = 0; i < _listeners.length; i++)
+				if (_listeners[i] == listener)
 				{
-					if (_listeners[i].equals(callback))
-					{
-						_removeListenerAt(i);
-					}
+					_removeListenerAt(i);
 				}
 			}
 		}
 		
-		public function removeListeners():void
+		public function removeAll():void
 		{
-			/*
-				O( constant )
-			*/
-			if (_listeners == null) return;
-			listenerPool.returnInstance.apply(_listeners);
+			if (isEmpty) return;
 			_listeners.length = 0;
-			_listeners = null;
 		}
 		
 		public function dispatch(...listenerArguments):void
 		{
-			if (_listeners == null) return;
+			if (isEmpty) return;
 			
 			const totalDispatchedArguments:int = listenerArguments.length;
 			const totalExpecedArguments:int = this.totalListenerArgumentClasses;
@@ -224,20 +168,12 @@ package orichalcum.signals
 			/*
 				later add listeners in limbo here
 			*/
-			_callListeners(listenerArguments);
-			_cleanListeners();
-		}
-		
-		private function _callListeners(listenerArguments:Array):void
-		{
-			for (var i:int = 0; i < listeners.length; i++)
-			{
-				var listener:SignalListener = _listeners[i];
 				
-				/**
-				 * Remove this check by assigning "NULL_SIGNAL_LISTENER" to removed listeners
-				 */
-				if (listener == null) continue;
+			/*
+				Call listeners
+			*/
+			for each(var listener:Object in _listeners)
+			{
 				
 				/*
 				 * Cases
@@ -247,30 +183,61 @@ package orichalcum.signals
 				 * 2. Listener has less arguments than dispatched
 				 * 	Trim back dispatched arguments to the appropriate set
 				 */
-				if (listener.callback.length < listenerArguments.length)
+				if (listenerArguments.length > listener.length)
 				{
-					listenerArguments.length = listener.callback.length;
+					listenerArguments.length = listener.length;
 				}
 				
-				listener.callback.apply(null, listenerArguments);
-				listener.remove && _removeListenerAt(i);
+				listener.apply(null, listenerArguments);
+			}
+			
+			/*
+				Clean listeners
+			*/
+			for (i = _listeners.length - 1; i >= 0; i--)
+			{
+				_listeners[i] === NULL_LISTENER && _listeners.splice(i, 1);
 			}
 		}
 		
-		private function _cleanListeners():void
+		private function _add(listener:Function):void
 		{
-			for (var i:int = _listeners.length - 1; i >= 0; i--)
+			if (listener == null)
 			{
-				_listeners[i] || _listeners.splice(i, 1);
+				throw new ArgumentError(Strings.interpolate(
+					'Argument "{}" passed to method "{}#{}" must not be null.',
+					'listener',
+					getQualifiedClassName(this),
+					'addListener'
+				));
 			}
+			
+			if (listener.length > totalListenerArgumentClasses)
+			{
+				throw new ArgumentError(Strings.interpolate(
+					'Argument "{}" passed to method "{}#{}" must accept {} arguments.',
+					'listener',
+					getQualifiedClassName(this),
+					'addListener',
+					totalListenerArgumentClasses
+				));
+			}
+			
+			/*
+				To prevent infinite chaining of callbacks adding callbacks 
+				I can add them to a limbo list to add later on call()
+			 */
+			(_listeners ||= new Vector.<Function>)[listeners.length] = listener;
+			_totalListeners++;
 		}
 		
 		private function _removeListenerAt(index:int):void
 		{
-			listenerPool.returnInstance(_listeners[index]);
-			_listeners[index] = null;
+			_listeners[index] = NULL_LISTENER;
+			_totalListeners--;
 		}
 		
 	}
 	
 }
+

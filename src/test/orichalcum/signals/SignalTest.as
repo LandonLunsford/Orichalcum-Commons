@@ -43,11 +43,11 @@ package orichalcum.signals
 			const signal:ISignal = new Signal;
 			const listener:Function = function():void {};
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			
 			assertThat(signal.totalListeners, equalTo(1));
 			assertThat(signal.hasListeners, isTrue());
-			assertThat(signal.hasListener(listener), isTrue());
+			assertThat(signal.has(listener), isTrue());
 		}
 		
 		/**
@@ -63,39 +63,12 @@ package orichalcum.signals
 			const signal:ISignal = new Signal;
 			const listener:Function = function():void {};
 			
-			signal.addListener(listener);
-			signal.removeListener(listener);
+			signal.add(listener);
+			signal.remove(listener);
 			
 			assertThat(signal.totalListeners, equalTo(0));
 			assertThat(signal.hasListeners, isFalse());
-			assertThat(signal.hasListener(listener), isFalse());
-		}
-		
-		[Test]
-		public function callOnce():void
-		{
-			const signal:ISignal = new Signal;
-			const state:Object = { };
-			const listener:Function = function():void { state.listenerCalled = !state.listenerCalled; };
-			
-			signal.addListener(listener).callOnce();
-			signal.dispatch();
-			signal.dispatch();
-			
-			assertThat(state.listenerCalled, isTrue());
-		}
-		[Test]
-		public function callTwice():void
-		{
-			const signal:ISignal = new Signal;
-			const state:Object = { };
-			const listener:Function = function():void { state.listenerCalled = !state.listenerCalled; };
-			
-			signal.addListener(listener);
-			signal.dispatch();
-			signal.dispatch();
-			
-			assertThat(state.listenerCalled, isFalse());
+			assertThat(signal.has(listener), isFalse());
 		}
 		
 		[Test]
@@ -105,7 +78,7 @@ package orichalcum.signals
 			const state:Object = { };
 			const listener:Function = function():void { state.listenerCalled = true; };
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch();
 			
 			assertThat(state.listenerCalled, isTrue());
@@ -117,7 +90,7 @@ package orichalcum.signals
 			const signal:ISignal = new Signal;
 			const listener:Function = function(arg1:*):void {};
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch();
 		}
 		
@@ -128,7 +101,7 @@ package orichalcum.signals
 			const state:Object = { };
 			const listener:Function = function(arg1:*):void { state.arg1 = arg1; };
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch(5);
 			
 			assertThat(state.arg1, equalTo(5));
@@ -173,7 +146,7 @@ package orichalcum.signals
 			const arg6:Number = 1.0;
 			const arg7:uint = uint.MAX_VALUE;
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 			
 			assertThat(state.arg1, equalTo(arg1));
@@ -191,17 +164,18 @@ package orichalcum.signals
 			const signal:ISignal = new Signal(int);
 			const listener:Function = function(arg1:Function):void { };
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch();
 		}
 		
+		[Ignore]
 		[Test(expects="Error")]
 		public function argumentCountMismatch_tooManyArgumentsDispatched():void
 		{
 			const signal:ISignal = new Signal(int, int);
 			const listener:Function = function(arg1:Function):void { };
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch(1, 2);
 		}
 		
@@ -211,7 +185,7 @@ package orichalcum.signals
 			const signal:ISignal = new Signal(Function);
 			const listener:Function = function(arg1:Function):void { };
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch(5);
 		}
 		
@@ -221,7 +195,7 @@ package orichalcum.signals
 			const signal:ISignal = new Signal();
 			const listener:Function = function(arg1:Function):void { };
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch();
 		}
 		
@@ -231,7 +205,7 @@ package orichalcum.signals
 			const signal:ISignal = new Signal();
 			const listener:Function = function(arg1:Function):void { };
 			
-			signal.addListener(listener);
+			signal.add(listener);
 			signal.dispatch();
 		}
 		
@@ -241,12 +215,12 @@ package orichalcum.signals
 			const signal:ISignal = new Signal();
 			const state:Object = { called0:0, called1:0, called2:0 };
 			const listener0:Function = function():void { state.called0++; };
-			const listener1:Function = function():void { state.called1++; signal.removeListener(listener0); };
+			const listener1:Function = function():void { state.called1++; signal.remove(listener0); };
 			const listener2:Function = function():void { state.called2++; };
 			
-			signal.addListener(listener0);
-			signal.addListener(listener1);
-			signal.addListener(listener2);
+			signal.add(listener0);
+			signal.add(listener1);
+			signal.add(listener2);
 			signal.dispatch();
 			signal.dispatch();
 			
@@ -261,12 +235,12 @@ package orichalcum.signals
 			const signal:ISignal = new Signal();
 			const state:Object = { called0:0, called1:0, called2:0 };
 			const listener0:Function = function():void { state.called0++; };
-			const listener1:Function = function():void { state.called1++; signal.removeListener(listener1); };
+			const listener1:Function = function():void { state.called1++; signal.remove(listener1); };
 			const listener2:Function = function():void { state.called2++; };
 			
-			signal.addListener(listener0);
-			signal.addListener(listener1);
-			signal.addListener(listener2);
+			signal.add(listener0);
+			signal.add(listener1);
+			signal.add(listener2);
 			signal.dispatch();
 			signal.dispatch();
 			
@@ -281,12 +255,12 @@ package orichalcum.signals
 			const signal:ISignal = new Signal();
 			const state:Object = { called0:0, called1:0, called2:0 };
 			const listener0:Function = function():void { state.called0++; };
-			const listener1:Function = function():void { state.called1++; signal.removeListener(listener2); };
+			const listener1:Function = function():void { state.called1++; signal.remove(listener2); };
 			const listener2:Function = function():void { state.called2++; };
 			
-			signal.addListener(listener0);
-			signal.addListener(listener1);
-			signal.addListener(listener2);
+			signal.add(listener0);
+			signal.add(listener1);
+			signal.add(listener2);
 			signal.dispatch();
 			signal.dispatch();
 			
