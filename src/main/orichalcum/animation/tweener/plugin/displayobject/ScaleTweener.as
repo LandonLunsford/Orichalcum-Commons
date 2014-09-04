@@ -2,13 +2,13 @@ package orichalcum.animation.tweener.plugin.displayobject
 {
 	import flash.display.DisplayObject;
 	import orichalcum.animation.tweener.NumberTweener;
-	import orichalcum.utility.FunctionUtil;
+	import orichalcum.utility.Functions;
 
 	public class ScaleTweener extends NumberTweener
 	{
 		
 		static public const properties:Array = ['scale'];
-		private var _tweenFunction:Function = FunctionUtil.NULL;
+		private var _tweenFunction:Function = Functions.NULL;
 		
 		override public function initialize(target:Object, property:String, from:Object, to:Object, fromValueIfAny:*, toValueIfAny:*):void 
 		{

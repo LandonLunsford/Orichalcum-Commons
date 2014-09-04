@@ -1,7 +1,7 @@
 package orichalcum.datastructure
 {
 	import flash.utils.Dictionary;
-	import orichalcum.utility.FunctionUtil;
+	import orichalcum.utility.Functions;
 
 	/* helped by : http://www.signalsondisplay.com/blog/wp-content/uploads/as3/algorithms/dijkstra/srcview/ */
 	public class Graph
@@ -151,7 +151,7 @@ package orichalcum.datastructure
 		{
 			if (!isEmpty)
 			{
-				_depthFirstRecurse(closure == null ? FunctionUtil.NULL : closure, from);
+				_depthFirstRecurse(closure == null ? Functions.NULL : closure, from);
 				_unmarkVisited();
 			}
 			return this;
@@ -162,7 +162,7 @@ package orichalcum.datastructure
 			if (!isEmpty)
 			{
 				const a:Array = _arrays.getInstance();
-				_breadthFirstTraverse(closure == null ? FunctionUtil.NULL : closure, from, a);
+				_breadthFirstTraverse(closure == null ? Functions.NULL : closure, from, a);
 				_arrays.returnInstance(a);
 				_unmarkVisited();
 			}

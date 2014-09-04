@@ -1,55 +1,41 @@
-package orichalcum.animation 
+package orichalcum.animation
 {
 	import flash.display.Shape;
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;
+	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
 	import flash.utils.getTimer;
 	import orichalcum.animation.tweener.BooleanTweener;
 	import orichalcum.animation.tweener.ITweener;
 	import orichalcum.animation.tweener.NumberTweener;
-	import orichalcum.utility.FunctionUtil;
-	import orichalcum.utility.MathUtil;
-	import orichalcum.utility.ObjectUtil;
+	import orichalcum.utility.Functions;
+	import orichalcum.utility.Mathematics;
 	
 	/**
 	 * @todo make animations copy(deep:Boolean = true) method
 	 * @todo streamline plugin strategy (init, tween) methods and tweener creation and initialization to be safe for properties that arent on target
 	 * @todo add record() allowing playback of all animations played
 	 * @todo add pre/post delay
-	 * @todo defect - no yoyo for each staggered tween
 	 * @todo add wait().call() API, 
 	 */
-	public class Animation extends AnimationBase
+	public class Animation
 	{
 		
 		static public const eventDispatcher:IEventDispatcher = new Shape;
-		
-		/** The duration in milliseconds for all animations if the animation's duration is not explicitly set **/
 		static public var durations:Object = { slow:800, normal:400, fast:200 };
-		
-		/** The easing function used for all animations if the animation's ease is not explicitly set **/
 		static public var defaultEase:Function = Ease.quadOut;
-		
-		/** @private */
 		static private const EPSILON:Number = 0.0001;
-		
-		/** @private */
-		static private var _tweenersByClass:Object = { 'Boolean': BooleanTweener, 'Number': NumberTweener, 'int': NumberTweener, 'uint': NumberTweener };
-		
-		/** @private */
+		static private var _tweenersByClass:Object = {
+			'Boolean':	BooleanTweener,
+			'Number':	NumberTweener,
+			'int':		NumberTweener,
+			'uint':		NumberTweener
+		};
 		static private var _tweenersByProperty:Object = {};
-		
-		/** @private */
 		static private var _currentTime:Number;
-		
-		/** @private */
 		static private var _deltaTime:Number;
-		
-		/** @private */
 		static private var _timeScale:Number = 1;
-		
-		/** @private */
 		static private var _currentFrame:uint;
 		
 		static public function get currentFrame():uint
@@ -101,42 +87,48 @@ package orichalcum.animation
 		 * @param	tweener
 		 * @param	triggers
 		 */
-		static public function install(tweener:Object, triggers:* = null):void
+		static public function install(plugins:Object, triggers:* = null):void
 		{
-			if (tweener == null)
-			{
+			if (!plugins)
 				throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Tween" must not be null.');
-			}
-			else if (tweener is Array || tweener is Vector.<Class>)
+			
+			if (!(plugins is Array))
+				plugins = [plugins];
+				
+			for each(var plugin:Class in plugins)
 			{
-				for each(var plugin:Class in tweener)
-					plugin && install(plugin, null);
-			}
-			else if (triggers is String)
-			{
-				_tweenersByProperty[triggers] = tweener;
-			}
-			else if (triggers is Class)
-			{
-				_tweenersByClass[getQualifiedClassName(triggers)] = tweener;
-			}
-			else if (triggers is Array || triggers is Vector.<String>)
-			{
+				if (triggers)
+				{
+					triggers = [triggers];
+				}
+				else if ('properties' in plugin)
+				{
+					triggers = plugin['properties'];
+				}
+				else
+				{
+					throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Animation" must specify triggers if no static "properties" member is found on class."');
+				}
+				
 				for each(var trigger:String in triggers)
-					trigger && install(tweener, trigger);
+				{
+					if (trigger is String)
+					{
+						_tweenersByProperty[trigger] = plugin;
+					}
+					else if (trigger is Class)
+					{
+						_tweenersByClass[getQualifiedClassName(trigger)] = plugin;
+					}
+					else
+					{
+						throw new ArgumentError();
+					}
+				}
 			}
-			else if ('properties' in tweener)
-			{
-				install(tweener, tweener['properties']);
-			}
-			else
-			{
-				throw new ArgumentError('Argument "tweener" passed to method "install" of class "orichalcum.animation.Animation" must specify triggers if no static "properties" member is found on class."');
-				//throw new ArgumentError('Argument "triggers" passed to method "install" of class "orichalcum.animation.Animation" must be one of the following types: String, Class, Array, Vector.<String>, Vector.<Class>.');
-			}
+			
 		}
 		
-		/** @private */
 		static internal function _createTweener(target:Object, propertyName:String):ITweener
 		{
 			const tweenerForProperty:Class = _tweenersByProperty[propertyName];
@@ -155,394 +147,137 @@ package orichalcum.animation
 			return null;
 		}
 		
-		/** @private */
 		internal var _initialized:Boolean;
-		
-		/** @private */
 		internal var _position:Number = 0;
-		
-		/** @private */
 		internal var _previousPosition:Number = -EPSILON;
-		
-		/** @private */
-		internal var _duration:Number = 0; // = durations.normal; bad for building animations from scratch
-		
-		/** @private */
+		internal var _previousCompletedCycles:int;
+		internal var _completedCycles:int;
+		internal var _duration:Number = 0;
 		internal var _delay:Number = 0;
-		
-		/** @private */
 		internal var _postDelay:Number = 0;
-		
-		/** @private */
 		internal var _iterations:Number = 1;
-		
-		/** @private */
 		internal var _timeScale:Number = 1;
-		
-		/** @private */
 		internal var _ease:Function = defaultEase;
-		
-		/** @private */
 		internal var _isPlaying:Boolean;
-		
-		/** @private */
-		internal var _yoyo:Boolean;
-		
-		/** @private */
+		internal var _render:Function = _renderWithoutYoyo;
 		internal var _useFrames:Boolean;
-		
-		/** @private */
-		internal var _onInit:Function = FunctionUtil.NULL;
-		
-		/** @private */
-		internal var _beforeChange:Function = FunctionUtil.NULL;
-		
-		/** @private */
-		internal var _onChange:Function = FunctionUtil.NULL;
-		
-		/** @private */
-		internal var _onYoyo:Function = FunctionUtil.NULL;
-		
-		/** @private */
-		internal var _onComplete:Function = FunctionUtil.NULL;
-		
-		/** @private */
+		internal var _started:Function = Functions.NULL;
+		internal var _changing:Function = Functions.NULL;
+		internal var _changed:Function = Functions.NULL;
+		internal var _yoyoed:Function = Functions.NULL;
+		internal var _completed:Function = Functions.NULL;
 		internal var _step:Number = 1;
-		
-		/** @private */
-		private var _to:Object;
-		
-		/** @private */
-		private var _from:Object;
-		
-		/** @private */
-		private var _stagger:Number = 0;
-		
-		/** @private */
-		protected var _children:Vector.<AnimationBase> = new Vector.<AnimationBase>;
-		
-		/** @private */
-		protected var _childrenPositions:Vector.<Number> = new Vector.<Number>;
-		
-		/** @private */
-		protected var _insertionTime:Number = 0;
+		internal var _to:Object;
+		internal var _from:Object;
+		internal var _targets:Array = [];
+		internal var _tweenersByTarget:Dictionary = new Dictionary;
 		
 		
-		public function Animation(args:Array = null)
+		public function Animation(...targets)
 		{
-			if (!args || args.length == 0)
-				return;
-				
-			const arg0:* = args[0];
-			
-			if (arg0 is AnimationBase)
-			{
-				for each(var animation:AnimationBase in args)
-				{
-					// this isn't the best... should be more polymorphic
-					if (animation is AnimationWait)
-					{
-						var time:Number = animation._totalDuration; // not duration but total duration
-						var previousEndTime:Number = _insertionTime = isNaN(time) ? _childrenPositions[_children.length-1] + _children[_children.length-1]._totalDuration : _insertionTime + time;
-						if (_duration < previousEndTime)
-							_duration = previousEndTime;
-					}
-					else if (animation is AnimationBase)
-					{
-						if (animation is Animation)
-							(animation as Animation).pause();
-						add(animation);
-					}
-				}
-			}
-			else if (arg0 is Object)
-			{
-				//trace('this doesnt work...')
-				
-				for each(var target:Object in args)
-				{
-					add(new AnimationChild(target));
-				}
-			}
-			else
-			{
-				throw new ArgumentError();
-			}
-			
-			/*
-				AUTOPLAY
-			 */
 			_setIsPlaying(true);
-		}
-		
-		public function clone():Animation
-		{
-			const clone:Animation = new Animation;
-			clone._initialized = false;
-			clone._position = _position;
-			clone._previousPosition = _previousPosition;
-			clone._duration = _duration;
-			clone._delay = _delay;
-			clone._postDelay = _postDelay;
-			clone._iterations = _iterations;
-			clone._timeScale = _timeScale;
-			clone._ease = _ease;
-			clone._isPlaying = false;
-			clone._yoyo = _yoyo;
-			clone._useFrames = _useFrames;
-			clone._onInit = _onInit;
-			clone._beforeChange = _beforeChange;
-			clone._onChange = _onChange;
-			clone._onYoyo = _onYoyo;
-			clone._onComplete = _onComplete;
-			clone._step = _step;
-			clone._to = ObjectUtil.clone(_to);
-			clone._from = ObjectUtil.clone(_from);
-			clone._stagger = _stagger;
-			clone._children = _children.concat();
-			clone._childrenPositions = _childrenPositions.concat();
-			clone._insertionTime = _insertionTime;
-			return clone;
-		}
-		
-		public function add(animation:AnimationBase, time:Number = NaN):Animation 
-		{
-			const insertionTime:Number = isNaN(time) ? _insertionTime : time;
-			const endTime:Number = insertionTime + animation._totalDuration;
 			
-			_childrenPositions.push(insertionTime);
-			_children.push(animation);
-			
-			if (_duration < endTime)
-				_duration = endTime;
-			
-			return this;
-		}
-		
-		public function clip(startTime:Number = 0, endTime:Number = Number.MAX_VALUE):Animation
-		{
-			const newChildren:Vector.<AnimationBase>  = new Vector.<AnimationBase>;
-			for (var i:int = 0; i < _children.length; i++)
+			if (targets.length)
 			{
-				var child:AnimationBase = _children[i];
-				var childPosition:Number = _childrenPositions[i];
-				if (childPosition >= startTime && childPosition <= endTime)
-				{
-					newChildren.push(child);
-				}
-				else
-				{
-					delete _childrenPositions[child];
-				}
-			}
-			_children = newChildren;
-			return this;
-		}
-		
-		public function remove(animation:AnimationBase):Animation
-		{
-			if (_children.length == 0)
-			{
-				return this;
+				_setTarget(targets.length == 1 && targets[0] is Array ? targets[0] : targets)
 			}
 			
-			if (animation._equals(_children[0]))
-			{
-				
-			}
-			else if (animation._equals(_children[_children.length - 1]))
-			{
-				
-			}
-			else
-			{
-				
-			}
-			
-			return this;
-		}
-		
-		public function wait(time:Number):Animation
-		{
-			return add(new AnimationWait(time));
-		}
-		
-		public function call(...args):Animation
-		{
-			return add(new AnimationCall(args));
 		}
 		
 		/////////////////////////////////////////////////////////////////////////////////
 		// Controls
 		/////////////////////////////////////////////////////////////////////////////////
 		
-		/**
-		 * Starts animation at the current position.
-		 * @return this animation
-		 */
 		public function play():Animation
 		{
 			_isAtEnd && rewind(); // video feature
 			return _setIsPlaying(true);
 		}
 		
-		/**
-		 * Stops animation at the current position.
-		 * @return this animation
-		 */
 		public function pause():Animation
 		{
 			return _setIsPlaying(false);
 		}
 		
-		/**
-		 * Plays the animation if paused or pauses the aniamtion if playing.
-		 * @return this animation
-		 */
 		public function toggle():Animation
 		{
 			return _isPlaying ? pause() : play();
 		}
 		
-		/**
-		 * Stops animation and resets playhead to the start position.
-		 * @return this animation
-		 */
 		public function stop():Animation
 		{
 			return rewind().pause();
 		}
 		
-		/**
-		 * Resets playhead to the start position and restarts the animation.
-		 * @return this animation
-		 */
 		public function replay():Animation
 		{
 			return rewind().play();
 		}
 		
-		/**
-		 * Resets playhead to the start position.
-		 * @return this animation
-		 */
 		public function rewind():Animation
 		{
 			return goto(-_delay);
 		}
 		
-		/**
-		 * Forces animation to end position.
-		 * @param triggerCallbacks If false callbacks such as onComplete will be supressed
-		 * @return this animation
-		 */
-		public function end(triggerCallbacks:Boolean = true):Animation
+		public function end():Animation
 		{
-			return goto(_endPosition, triggerCallbacks);
+			return goto(_endPosition);
 		}
 		
-		/**
-		 * Moves playhead to a given position.
-		 * @param position The position to move the playhead (value of 0 to duration)
-		 * @param triggerCallbacks If false callbacks such as onComplete will be supressed
-		 * @return this animation
-		 */
-		public function goto(position:Number, triggerCallbacks:Boolean = true):Animation
+		public function next():Animation
 		{
-			return _setPosition(position, true, triggerCallbacks);
+			return goto(_position + (_useFrames ? 1 : _deltaTime));
 		}
 		
-		/**
-		 * @todo copy docs
-		 */
+		public function previous():Animation
+		{
+			return goto(_position - (_useFrames ? 1 : _deltaTime));
+		}
+		
+		public function goto(position:Number):Animation
+		{
+			return _setPosition(position);
+		}
+		
 		public function reverse():Animation
 		{
 			_step = -_step;
 			return this;
 		}
 		
-		/**
-		 * @todo copy docs
-		 */
 		public function invalidate():Animation
 		{
 			_initialized = false;
 			return this;
 		}
 		
-		
 		/////////////////////////////////////////////////////////////////////////////////
 		// Accessors and Modifiers
 		/////////////////////////////////////////////////////////////////////////////////
 		
-		/**
-		 * Get or set the current progress of the animation (position/duration)
-		 */
 		public function target(...args):*
 		{
-			return args.length ? _setTarget(args[0]) : _getTarget();
+			return args.length ? _setTarget(args.length == 1 && args[0] is Array ? args[0] : args) : _getTarget();
 		}
-		 
-		/**
-		 * True if the animation is stopped.
-		 */
-		public function get isPaused():Boolean
+		
+		public function isPaused():Boolean
 		{
 			return !_isPlaying;
 		}
 		
-		/**
-		 * True if the animation is playing.
-		 */
-		public function get isPlaying():Boolean
+		public function isPlaying():Boolean
 		{
 			return _isPlaying;
 		}
 		
-		/**
-		 * True if the animation is playing and moving forward.
-		 */
-		public function get isPlayingForward():Boolean
+		public function isPlayingForward():Boolean
 		{
 			return _isPlaying && _previousPosition < _position;
 		}
 		
-		/**
-		 * True if the animation is playing and moving in reverse.
-		 */
-		public function get isPlayingBackward():Boolean
+		public function isPlayingBackward():Boolean
 		{
 			return _isPlaying && _previousPosition > _position;
-		}
-		
-		public function forEach(closure:Function):*
-		{
-			if (closure == null || closure.length < 1 || closure.length > 2)
-				return this;
-				
-			if (closure.length == 0)
-			{
-				for each(var child:AnimationBase in _children)
-				{
-					closure.call(this);
-				}
-			}
-			else if (closure.length == 1)
-			{
-				for each(child in _children)
-				{
-					closure.call(this, child);
-				}
-			}
-			else if (closure.length == 2)
-			{
-				for (var i:int = 0; i < _children.length; i++)
-				{
-					closure.call(this, child, i);
-				}
-			}
-				
-			return this;
 		}
 		
 		public function to(...args):*
@@ -555,182 +290,100 @@ package orichalcum.animation
 			return args.length ? _setFrom(args[0]) : (_from ||= {});
 		}
 		
-		/**
-		 * Get previous position
-		 */
-		public function get previousPosition():Number
+		private function previousPosition():Number
 		{
 			return _previousPosition;
 		}
 		
-		/**
-		 * Get the current position of the animation in time or frames
-		 */
-		public function get position():Number
+		public function lastPositionChange():Number
 		{
-			return _position;
+			return _position - _previousPosition;
 		}
 		
-		/**
-		 * Get the most recent change in position
-		 */
-		public function get lastPositionChange():Number
+		public function position(...args):*
 		{
-			return position - previousPosition;
+			return args.length ? _setPosition(args[0]) : _position;
 		}
 		
-		/**
-		 * Get or set the current progress of the animation (position/duration)
-		 */
 		public function progress(...args):*
 		{
 			return args.length ? _setProgress(args[0]) : _progress;
 		}
 		
-		/**
-		 * Get or set the animation stagger in frames or seconds
-		 */
-		public function stagger(...args):* 
-		{
-			return args.length ? _setStagger(args[0]) : _stagger;
-		}
-		
-		/**
-		 * Get or set the animation delay in frames or seconds
-		 */
 		public function delay(...args):*
 		{
 			return args.length ? _setDelay(args[0]) : _delay;
 		}
 		
-		/**
-		 * Get or set the animation delay in frames or seconds
-		 */
+		public function duration(...args):*
+		{
+			return args.length ? _setDuration(args[0]) : _duration;
+		}
+		
 		public function postDelay(...args):*
 		{
 			return args.length ? _setPostDelay(args[0]) : _postDelay;
 		}
 		
-		/**
-		 * Get or set the animation duration in milliseconds
-		 */
-		public function duration(...args):*
-		{
-			return args.length ? _setDuration(args[0]) : _durationWithStagger;
-		}
-		
-		/**
-		 * Get or set the animation duration in milliseconds
-		 */
-		public function milliseconds(...args):*
-		{
-			return args.length ? _setMilliseconds(args[0]) : _durationWithStagger;
-		}
-		
-		/**
-		 * Get or set the animation duration in seconds
-		 */
-		public function seconds(...args):*
-		{
-			return args.length ? _setSeconds(args[0]) : _durationWithStagger * 0.001;
-		}
-		
-		/**
-		 * Set the animation duration in frames
-		 */
-		public function frames(...args):*
-		{
-			return args.length ? _setFrames(args[0]) : _durationWithStagger;
-		}
-		
-		/**
-		 * Set the animation duration to default small time in seconds
-		 */
-		public function quickly():Animation
-		{
-			return milliseconds(Animation.durations.fast);
-		}
-		
-		/**
-		 * Set the animation duration to default time larger than "normal" or "fast"
-		 */
-		public function slowly():Animation
-		{
-			return milliseconds(Animation.durations.slow);
-		}
-		
-		/**
-		 * Get or set the animation's timeScale
-		 */
 		public function timeScale(...args):*
 		{
 			return args.length ? _setTimeScale(args[0]) : _timeScale;
 		}
 		
-		/**
-		 * Get or set whether or not the animation uses frames instead of seconds
-		 */
-		public function useFrames(...args):*
+		public function frames():*
 		{
-			return args.length ? _setUseFrames(args[0]) : _timeScale;
+			_useFrames = true;
+			return this;
 		}
 		
-		/**
-		 * Set or set the animation's easing function
-		 */
+		public function seconds():*
+		{
+			_useFrames = false;
+			return this;
+		}
+		
 		public function ease(...args):*
 		{
 			return args.length ? _setEase(args[0]) : _ease;
 		}
 		
-		/**
-		 * Set or set the animation's yoyo property
-		 */
 		public function yoyo(...args):*
 		{
 			return args.length ? _setYoyo(args[0]) : _yoyo;
 		}
 		
-		/**
-		 * Set or set the number of times the animation will repeat
-		 */
 		public function repeat(...args):*
 		{
 			return args.length ? _setRepeat(args[0]) : _repeat;
 		}
 		
-		/**
-		 * Set the animation's on init callback to be called the first frame of the animation after it starts for the first time.
-		 * @param	...callback Function (function(isJump:Boolean):* { }) where object "this" is the animation
-		 * @return
-		 */
-		public function onInit(callback:Function):Animation
+		public function started(callback:Function):Animation
 		{
-			_onInit = callback == null ? FunctionUtil.NULL : callback;
+			_started = callback == null ? Functions.NULL : callback;
 			return this;
 		}
 		
-		public function beforeChange(callback:Function):Animation
+		public function changing(callback:Function):Animation
 		{
-			_beforeChange = callback == null ? FunctionUtil.NULL : callback;
+			_changing = callback == null ? Functions.NULL : callback;
 			return this;
 		}
 		
-		public function onChange(callback:Function):Animation
+		public function changed(callback:Function):Animation
 		{
-			_onChange = callback == null ? FunctionUtil.NULL : callback;
+			_changed = callback == null ? Functions.NULL : callback;
 			return this;
 		}
 		
-		public function onYoyo(callback:Function):Animation
+		public function yoyoed(callback:Function):Animation
 		{
-			_onYoyo = callback == null ? FunctionUtil.NULL : callback;
+			_yoyoed = callback == null ? Functions.NULL : callback;
 			return this;
 		}
 		
-		public function onComplete(callback:Function):Animation
+		public function completed(callback:Function):Animation
 		{
-			_onComplete = callback == null ? FunctionUtil.NULL : callback;
+			_completed = callback == null ? Functions.NULL : callback;
 			return this;
 		}
 		
@@ -738,17 +391,9 @@ package orichalcum.animation
 		// Private Parts
 		/////////////////////////////////////////////////////////////////////////////////
 		
-		override internal function get _totalDuration():Number
-		{
-			//return _iterations <= 0 || isNaN(_iterations) ? Infinity : _durationWithStagger * _iterations * (_yoyo ? 2 : 1);
-			return _iterations <= 0 || isNaN(_iterations)
-				? Infinity
-				: _durationWithStagger * _iterations * (_yoyo ? 2 : 1);
-		}
-		
 		protected function get _progress():Number
 		{
-			return _position / _totalDuration;
+			return _position / getTotalDuration();
 		}
 		
 		protected function get _repeat():Number
@@ -756,51 +401,29 @@ package orichalcum.animation
 			return _iterations - 1;
 		}
 		
-		protected function get _startPosition():Number
+		protected function get _yoyo():Boolean
 		{
-			return 0;
+			return _render == _renderYoyo;
 		}
 		
 		protected function get _endPosition():Number
 		{
-			return _totalDuration;
-		}
-		
-		protected function get _isAtStart():Boolean
-		{
-			return _position <= 0;
+			return getTotalDuration();
 		}
 		
 		protected function get _isAtEnd():Boolean
 		{
-			return _position >= _totalDuration;
+			return _position >= getTotalDuration();
 		}
 		
 		protected function _getTarget():*
 		{
-			if (_children.length == 0) return null;
-			if (_children.length == 1) return 0;
-			const targets:Array = [];
-			for each(var animationChild:AnimationChild in _children)
-			{
-				animationChild && targets.push(animationChild._target);
-			}
-			return targets;
+			return _targets;
 		}
 		
 		protected function _setTarget(arg:*):Animation
 		{
-			// not sure how to get this working with children<AnimationBase> and all
-			//if (arg)
-			//{
-				//if ('length' in arg)
-				//{
-					//for each(var target:Object in arg)
-					//{
-						//add(new AnimationChild(
-					//}
-				//}
-			//}
+			_targets = arg;
 			return this;
 		}
 		
@@ -816,33 +439,27 @@ package orichalcum.animation
 			return this;
 		}
 		
-		protected function _setStagger(value:Number):Animation 
+		protected function _setPosition(value:Number):Animation
 		{
-			_stagger = value * 1000;
-			return this;
-		}
-		
-		protected function _setPosition(value:Number, isJump:Boolean = false, triggerCallbacks:Boolean = true):Animation
-		{
-			_render(value, isJump, triggerCallbacks);
+			_render(value);
 			return this;
 		}
 		
 		protected function _setProgress(value:Number):Animation
 		{
-			_setPosition(value * _totalDuration, true);
+			_setPosition(value * getTotalDuration());
 			return this;
 		}
 		
 		protected function _setDelay(value:Number):Animation 
 		{
-			_delay = value * 1000;
+			_delay = value;
 			return this;
 		}
 		
 		protected function _setPostDelay(value:Number):Animation 
 		{
-			_postDelay = value * 1000;
+			_postDelay = value;
 			return this;
 		}
 		
@@ -854,12 +471,11 @@ package orichalcum.animation
 			}
 			else if (value is String)
 			{
-				_duration = durations[value] ? durations[value] : durations.normal;
-				_useFrames = false;
+				_duration = value in durations ? durations[value] : durations.normal;
 			}
 			else if (value is Number)
 			{
-				_duration = MathUtil.limit(value, 0, Number.MAX_VALUE);
+				_duration = Mathematics.limit(value, 0, Number.MAX_VALUE);
 			}
 			else
 			{
@@ -868,34 +484,9 @@ package orichalcum.animation
 			return this;
 		}
 		
-		protected function _setMilliseconds(value:Number):Animation
-		{
-			_duration = value;
-			_useFrames = false;
-			return this;
-		}
-		
-		protected function _setSeconds(value:Number):Animation
-		{
-			return _setMilliseconds(value * 1000);
-		}
-		
-		protected function _setFrames(value:Number):Animation
-		{
-			_duration = value;
-			_useFrames = true;
-			return this;
-		}
-		
 		protected function _setTimeScale(value:Number):Animation
 		{
 			_timeScale = value;
-			return this;
-		}
-		
-		protected function _setUseFrames(value:Boolean):Animation 
-		{
-			_useFrames = value;
 			return this;
 		}
 		
@@ -907,7 +498,7 @@ package orichalcum.animation
 			}
 			else if (value is String)
 			{
-				_ease = Ease[value] ? Ease[value] : Animation.defaultEase;
+				_ease = value in Ease ? Ease[value] : Animation.defaultEase;
 			}
 			else
 			{
@@ -918,7 +509,7 @@ package orichalcum.animation
 		
 		protected function _setYoyo(value:Boolean):Animation
 		{
-			_yoyo = value;
+			_render = value ? _renderYoyo : _renderWithoutYoyo;
 			return this;
 		}
 		
@@ -932,7 +523,8 @@ package orichalcum.animation
 		{
 			if (_isPlaying != value)
 			{
-				_isPlaying = value
+				_isPlaying = value;
+				
 				if (value)
 				{
 					eventDispatcher.addEventListener(Event.ENTER_FRAME, _integrate);
@@ -945,39 +537,29 @@ package orichalcum.animation
 			return this;
 		}
 		
-		protected function _initHandler(jump:Boolean):void 
+		protected function _initHandler():void 
 		{
-			_onInit.length == 1
-				? _onInit.call(this, jump)
-				: _onInit.call(this)
+			_started.call(this)
 		}
 		
-		protected function _preChangeHandler(jump:Boolean):void 
+		protected function _changingHandler():void 
 		{
-			_beforeChange.length == 1
-				? _beforeChange.call(this, jump)
-				: _beforeChange.call(this)
+			_changing.call(this)
 		}
 		
-		protected function _changeHandler(jump:Boolean):void 
+		protected function _changedHandler():void 
 		{
-			_onChange.length == 1
-				? _onChange.call(this, jump)
-				: _onChange.call(this)
+			_changed.call(this)
 		}
 		
-		protected function _yoyoHandler(jump:Boolean):void 
+		protected function _yoyoedHandler():void 
 		{
-			_onYoyo.length == 1
-				? _onYoyo.call(this, jump)
-				: _onYoyo.call(this)
+			_yoyoed.call(this)
 		}
 		
-		protected function _completeHandler(jump:Boolean):void 
+		protected function _completedHandler():void 
 		{
-			_onComplete.length == 1
-				? _onComplete.call(this, jump)
-				: _onComplete.call(this)
+			_completed.call(this)
 		}
 		
 		/////////////////////////////////////////////////////////////////////////////////
@@ -987,193 +569,236 @@ package orichalcum.animation
 		protected function _initialize():void
 		{
 			_initialized = true;
-			//_position = -_delay;
-			//_previousPosition = _position - EPSILON;
 			
-			for each(var kid:* in _children)
+			for each(var target:* in _targets)
 			{
-				var child:AnimationChild = kid as AnimationChild;
-				if (!child) continue;
-				
-				var target:Object = child._target;
 				var from:Object = _from ? _from : target;
 				var to:Object = _to ? _to : target;
 				
 				if (to === from) return;
 				
 				var values:Object = _to ? _to : _from;
+				var tweeners:Dictionary = _tweenersByTarget[target] ||= new Dictionary;
 				
 				for (var property:String in values)
 				{
-					// for each child
-					child._tweeners ||= {};
 					
-					var tweener:ITweener = child._tweeners[property] ||= _createTweener(target, property);
+					var tweener:ITweener = tweeners[property] ||= _createTweener(target, property);
 					
-					// boolean tween bug where start isnt set dynamically when in to
-					if (tweener)
-					{
+					if (!tweener)
+						throw new ArgumentError();
 						
-						tweener.initialize(
-							target
-							,property
-							,from
-							,to
-							,property in from
-								? from[property]
-								: property in target
-									? target[property]
-									: null
-							,property in to
-								? to[property]
+					tweener.initialize(
+						target
+						,property
+						,from
+						,to
+						,property in from
+							? from[property]
+							: property in target
+								? target[property]
 								: null
-							);
-					}
+						,property in to
+							? to[property]
+							: null
+						);
 				}
 			}
 		}
 		
 		protected function _integrate(event:Event = null):void 
 		{
-			_isPlaying && _render(_position + (_useFrames ? 1 : deltaTime) * Animation.timeScale * _timeScale * _step * (_yoyo ? 2 : 1), false, true);
+			_isPlaying && _render(
+				_position
+				+ (_useFrames ? 1 : deltaTime)
+				* Animation.timeScale
+				* _timeScale
+				* _step
+			);
 		}
 		
-		// problem is each needs to track its own yoyo stuff
-		override internal function _render(position:Number, isGoto:Boolean = false, triggerCallbacks:Boolean = true, progress:Number = NaN):void
+		private function getIterationDuration():Number
 		{
-			var initHandler:Function;
-			var preChangeHandler:Function;
-			var changeHandler:Function;
-			var yoyoHandler:Function;
-			var completeHandler:Function;
-			
-			var yoyosCompleted:int = 0;
-			var endPosition:Number = _endPosition;
-			var renderedPosition:Number;
-			
-			_previousPosition = _position;
-			_position = MathUtil.limit(position, -_delay, endPosition + _postDelay);
-			
-			const isMovingForward:Boolean = _position > _previousPosition;
+			return (_delay + _duration + _postDelay)
+				* (_useFrames ? 1 : 1000)
+		}
+		
+		private function getTotalDuration():Number
+		{
+			return _iterations <= 0 || isNaN(_iterations)
+				? Infinity
+				: getIterationDuration()
+					* _iterations
+					* (_yoyo ? 2 : 1);
+		}
+		
+		private function _renderYoyo(position:Number):void
+		{
 			
 			/**
-			 * Akward null object pattern usage to avoid duplicate "if" statements for efficiency
-			 * Truly I should convert this class implementation to use the state pattern to avoid many other if statements
-			 */
-			if (triggerCallbacks)
+			 * Recompute these everytime one of its dependencies change but not now
+			 */ 
+			const scale:Number = _useFrames ? 1 : 1000;
+			const delay:Number = _delay * scale;
+			const duration:Number = _duration * scale;
+			const postDelay:Number = _postDelay * scale;
+			const iterationDuration:Number = delay + duration + postDelay;
+			const totalDuration:Number = _iterations <= 0 || isNaN(_iterations) ? Infinity : iterationDuration * _iterations * 2; // x2 for yoyo
+			
+			if (_initialized)
 			{
-				preChangeHandler = _preChangeHandler;
-				changeHandler = _changeHandler;
-				//if (isMovingForward)
-				//{
-					initHandler = _initHandler;
-					yoyoHandler = _yoyoHandler;
-					completeHandler = _completeHandler;
-				//}
+				_previousPosition = _position;
+				_position = Mathematics.limit(position, 0, totalDuration);
+				_previousCompletedCycles = _completedCycles;
 			}
 			else
-			{
-				initHandler = FunctionUtil.NULL;
-				preChangeHandler = FunctionUtil.NULL;
-				changeHandler = FunctionUtil.NULL;
-				yoyoHandler = FunctionUtil.NULL;
-				completeHandler = FunctionUtil.NULL;
-			}
-			
-			// hotfix
-			if (!_initialized)
 			{
 				_initialize();
-				initHandler(isGoto);
-				_position -= _delay;
-				_previousPosition -= _delay;
+				_initHandler();
+				
+				_previousPosition = -EPSILON;
+				_position = 0;
+				_previousCompletedCycles = 0;
+				_completedCycles = 0;
 			}
 			
-			const isComplete:Boolean = _position >= endPosition + _postDelay;
-			const isInMiddle:Boolean = _position > 0 && _position < endPosition;
+			const changed:Boolean = _position != _previousPosition;
+			if (!changed) return;
 			
-			if (isComplete || _position >= endPosition)
+			_completedCycles = _position / iterationDuration;
+			const isInReverseCycle:Boolean = (_completedCycles & 1) == 1;
+			
+			const completed:Boolean = _position >= totalDuration;
+			const renderPosition:Number = (_position % iterationDuration) - (isInReverseCycle ? postDelay : delay);
+			
+			var renderProgress:Number = 0;
+			if (completed)
 			{
-				renderedPosition = _yoyo ? 0 : endPosition;
+				renderProgress = 1;
 			}
-			else if (_position <= 0)
+			if (renderPosition <= 0)
 			{
-				renderedPosition = 0;
+				renderProgress = 0;
+			}
+			else if (renderPosition >= duration
+			|| duration == 0) // must come after renderPosition <= 0 check so when in delay it renders as 0
+			{
+				renderProgress =  1;
 			}
 			else
 			{
-				renderedPosition = _position % _durationWithStagger;
+				renderProgress = _ease(renderPosition / duration, 0, 1, 1);
+			}
+			/**/
+			if (isInReverseCycle)
+			{
+				// inacurate.. i need to reverse the ease function too...
+				renderProgress = 1 - renderProgress;
 			}
 			
-			// optional failfast
-			//if (isComplete && _previousPosition == endPosition) return;
-			
-			if (_yoyo && isInMiddle)
+			_changingHandler();
+			for each(var target:Object in _targets)
 			{
-				const currentCompletedCycles:int = _position / _durationWithStagger;
-				
-				// this happens after yoyo is coming back. thats a problem
-				yoyosCompleted = ((currentCompletedCycles + 1) >> 1) - (((_previousPosition / _durationWithStagger) + 1) >> 1);
-				
-				if (currentCompletedCycles & 1 == 1)
+				var tweeners:Dictionary = _tweenersByTarget[target];
+				for (var property:String in tweeners)
 				{
-					renderedPosition = _durationWithStagger - renderedPosition;
+					tweeners[property].tween(target, property, renderProgress);
 				}
 			}
+			_changedHandler();
 			
-			// not sure this invalidate() should be before the initialize below
-			if (_step < 0 && _position <= 0)
-			{
-				isNaN(progress) && invalidate();
-				reverse().pause();
-			}
-			
-			
-			if (_position != _previousPosition)
-			{
-				preChangeHandler(isGoto);
-				
-				var totalChildren:int = _children.length;
-				if (isMovingForward){ var index:int = 0, step:int = 1; } else { index = totalChildren - 1; step = -1; }
-				for (; totalChildren-- > 0; index += step)
-				{
-					var child:AnimationBase = _children[index];
-					var childPosition:Number = renderedPosition - _childrenPositions[index] - index * _stagger;
-					
-					// polymorphic but does unnecessary calls to MathUtil.limit & _ease() when child is nested Animation
-					// THIS IS CAUSING ISSUE WITH Ease.elasticOut + yoyo, it looks like only a portion is integrated
-					child._render(childPosition, isGoto, triggerCallbacks, _ease(MathUtil.limit(childPosition/_duration, 0, 1), 0, 1, 1) );
-				}
-				
-				changeHandler(isGoto);
-			}
-			
+			const realPosition:Number = _position;
+			const yoyosCompleted:int = ((_completedCycles + 1) >> 1) - ((_previousCompletedCycles + 1) >> 1);
 			while (yoyosCompleted-- > 0)
 			{
-				yoyoHandler(isGoto);
+				_position = (_previousCompletedCycles + yoyosCompleted) * iterationDuration;
+				_yoyoedHandler();
 			}
+			_position = realPosition;
 			
-			if (isComplete)
+			if (completed)
 			{
-				// invalidate screws with child animations
-				//invalidate().pause(); // should this be triggered when jumping ?
-				//hoftix to only invalidate parent animation not nested animations that complete
-				isNaN(progress) && invalidate();
-				pause();
-				completeHandler(isGoto);
+				if (isPlaying())
+				{
+					invalidate();
+					pause();
+				}
+				_completedHandler();
+			}
+		}
+		
+		private function _renderWithoutYoyo(position:Number):void
+		{
+			/**
+			 * Recompute these everytime one of its dependencies change but not now
+			 */ 
+			const scale:Number = _useFrames ? 1 : 1000;
+			const delay:Number = _delay * scale;
+			const duration:Number = _duration * scale;
+			const postDelay:Number = _postDelay * scale;
+			const iterationDuration:Number = delay + duration + postDelay;
+			const totalDuration:Number = _iterations <= 0 || isNaN(_iterations) ? Infinity : iterationDuration * _iterations;
+			
+			if (_initialized)
+			{
+				_previousPosition = _position;
+				_position = Mathematics.limit(position, 0, totalDuration);
+			}
+			else
+			{
+				_initialize();
+				_initHandler();
+				
+				_previousPosition = -EPSILON;
+				_position = 0;
 			}
 			
+			const changed:Boolean = _position != _previousPosition;
+			if (!changed) return;
 			
-		}
-		
-		private function get _durationWithStagger():Number
-		{
-			return _duration + (_children.length - 1) * _stagger;
-		}
-		
-		protected function _timeOf(animation:AnimationBase):Number
-		{
-			return _childrenPositions[animation];
+			const completed:Boolean = _position >= totalDuration;
+			const renderPosition:Number = (_position % iterationDuration) - delay;
+			
+			var renderProgress:Number = 0;
+			if (completed) // cancells modulo error of turning 100% to 0
+			{
+				renderProgress = 1;
+			}
+			else if (renderPosition <= 0)
+			{
+				renderProgress = 0;
+			}
+			else if (renderPosition >= duration
+			|| duration == 0) // must come after renderPosition <= 0 check so when in delay it renders as 0
+			{
+				renderProgress = 1;
+			}
+			else
+			{
+				renderProgress = _ease(renderPosition / duration, 0, 1, 1);
+			}
+			
+			_changingHandler();
+			for each(var target:Object in _targets)
+			{
+				var tweeners:Dictionary = _tweenersByTarget[target];
+				for (var property:String in tweeners)
+				{
+					tweeners[property].tween(target, property, renderProgress);
+				}
+			}
+			_changedHandler();
+			
+			if (completed)
+			{
+				if (isPlaying())
+				{
+					invalidate();
+					pause();
+				}
+				_completedHandler();
+			}
+			
 		}
 		
 	}

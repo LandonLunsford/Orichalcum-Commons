@@ -3,8 +3,8 @@ package orichalcum.audio
 	import flash.events.Event;
 	import flash.media.Sound;
 	import flash.media.SoundTransform;
-	import orichalcum.utility.FunctionUtil;
-	import orichalcum.utility.MathUtil;
+	import orichalcum.utility.Functions;
+	import orichalcum.utility.Mathematics;
 
 	public class AudioClip
 	{
@@ -39,7 +39,7 @@ package orichalcum.audio
 		protected var _volume:Number = 1;
 		
 		/** @private the function called when the sound completes */
-		protected var _onComplete:Function = FunctionUtil.NULL;
+		protected var _onComplete:Function = Functions.NULL;
 		
 		
 		public function AudioClip(sound:Sound = null)
@@ -96,14 +96,14 @@ package orichalcum.audio
 		
 		public function goto(position:Number):AudioClip
 		{
-			_position = MathUtil.limit(position, 0, _sound.length);
+			_position = Mathematics.limit(position, 0, _sound.length);
 			if (_position === _sound.length) _soundCompleteHandler(null);
 			return this;
 		}
 		
 		public function onComplete(callback:Function):AudioClip
 		{
-			_onComplete = FunctionUtil.nullToEmpty(callback);
+			_onComplete = Functions.nullToEmpty(callback);
 			return this;
 		}
 		

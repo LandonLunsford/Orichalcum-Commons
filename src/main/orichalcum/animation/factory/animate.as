@@ -1,10 +1,10 @@
 package orichalcum.animation.factory 
 {
 	import orichalcum.animation.Animation;
-	
-	public function animate(...animations):Animation
+
+	public function animate(...targets):Animation
 	{
-		return new Animation(animations);
+		return new Animation(targets);
 	}
 
 }

@@ -6,7 +6,7 @@ package orichalcum.utility
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
-	public class BitmapUtil
+	public class Bitmaps
 	{
 		static private const _sourceRect:Rectangle = new Rectangle();
 		static private const _destPoint:Point = new Point();
@@ -58,7 +58,7 @@ package orichalcum.utility
 			var bitmapWidth:int = tile.width * tilesPerRow;
 			var bitmapHeight:int = tile.height * data.length / tilesPerRow;
 			var bitmap:Bitmap = new Bitmap(new BitmapData(bitmapWidth, bitmapHeight));
-			BitmapUtil.drawTileMap(data, tiles, bitmap.bitmapData);
+			Bitmaps.drawTileMap(data, tiles, bitmap.bitmapData);
 			return bitmap;
 		}
 		

@@ -1,7 +1,7 @@
 package orichalcum.datastructure 
 {
 	import flash.utils.flash_proxy;
-	import orichalcum.utility.StringUtil;
+	import orichalcum.utility.Strings;
 	
 	use namespace flash_proxy;
 
@@ -54,7 +54,7 @@ package orichalcum.datastructure
 		override protected function setValue(index:uint, value:*):void 
 		{
 			if (index >= length)
-				throw new ArgumentError(StringUtil.substitute('Argument "{0}" ({1}) is out of bounds{2}.', 'index', index, length == 0 ? '' : ' (0 to ' + (length - 1) + ')'));
+				throw new ArgumentError(Strings.substitute('Argument "{0}" ({1}) is out of bounds{2}.', 'index', index, length == 0 ? '' : ' (0 to ' + (length - 1) + ')'));
 			
 			_array[index] = value;
 		}

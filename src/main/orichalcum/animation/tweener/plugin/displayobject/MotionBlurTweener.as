@@ -3,7 +3,7 @@ package orichalcum.animation.tweener.plugin.displayobject
 	import flash.display.DisplayObject;
 	import flash.filters.BlurFilter;
 	import orichalcum.animation.tweener.ITweener;
-	import orichalcum.utility.FunctionUtil;
+	import orichalcum.utility.Functions;
 	
 	
 	/**

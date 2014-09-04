@@ -1,8 +1,10 @@
 package orichalcum.utility 
 {
 	import flash.display.DisplayObjectContainer;
+	import flash.utils.getDefinitionByName;
+	import flash.utils.getQualifiedSuperclassName;
 	
-	public class ObjectUtil
+	public class Objects
 	{
 		static public function isEmpty(object:Object):Boolean
 		{
@@ -256,6 +258,18 @@ package orichalcum.utility
 			}
 			
 			return object;
+		}
+		
+		static public function getQualifiedAncestorNames(object:Object, flyweight:Array = null):Array
+		{
+			if (flyweight == null) flyweight = [];
+			var name:String;
+			while (name = getQualifiedSuperclassName(object))
+			{
+				flyweight.push(name);
+				object = getDefinitionByName(name);
+			}
+			return flyweight;
 		}
 		
 	}

@@ -18,7 +18,7 @@ package orichalcum.signals
 		private var _totalListeners:int;
 		private var _listeners:Vector.<Function>;
 		private var _listenerArgumentClasses:Vector.<Class>;
-		
+		private var _listenerArgumentsCopy:Array = [];
 		
 		public function Signal(...listenerArgumentClasses)
 		{
@@ -133,7 +133,7 @@ package orichalcum.signals
 			if (totalDispatchedArguments != totalExpecedArguments)
 			{
 				throw new ArgumentError(
-					Strings.interpolate(
+					Strings.substitute(
 						'Argument count mismatch found on "{}#dispatch()". Found <{}> expected <{}>.',
 						getQualifiedClassName(this),
 						totalDispatchedArguments,
@@ -155,7 +155,7 @@ package orichalcum.signals
 					continue;
 				
 				throw new ArgumentError(
-					Strings.interpolate(
+					Strings.substitute(
 						'Argument type mismatch found on "{}#dispatch()". Found value of type "{}" at index <{}>. Expected value of type "{}".',
 						getQualifiedClassName(this),
 						getQualifiedClassName(argument),
@@ -175,20 +175,29 @@ package orichalcum.signals
 			for each(var listener:Object in _listeners)
 			{
 				
+				_listenerArgumentsCopy.length = 0;
+				for each(argument in listenerArguments)
+				{
+					_listenerArgumentsCopy.push(argument);
+				}
+				
 				/*
+				 * BUUUG! this needs to be done on a per-listener basis!
+				 * 
 				 * Cases
 				 * 0. Listener has same number of arguments as dispatched
 				 * 1. listener has more arguments than dispatched
 				 * 	Allow runtime to determin argument count missmatch
 				 * 2. Listener has less arguments than dispatched
 				 * 	Trim back dispatched arguments to the appropriate set
+				 * 
 				 */
 				if (listenerArguments.length > listener.length)
 				{
-					listenerArguments.length = listener.length;
+					_listenerArgumentsCopy.length = listener.length;
 				}
 				
-				listener.apply(null, listenerArguments);
+				listener.apply(null, _listenerArgumentsCopy);
 			}
 			
 			/*
@@ -204,7 +213,7 @@ package orichalcum.signals
 		{
 			if (listener == null)
 			{
-				throw new ArgumentError(Strings.interpolate(
+				throw new ArgumentError(Strings.substitute(
 					'Argument "{}" passed to method "{}#{}" must not be null.',
 					'listener',
 					getQualifiedClassName(this),
@@ -214,7 +223,7 @@ package orichalcum.signals
 			
 			if (listener.length > totalListenerArgumentClasses)
 			{
-				throw new ArgumentError(Strings.interpolate(
+				throw new ArgumentError(Strings.substitute(
 					'Argument "{}" passed to method "{}#{}" must accept {} arguments.',
 					'listener',
 					getQualifiedClassName(this),

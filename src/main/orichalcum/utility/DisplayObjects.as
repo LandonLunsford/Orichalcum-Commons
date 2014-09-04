@@ -9,7 +9,7 @@ package orichalcum.utility
 	 * @TODO change format of closure passing to (container, type, closure, args)... closure.apply(null, args.unshift(target));
 	 * that way the 'this' inside the closure will be the 'target'
 	 */
-	public class DisplayObjectUtil
+	public class DisplayObjects
 	{
 		
 		static public function isSibling(object:DisplayObject, sibling:DisplayObject):Boolean

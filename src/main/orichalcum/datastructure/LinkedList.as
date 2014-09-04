@@ -1,7 +1,6 @@
 package orichalcum.datastructure 
 {
 	import flash.utils.flash_proxy;
-	import orichalcum.utility.StringUtil;
 	
 	use namespace flash_proxy;
 	

@@ -3,13 +3,13 @@ package orichalcum.animation.tweener.plugin.displayobject
 	import flash.display.DisplayObject;
 	import flash.filters.BlurFilter;
 	import orichalcum.animation.tweener.ITweener;
-	import orichalcum.utility.FunctionUtil;
+	import orichalcum.utility.Functions;
 	
 	public class BlurFilterTweener implements ITweener
 	{
 		static public const properties:Array = ['blur', 'blurX', 'blurY'];
 		
-		private var _tweenFunction:Function = FunctionUtil.NULL;
+		private var _tweenFunction:Function = Functions.NULL;
 		private var _filterIndex:int = -1;
 		private var _filter:Object;
 		private var _start:Number;

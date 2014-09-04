@@ -6,7 +6,7 @@ package orichalcum.reflection
 	import flash.utils.getQualifiedClassName;
 	import orichalcum.lifecycle.IDisposable;
 	import orichalcum.system.FlashPlayer;
-	import orichalcum.utility.StringUtil;
+	import orichalcum.utility.Strings;
 
 	public class Reflector implements IDisposable, IReflector
 	{
@@ -120,7 +120,7 @@ package orichalcum.reflection
 					case 13: new type(null, null, null, null, null, null, null, null, null, null, null, null, null); break;
 					case 14: new type(null, null, null, null, null, null, null, null, null, null, null, null, null, null); break;
 					case 15: new type(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null); break;
-					throw new ArgumentError(StringUtil.substitute('Type "{0}" requires over {1} constructor arguments. Consider refactor.', getTypeName(type), 16));
+					throw new ArgumentError(Strings.substitute('Type "{0}" requires over {1} constructor arguments. Consider refactor.', getTypeName(type), 16));
 				}
 			}
 			catch (error:Error)

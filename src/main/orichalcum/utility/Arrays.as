@@ -1,7 +1,7 @@
 package orichalcum.utility 
 {
 	
-	public class ArrayUtil
+	public class Arrays
 	{
 		
 		static public function rotate(array:Array, columns:int, right:Boolean = true, times:int = 1):int

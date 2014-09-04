@@ -1,55 +1,34 @@
-package orichalcum.datastructure
+package orichalcum.datastructure 
 {
+	import flash.utils.Proxy;
+	import flash.utils.flash_proxy;
+	
+	use namespace flash_proxy;
 
-	import flash.utils.Dictionary;
-
-	public class FallbackMap
+	public dynamic class FallbackMap extends AbstractMap
 	{
-	
 		private var _fallback:*;
-		private var _data:Dictionary;
 		
-	
-		public function FallbackMap(fallback:* = undefined)
+		public function FallbackMap(fallback:* = undefined) 
 		{
-			_fallback = fallback;
-			_data = new Dictionary;
+			this.fallback = fallback;
 		}
 		
-		public function get data():Dictionary
-		{
-			return _data;
-		}
-		
-		public function set data(value:Dictionary):void
-		{
-			_data = value;
-		}
-	
-		public function get fallback():*
+		public function get fallback():* 
 		{
 			return _fallback;
 		}
 		
-		public function set fallback(value:*):void
+		public function set fallback(value:*):void 
 		{
 			_fallback = value;
 		}
 		
-		public function map(key:*, value:*):void
+		override flash_proxy function getProperty(name:*):*
 		{
-			_data[key] = value;
+			return name in _entries ? _entries[name] : fallback;
 		}
 		
-		public function unmap(key:*):void
-		{
-			delete _data[key];
-		}
-		
-		public function getValue(key:*):*
-		{
-			return key in _data ? _data[key] : fallback;
-		}
-	
 	}
+
 }

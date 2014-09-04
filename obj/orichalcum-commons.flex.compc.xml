@@ -26,14 +26,8 @@
   <include-classes>
     <class>orichalcum.abstraction.Direction</class>
     <class>orichalcum.animation.Animation</class>
-    <class>orichalcum.animation.AnimationBase</class>
-    <class>orichalcum.animation.AnimationCall</class>
-    <class>orichalcum.animation.AnimationChild</class>
-    <class>orichalcum.animation.AnimationWait</class>
     <class>orichalcum.animation.Ease</class>
     <class>orichalcum.animation.factory.animate</class>
-    <class>orichalcum.animation.factory.call</class>
-    <class>orichalcum.animation.factory.wait</class>
     <class>orichalcum.animation.tweener.BooleanTweener</class>
     <class>orichalcum.animation.tweener.ITweener</class>
     <class>orichalcum.animation.tweener.NumberTweener</class>
@@ -51,40 +45,43 @@
     <class>orichalcum.audio._NullSound</class>
     <class>orichalcum.audio._NullSoundChannel</class>
     <class>orichalcum.datastructure.AbstractList</class>
+    <class>orichalcum.datastructure.AbstractMap</class>
     <class>orichalcum.datastructure.ArrayList</class>
     <class>orichalcum.datastructure.Dijkstra</class>
     <class>orichalcum.datastructure.FallbackMap</class>
     <class>orichalcum.datastructure.Graph</class>
     <class>orichalcum.datastructure.GraphEdge</class>
     <class>orichalcum.datastructure.GraphVertex</class>
+    <class>orichalcum.datastructure.HierarchyMap</class>
     <class>orichalcum.datastructure.ICollection</class>
     <class>orichalcum.datastructure.IGraph</class>
     <class>orichalcum.datastructure.IList</class>
     <class>orichalcum.datastructure.LinkedList</class>
     <class>orichalcum.datastructure.LinkedListNode</class>
+    <class>orichalcum.datastructure.Maps</class>
     <class>orichalcum.datastructure.Pool</class>
     <class>orichalcum.datastructure.Sets</class>
     <class>orichalcum.datastructure.SetSpectrum</class>
+    <class>orichalcum.datastructure.comparison.IComparator</class>
+    <class>orichalcum.datastructure.comparison.NumberComparator</class>
     <class>orichalcum.lifecycle.IDisposable</class>
     <class>orichalcum.reflection.IReflector</class>
     <class>orichalcum.reflection.Reflector</class>
     <class>orichalcum.signals.ISignal</class>
-    <class>orichalcum.signals.ISignalListener</class>
     <class>orichalcum.signals.Signal</class>
-    <class>orichalcum.signals.SignalListener</class>
     <class>orichalcum.system.FlashPlayer</class>
     <class>orichalcum.transform.MatrixTransformer</class>
     <class>orichalcum.transform.ViewTransformer</class>
-    <class>orichalcum.utility.ArrayUtil</class>
-    <class>orichalcum.utility.BitmapUtil</class>
-    <class>orichalcum.utility.ColorUtil</class>
-    <class>orichalcum.utility.DisplayObjectUtil</class>
-    <class>orichalcum.utility.FunctionUtil</class>
-    <class>orichalcum.utility.MathUtil</class>
-    <class>orichalcum.utility.ObjectUtil</class>
+    <class>orichalcum.utility.Arrays</class>
+    <class>orichalcum.utility.Bitmaps</class>
+    <class>orichalcum.utility.Colors</class>
+    <class>orichalcum.utility.DisplayObjects</class>
+    <class>orichalcum.utility.Functions</class>
+    <class>orichalcum.utility.getClassName</class>
+    <class>orichalcum.utility.Mathematics</class>
+    <class>orichalcum.utility.Objects</class>
     <class>orichalcum.utility.Random</class>
     <class>orichalcum.utility.Strings</class>
-    <class>orichalcum.utility.StringUtil</class>
-    <class>orichalcum.utility.XmlUtil</class>
+    <class>orichalcum.utility.Xmls</class>
   </include-classes>
 </flex-config>

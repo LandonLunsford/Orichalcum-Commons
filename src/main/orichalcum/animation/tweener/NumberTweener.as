@@ -1,6 +1,6 @@
 package orichalcum.animation.tweener
 {
-	import orichalcum.utility.StringUtil;
+	import orichalcum.utility.Strings;
 	
 	public class NumberTweener implements ITweener
 	{
@@ -88,7 +88,7 @@ package orichalcum.animation.tweener
 		
 		public function toString():String
 		{
-			return StringUtil.substitute('<number-tweener start="{0}" end="{1}" round="{2}">', _start, _start + _delta, _round == Math.round);
+			return Strings.substitute('<number-tweener start="{0}" end="{1}" round="{2}">', _start, _start + _delta, _round == Math.round);
 		}
 		
 		

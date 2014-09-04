@@ -1,7 +1,7 @@
 package orichalcum.utility 
 {
 	
-	public class ColorUtil 
+	public class Colors 
 	{
 		
 		static public function toHex(a:uint, r:uint, g:uint, b:uint):uint

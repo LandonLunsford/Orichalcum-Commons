@@ -1,6 +1,6 @@
 package orichalcum.animation.tweener
 {
-	import orichalcum.utility.StringUtil;
+	import orichalcum.utility.Strings;
 
 	public class BooleanTweener implements ITweener
 	{
@@ -35,7 +35,7 @@ package orichalcum.animation.tweener
 
 		public function toString():String
 		{
-			return StringUtil.substitute('<boolean-tweener start="{0}" end="{1}">', _start, _end);
+			return Strings.substitute('<boolean-tweener start="{0}" end="{1}">', _start, _end);
 		}
 	}
 

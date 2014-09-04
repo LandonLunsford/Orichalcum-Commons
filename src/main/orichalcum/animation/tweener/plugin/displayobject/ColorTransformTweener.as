@@ -4,23 +4,23 @@ package orichalcum.animation.tweener.plugin.displayobject
 	import flash.geom.ColorTransform;
 	import orichalcum.animation.tweener.ITweener;
 	import orichalcum.animation.tweener.NumberTweener;
-	import orichalcum.utility.FunctionUtil;
-	import orichalcum.utility.MathUtil;
+	import orichalcum.utility.Functions;
+	import orichalcum.utility.Mathematics;
 
 	public class ColorTransformTweener implements ITweener
 	{
 		
 		static public const properties:Array = ['tint', 'redMultiplier', 'greenMultiplier', 'blueMultiplier', 'alphaMultiplier', 'redOffset', 'greenOffset', 'blueOffset', 'alphaOffset'];
-		private var _tweenFunction:Function = FunctionUtil.NULL;
+		private var _tweenFunction:Function = Functions.NULL;
 		private var _start:int;
 		private var _end:int;
 		
 		private function tintOfColorTransform(t:ColorTransform):int
 		{
-			const a:int = MathUtil.limit(1 - t.redMultiplier, 0, 1);
-			const r:int = MathUtil.limit(t.redOffset * a, -0xff, 0xff);
-			const g:int = MathUtil.limit(t.greenOffset * a, -0xff, 0xff);
-			const b:int = MathUtil.limit(t.blueOffset * a, -0xff, 0xff);
+			const a:int = Mathematics.limit(1 - t.redMultiplier, 0, 1);
+			const r:int = Mathematics.limit(t.redOffset * a, -0xff, 0xff);
+			const g:int = Mathematics.limit(t.greenOffset * a, -0xff, 0xff);
+			const b:int = Mathematics.limit(t.blueOffset * a, -0xff, 0xff);
 			return a * 0xff << 24 | r << 16 | g << 8 | b;
 		}
 		

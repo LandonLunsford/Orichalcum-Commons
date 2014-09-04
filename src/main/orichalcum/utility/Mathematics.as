@@ -3,7 +3,7 @@ package orichalcum.utility
 
 	import flash.geom.Point;
 	
-	public class MathUtil 
+	public class Mathematics 
 	{
 		static private var _powers:Array = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000];
 		static public const DEGREE_TO_RADIAN:Number = Math.PI / 180;
@@ -79,6 +79,10 @@ package orichalcum.utility
 			return values.length == 0 ? 0 : sum.apply(null, values) / values.length;
 		}
 		
+		static public function round(value:Number, to:Number = 1):Number
+		{
+			return Math.round(value / to) * to;
+		}
 		
 	}
 

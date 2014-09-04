@@ -1,7 +1,7 @@
 package orichalcum.utility
 {
 
-	public class FunctionUtil
+	public class Functions
 	{
 		
 		static public const NULL:Function = function(...args):* { return undefined; };
