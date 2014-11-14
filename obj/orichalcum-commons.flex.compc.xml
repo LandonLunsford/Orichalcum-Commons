@@ -24,7 +24,6 @@
     </library-path>
   </compiler>
   <include-classes>
-    <class>orichalcum.abstraction.Direction</class>
     <class>orichalcum.animation.Animation</class>
     <class>orichalcum.animation.Ease</class>
     <class>orichalcum.animation.factory.animate</class>

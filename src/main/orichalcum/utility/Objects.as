@@ -1,11 +1,36 @@
 package orichalcum.utility 
 {
 	import flash.display.DisplayObjectContainer;
+	import flash.utils.ByteArray;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedSuperclassName;
 	
 	public class Objects
 	{
+		
+		static private const _bytes:ByteArray = new ByteArray;
+		
+		static public function copy(a:Object, b:Object):*
+		{
+			for (var key:String in a)
+			{
+				delete a[key];
+			}
+			for (key in b)
+			{
+				a[key] = b[key];
+			}
+			return a;
+		}
+		
+		static public function deepCopy(object:*):*
+		{
+			_bytes.clear();
+			_bytes.writeObject(object);
+			_bytes.position = 0;
+			return _bytes.readObject();
+		}
+		
 		static public function isEmpty(object:Object):Boolean
 		{
 			if (object)

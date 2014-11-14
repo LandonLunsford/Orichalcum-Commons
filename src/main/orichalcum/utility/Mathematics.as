@@ -8,6 +8,20 @@ package orichalcum.utility
 		static private var _powers:Array = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000];
 		static public const DEGREE_TO_RADIAN:Number = Math.PI / 180;
 		static public const RADIAN_TO_DEGREE:Number = 180 / Math.PI;
+		static public const HALF_PI:Number = Math.PI * 0.5;
+		static public const TWO_PI:Number = Math.PI * 2;
+		
+		static public function sign(value:Number):Number
+		{
+			return value < 0 ? -1 : 1;
+		}
+		
+		static public function normalize(value:Number):Number
+		{
+			if (value < 0) return -1;
+			if (value > 0) return 1;
+			return 0;
+		}
 		
 		static public function toDegrees(radians:Number):Number
 		{

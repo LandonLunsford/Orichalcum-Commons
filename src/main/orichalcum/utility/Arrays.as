@@ -4,6 +4,34 @@ package orichalcum.utility
 	public class Arrays
 	{
 		
+		static public function empty(array:Array):Array
+		{
+			array.length = 0;
+			return array;
+		}
+		
+		static public function extend(a:Array, ...b):Array
+		{
+			for each(var array:* in b)
+			{
+				for each(var item:* in array)
+				{
+					a.push(item);
+				}
+			}
+			return a;
+		}
+		
+		static public function copy(a:Array, b:Array):Array
+		{
+			a.length = 0;
+			for each(var item:* in b)
+			{
+				a.push(item);
+			}
+			return a;
+		}
+		
 		static public function rotate(array:Array, columns:int, right:Boolean = true, times:int = 1):int
 		{
 			switch(right ? times % 4 : 4 - (times % 4))
