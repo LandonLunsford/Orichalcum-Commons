@@ -6,6 +6,8 @@ package orichalcum.utility
 	public class Random extends Object
 	{
 		
+		static private var _possibleIndices:Array = [];
+		static private var _previousIndexKey:String = '__previousRandomIndex';
 		
 		static public function nonRepeatingInteger(min:int, max:int, previous:int):int
 		{
@@ -62,6 +64,34 @@ package orichalcum.utility
 		static public function elementOf(array:Array):*
 		{
 			return array[integer(0, array.length - 1)];
+		}
+		
+		/**
+		 * @param	array	The array from which a random element will be selected and returned
+		 * @return	Random element from the array. This element will not be the same as the last randomly selected element.
+		 */
+		static public function newElementOf(array:Array):*
+		{
+			var index:int;
+			if (_previousIndexKey in array)
+			{
+				index = integer(0, array.length - 1);
+			}
+			else
+			{
+				_possibleIndices.length = 0;
+				for (var i:int = 0; i < array.length - 1; i ++)
+				{
+					if (i != array[_previousIndexKey])
+					{
+						_possibleIndices[_possibleIndices.length] = i;
+					}
+				}
+				index = _possibleIndices[integer(0, _possibleIndices.length - 1)];
+			}
+			
+			array[_previousIndexKey] = index;
+			return array[index];
 		}
 		
 		/**

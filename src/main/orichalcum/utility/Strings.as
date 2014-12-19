@@ -19,6 +19,30 @@ package orichalcum.utility
 			return value ? value : '';
 		}
 		
+		static public function startsWith(value:String, prefix:String):Boolean
+		{
+			return prefix == value.substring(0, prefix.length);
+		}
+		
+		static public function startsWithIgnoreCase(value:String, prefix:String):Boolean
+		{
+			value = value.toLowerCase();
+			prefix = prefix.toLowerCase();
+			return prefix == value.substring(0, prefix.length);
+		}
+		
+		static public function endsWith(value:String, suffix:String):Boolean
+		{
+			return suffix == value.substring(value.length - suffix.length);
+		}
+		
+		static public function endsWithIgnoreCase(value:String, suffix:String):Boolean
+		{
+			value = value.toLowerCase();
+			suffix = suffix.toLowerCase();
+			return suffix == value.substring(value.length - suffix.length);
+		}
+		
 		static public function padLeft(string:String, padding:String = ' ', totalLength:int = 0):String
 		{
 			if (totalLength == 0) return string;
